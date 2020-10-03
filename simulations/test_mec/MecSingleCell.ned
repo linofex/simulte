@@ -20,6 +20,8 @@ import lte.corenetwork.binder.LteBinder;
 import lte.corenetwork.nodes.eNodeB;
 import lte.corenetwork.nodes.Ue;
 
+import inet.node.inet.Router;
+
 //mec
 import lte.corenetwork.nodes.mec.MEHost;
 import lte.corenetwork.nodes.mec.VirtualisationInfrastructure.VirtualisationInfrastructure;
@@ -63,9 +65,19 @@ network MecSingleCell
         }
         pgw: PgwStandardSimplified {
             nodeType = "PGW";
-            @display("p=630,250;is=l");
+            @display("p=530,250;is=l");
+            gates:
+                pppg[];
         }
-
+		
+		  router: Router {
+            parameters:
+                numExtInterfaces = 1;
+                @display("p=730,250;i=abstract/router");
+            gates:
+                pppg[];
+        }
+        
         //# MEC module
         meHost: MEHost {
             @display("p=400,100;is=l");
@@ -75,6 +87,7 @@ network MecSingleCell
     connections allowunconnected:
 
         pgw.pppg++ <--> Eth10G <--> eNodeB1.ppp;
+        router.pppg++ <--> Eth10G <--> pgw.pppg++;
 
         //#	mec
         // direct connection between eNodeB2 and meHost
