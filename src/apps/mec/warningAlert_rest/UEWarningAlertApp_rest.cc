@@ -43,9 +43,8 @@ void UEWarningAlertApp_rest::initialize(int stage)
     localPort_ = par("localPort");
     destPort_ = par("destPort");
     sourceSimbolicAddress = (char*)getParentModule()->getFullName();
-//    destSimbolicAddress = (char*)par("destAddress").stringValue();
-//    destAddress_ = inet::L3AddressResolver().resolve(destSimbolicAddress);
-    destAddress_ = inet::L3AddressResolver().resolve(par("destAddress"));
+    destSimbolicAddress = (char*)par("destAddress").stringValue();
+    destAddress_ = inet::L3AddressResolver().resolve(destSimbolicAddress);
     requiredRam = par("requiredRam");
     requiredDisk = par("requiredDisk");
     requiredCpu = par("requiredCpu").doubleValue();
@@ -89,7 +88,7 @@ void UEWarningAlertApp_rest::handleMessage(cMessage *msg)
     // Sender Side
     if (msg->isSelfMessage())
     {
-       if(!strcmp(msg->getName(), "selfSender_"))   sendInfoUEWarningAlertApp();
+       if(!strcmp(msg->getName(), "selfSender"))   sendInfoUEWarningAlertApp();
 
 
         else    throw cRuntimeError("UEWarningAlertApp_rest::handleMessage - \tWARNING: Unrecognized self message");
@@ -116,7 +115,7 @@ void UEWarningAlertApp_rest::finish()
 
 void UEWarningAlertApp_rest::sendInfoUEWarningAlertApp()
 {
-    EV << "UEWarningAlertApp_rest::sendInfoUEInceAlertApp - Sending " << INFO_UEAPP <<" type WarningAlertPacket\n";
+    EV << "###UEWarningAlertApp_rest::sendInfoUEInceAlertApp - Sending " << INFO_UEAPP <<" type WarningAlertPacket\n";
 
     position = mobility->getCurrentPosition();
 
