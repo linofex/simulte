@@ -3,9 +3,15 @@
     <interface hosts="eNodeB*" names="wlan" address="10.x.x.x" netmask="255.0.0.0"/>
     <interface hosts="car*" names="wlan" address="10.x.x.x" netmask="255.0.0.0"/>
     
-    <!-- Assign 192.168.x.x addresses to all other interfaces -->
-    <interface hosts="**" address="192.168.x.x" netmask="255.255.255.0"/>
     
+    <!-- Assign 192.168.x.x addresses to all other interfaces -->
+    <interface hosts="**" address="193.168.x.x" netmask="255.255.255.0"/>
+    
+	<route hosts="ue*" destination="192.168.1.175" netmask="255.255.255.255" interface="wlan"/>
+	<route hosts="eNodeB*" destination="192.168.1.175" netmask="255.255.255.255" interface="pppIf"/>
+	<route hosts="pgw*" destination="192.168.1.175" netmask="255.255.255.255" interface="ppp1"/>
+	<route hosts="router*" destination="192.168.1.175" netmask="255.255.255.255" interface="ext0"/>
+	    
 
     <!-- all D2D-capable UEs participate in the multicast group --> 
     <multicast-group hosts="car*" interfaces="wlan" address="224.0.0.10"/>

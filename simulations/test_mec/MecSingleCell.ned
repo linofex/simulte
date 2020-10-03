@@ -49,7 +49,7 @@ network MecSingleCell
             config = xmldoc("demo.xml");
         }
         ue[numUes]: Ue {
-            @display("p=300,300");
+            @display("p=262.2,357.41998");
         }
 
         //# LTE modules
@@ -69,15 +69,15 @@ network MecSingleCell
             gates:
                 pppg[];
         }
-		
-		  router: Router {
+
+        router: Router {
             parameters:
                 numExtInterfaces = 1;
                 @display("p=730,250;i=abstract/router");
             gates:
                 pppg[];
         }
-        
+
         //# MEC module
         meHost: MEHost {
             @display("p=400,100;is=l");
