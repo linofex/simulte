@@ -95,11 +95,18 @@ void UEWarningAlertApp_rest::handleMessage(cMessage *msg)
     }
     // Receiver Side
     else{
+        EV << "###RICEVUTO: " << msg;
+
         if(msg->getKind() == UDP_I_DATA){
 
+            RawPacket *request = check_and_cast<RawPacket *>(msg);
+            char *packet = request->getByteArray().getDataPtr();
+            EV << packet;
+
+
         }
-        RawPacket* mePkt = check_and_cast<RawPacket*>(msg);
-        if (mePkt == 0) throw cRuntimeError("UEWarningAlertApp_rest::handleMessage - \tFATAL! Error when casting to MEAppPacket");
+//        RawPacket* mePkt = check_and_cast<RawPacket*>(msg);
+//        if (mePkt == 0) throw cRuntimeError("UEWarningAlertApp_rest::handleMessage - \tFATAL! Error when casting to MEAppPacket");
 
 
         delete msg;
@@ -123,12 +130,8 @@ void UEWarningAlertApp_rest::sendInfoUEWarningAlertApp()
     RawPacket *pck  = new RawPacket("udpPacket");
     std::string payload;
     std::ostringstream strs;
-    strs << position.x;
+    strs << "X: " << position.x << "\n" << "Y: " << position.y << "\n" << "Z: " << position.z << "\n";
     payload = strs.str();
-    strs << position.y;
-    payload = payload + "\n" +strs.str();
-    strs << position.z;
-    payload = payload + "\n" +strs.str()+"\n";
 
     pck->setDataFromBuffer(payload.c_str(), payload.size());
     pck->setByteLength(payload.size());
