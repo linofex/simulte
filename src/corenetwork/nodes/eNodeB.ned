@@ -59,6 +59,9 @@ module eNodeB
         //#mec	
         //@author Angelo Buono
         string meHost = default("");		// symbolic name of the connected MEHost in the Network
+        //@author Alessandro Noferi
+        //use it in case of emulation
+        string meHostExtConn = default("192.168.1.0/24"); // Network Address of the external MeApp IP/mask
 
     gates:
         inout ppp;                // connection to the Core Network
