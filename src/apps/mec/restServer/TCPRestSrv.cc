@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "inet/applications/restServer/TCPRestSrv.h"
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
@@ -26,7 +25,10 @@
 #include "inet/applications/restServer/packets/RestPacket.h"
 
 #include "inet/common/RawPacket.h"
-#include "inet/applications/restServer/utils/utils.h"
+
+
+#include "apps/mec/restServer/utils/utils.h"
+#include "apps/mec/restServer/TCPRestSrv.h"
 
 
 #include <string>
@@ -34,10 +36,10 @@
 
 namespace inet {
 
-Define_Module(TCPRestSrv);
+Define_Module(TCPRestSrv_mec);
 
 
-void TCPRestSrv::initialize(int stage)
+void TCPRestSrv_mec::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -47,6 +49,8 @@ void TCPRestSrv::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
+
+        res = new RawPacket("response");
 
         serverSocket.setOutputGate(gate("tcpOut"));
         serverSocket.setDataTransferMode(TCP_TRANSFER_BYTESTREAM); // BYTESTREAM to send bytes!
@@ -62,7 +66,7 @@ void TCPRestSrv::initialize(int stage)
 }
 
 
-void TCPRestSrv::sendResponse(cMessage *msg, TCPSocket *socket)
+void TCPRestSrv_mec::sendResponse(cMessage *msg, TCPSocket *socket)
 {
     cPacket *packet = dynamic_cast<cPacket *>(msg);
 
@@ -70,10 +74,10 @@ void TCPRestSrv::sendResponse(cMessage *msg, TCPSocket *socket)
 }
 
 
-//void  TCPRestSrv::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) {
+//void  TCPRestSrv_mec::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) {
 //    EV<<"\n########ECCOLO:  "<< msg;
 //}
-void TCPRestSrv::handleMessage(cMessage *msg)
+void TCPRestSrv_mec::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         delete msg;
@@ -123,7 +127,7 @@ void TCPRestSrv::handleMessage(cMessage *msg)
 
 }
 
- void TCPRestSrv::handleRequest(char *packet, TCPSocket *socket){
+ void TCPRestSrv_mec::handleRequest(char *packet, TCPSocket *socket){
      std::map<std::string, std::string> request = parseRequest(packet); // e.g. [0] GET [1] URI
      if(request.at("method").compare("GET") == 0)
          handleGetRequest(request.at("uri"), socket); // pass URI
@@ -138,7 +142,7 @@ void TCPRestSrv::handleMessage(cMessage *msg)
 
 }
 
-std::map<std::string, std::string> TCPRestSrv::parseRequest(char *packet_){
+std::map<std::string, std::string> TCPRestSrv_mec::parseRequest(char *packet_){
 
     std::string tre(packet_);
    // std::string packet(packet_);
@@ -174,33 +178,43 @@ std::map<std::string, std::string> TCPRestSrv::parseRequest(char *packet_){
 }
 
 
-void TCPRestSrv::handleGetRequest(std::string uri, TCPSocket* socket){
+void TCPRestSrv_mec::handleGetRequest(std::string uri, TCPSocket* socket){
     // pretend all ok, generate a response
-//    HTTPRespPacket *res = new HTTPRespPacket("res");
-//    res->setHeaderField("ciao");
-//    res->createRequest();
-    //delete res;
+    HTTPRespPacket temp_res = HTTPRespPacket("res");
+    temp_res.setResCode(OK);
+    temp_res.setContentType("application/json");
+    temp_res.setConnection("keep-alive");
+    temp_res.addNewLine();
+    temp_res.setBody();
+//    delete res;
     EV <<"\n\n\n\n######SEND!!!\n\n\n";
-    RawPacket *e = new RawPacket("resraw");
-    std::string s = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nConnection: keep-alive\r\n\r\n{\n\t\"Hello\" : \"World\"\n}\r\n";
-    e->setDataFromBuffer(s.c_str(), s.size());
-    e->setByteLength(s.size());
+//    RawPacket *e = new RawPacket("resraw");
+//    std::string s = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nConnection: keep-alive\r\n\r\n{\n\t\"DIO\" : \"BUONO\"\n}\r\n";
+    res->setDataFromBuffer(temp_res.getPacket().c_str(), temp_res.getPacket().size());
+    res->setByteLength(temp_res.getPacket().size());
 
-    socket->send(e);
-//    res->createRequest();
+//    e->setDataFromBuffer(s.c_str(), s.size());
+//    e->setByteLength(s.size());
+
+//    cPacket *mm = new cPacket("ciao come sta");
+    if(res == nullptr){
+        throw cRuntimeError("Response code not allowed");
+    }
+      socket->send(res);
+//    temp_res.createRequest();
 }
 
 
-void TCPRestSrv::refreshDisplay() const
+void TCPRestSrv_mec::refreshDisplay() const
 {
 // TODO
 }
 
-void TCPRestSrv::finish()
+void TCPRestSrv_mec::finish()
 {
 }
 
-TCPRestSrv::~TCPRestSrv(){
+TCPRestSrv_mec::~TCPRestSrv_mec(){
     socketMap.deleteSockets(); //it calls delete, too
 }
 

@@ -32,11 +32,12 @@ namespace inet {
  *
  *
  */
-class INET_API TCPRestSrv : public cSimpleModule, public ILifecycle
+class INET_API TCPRestSrv_mec : public cSimpleModule, public ILifecycle
 {
   protected:
     TCPSocket serverSocket; // Used to listen incoming connections
     TCPSocketMap socketMap; // Stores the connections
+    RawPacket* res;
     // TODO data structure to save RNI info
 
   protected:
@@ -51,7 +52,7 @@ class INET_API TCPRestSrv : public cSimpleModule, public ILifecycle
     virtual void handleRequest(char *packet, TCPSocket *socket);
     virtual void handleGetRequest(std::string, TCPSocket *socket);
 
-    virtual ~TCPRestSrv();
+    virtual ~TCPRestSrv_mec();
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
