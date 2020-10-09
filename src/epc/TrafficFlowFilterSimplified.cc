@@ -36,6 +36,16 @@ void TrafficFlowFilterSimplified::initialize(int stage)
 
         meHost = getParentModule()->par("meHost").stringValue();
         if(ownerType_ == ENB &&  strcmp(meHost.c_str(), "")){
+            //@author Alessandro Noferi
+            //begin
+            std::vector<std::string> extAdd = utils::splitString(getParentModule()->par("meHostExtConn").stringValue(), "/");
+            if(extAdd.size() != 2){
+                throw cRuntimeError("TrafficFlowFilterSimplified::initialize - Bad meHostExtConn parameter. It must be like addres/mask");
+
+            }
+            meHostExtAddress = inet::L3AddressResolver().resolve(extAdd[0].c_str());
+            meHostExtAddressMask = atoi(extAdd[1].c_str());
+            //end
 
             std::stringstream meHostName;
             meHostName << meHost.c_str() << ".virtualisationInfrastructure";
@@ -114,6 +124,14 @@ TrafficFlowTemplateId TrafficFlowFilterSimplified::findTrafficFlow(L3Address src
         EV << "TrafficFlowFilterSimplified::findTrafficFlow - returning flowId (-3) for tunneling to " << meHost << endl;
         return -3;
     }
+    else if (ownerType_ == ENB && destAddress.matches(meHostExtAddress, meHostExtAddressMask))
+    {
+        // the destination is the ME Host
+        EV << "TrafficFlowFilterSimplified::findTrafficFlow - returning flowId (REST) for tunneling to " << meHost << endl;
+        return -3;
+    }
+
+
     else if(ownerType_ == GTPENDPOINT)
     {
         // send only messages direct to cars --> car[] has macNodeId != 0
