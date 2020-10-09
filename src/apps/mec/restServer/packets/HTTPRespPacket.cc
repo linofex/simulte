@@ -2,7 +2,7 @@
 // @ Alessandro Noferi
 //
 
-#include "inet/applications/restServer/packets/HTTPRespPacket.h"
+#include "apps/mec/restServer/packets/HTTPRespPacket.h"
 
 namespace inet {
 
@@ -54,18 +54,21 @@ void HTTPRespPacket::setResCode(const response res){
             throw cRuntimeError("Response code not allowed");
     }
     ::omnetpp::opp_string resCode = HttpVersion + response + "\r\n";
+    payload =  resCode;
     byteArray.setDataFromBuffer(resCode.c_str(), resCode.size());
     addByteLength(resCode.size());
 }
 
 void HTTPRespPacket::setContentType(const char * conType){
     ::omnetpp::opp_string field = ::omnetpp::opp_string("Content-Type: ") + ::omnetpp::opp_string(conType) + "\r\n";
+    payload += field;
     byteArray.addDataFromBuffer(field.c_str(), field.size());
     addByteLength(field.size());
 }
 
 void HTTPRespPacket::setConnection(const char *conn){
-    ::omnetpp::opp_string field = ::omnetpp::opp_string("Connection") + ::omnetpp::opp_string(conn) + "\r\n";
+    ::omnetpp::opp_string field = ::omnetpp::opp_string("Connection: ") + ::omnetpp::opp_string(conn) + "\r\n";
+    payload += field;
     byteArray.addDataFromBuffer(field.c_str(), field.size());
     addByteLength(field.size());
 
@@ -73,6 +76,7 @@ void HTTPRespPacket::setConnection(const char *conn){
 
 void HTTPRespPacket::setHeaderField(const char *field_){
     ::omnetpp::opp_string field = ::omnetpp::opp_string(field_) + "\r\n";
+    payload += field;
     byteArray.setDataFromBuffer(field.c_str(), field.size());
     setByteLength(field.size());
 
@@ -83,14 +87,19 @@ void HTTPRespPacket::addNewLine(){
 }
 
 void HTTPRespPacket::setBody(){
-    ::omnetpp::opp_string body ("{\n  \"Hello\": \"world\"\n}");
+    ::omnetpp::opp_string newLine("\r\n");
+    ::omnetpp::opp_string body = newLine + "{\n  \"Hello\": \"mondo\"\n}";
     byteArray.addDataFromBuffer(body.c_str(), body.size());
     addByteLength(body.size());
+    payload += body;
 }
 
 RawPacket* HTTPRespPacket::getRawPacket(){
     return &byteArray;
 }
 
+::omnetpp::opp_string& HTTPRespPacket::getPacket(){
+    return payload;
+}
 } // namespace inet
 

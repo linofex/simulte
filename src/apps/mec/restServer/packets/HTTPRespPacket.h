@@ -22,6 +22,7 @@ class INET_API HTTPRespPacket : public HTTPRespPacket_Base
 {
   private:
     ::omnetpp::opp_string HttpVersion = "HTTP/1.1 ";
+    ::omnetpp::opp_string payload;
   public:
     /**
      * Constructor
@@ -79,6 +80,7 @@ class INET_API HTTPRespPacket : public HTTPRespPacket_Base
     void setHeaderField(const char *); //generic field
     void addNewLine();
     void setBody();
+    ::omnetpp::opp_string& getPacket();
     RawPacket* getRawPacket();
 };
 
