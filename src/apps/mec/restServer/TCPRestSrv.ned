@@ -41,7 +41,7 @@ import inet.applications.contract.ITCPApp;
 //
 // @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
 //
-simple TCPRestSrv_mec like ITCPApp
+simple TCPRestSrv like ITCPApp
 {
     parameters:
         string localAddress = default(""); // local address; may be left empty ("")

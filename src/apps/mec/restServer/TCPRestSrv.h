@@ -24,41 +24,41 @@
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPSocketMap.h"
 #include <vector>
+#include <map>
 
-namespace inet {
 
 /**
  *
  *
  *
  */
-class INET_API TCPRestSrv_mec : public cSimpleModule, public ILifecycle
+class TCPRestSrv: public cSimpleModule, public inet::ILifecycle
 {
   protected:
-    TCPSocket serverSocket; // Used to listen incoming connections
-    TCPSocketMap socketMap; // Stores the connections
-    RawPacket* res;
+    inet::TCPSocket serverSocket; // Used to listen incoming connections
+    inet::TCPSocketMap socketMap; // Stores the connections
+    std::map<std::string, std::string> usersLocations;
+    UEWarningAlertApp_rest *app; //user
     // TODO data structure to save RNI info
 
   protected:
 
     std::map<std::string, std::string> parseRequest(char *packet_);
-    virtual void sendResponse(cMessage *msg, TCPSocket *socket);
     virtual void initialize(int stage) override;
-    virtual int  numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
-    virtual void handleRequest(char *packet, TCPSocket *socket);
-    virtual void handleGetRequest(std::string, TCPSocket *socket);
+    virtual void handleRequest(char *packet, inet::TCPSocket *socket);
+    virtual void handleGetRequest(const std::string& uri, inet::TCPSocket* socket);
+    virtual void handlePostRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
 
-    virtual ~TCPRestSrv_mec();
+    virtual ~TCPRestSrv();
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override
+    virtual bool handleOperationStage(inet::LifecycleOperation *operation, int stage, inet::IDoneCallback *doneCallback) override
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
-} // namespace inet
 
 #endif // ifndef __INET_TCPRESTSRV_H
 

@@ -21,9 +21,8 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "inet/applications/restServer/packets/HTTPRespPacket.h"
-#include "inet/applications/restServer/packets/RestPacket.h"
-
+#include "apps/mec/restServer/packets/HTTPRespPacket.h"
+#include "apps/mec/warningAlert_rest/UEWarningAlertApp_rest.h"
 #include "inet/common/RawPacket.h"
 
 
@@ -34,60 +33,56 @@
 #include <string>
 #include <vector>
 
-namespace inet {
-
-Define_Module(TCPRestSrv_mec);
 
 
-void TCPRestSrv_mec::initialize(int stage)
+Define_Module(TCPRestSrv);
+
+
+void TCPRestSrv::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == inet::INITSTAGE_LOCAL) {
         return;
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER) {
+    else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
 
-        res = new RawPacket("response");
 
         serverSocket.setOutputGate(gate("tcpOut"));
-        serverSocket.setDataTransferMode(TCP_TRANSFER_BYTESTREAM); // BYTESTREAM to send bytes!
-        serverSocket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
+        serverSocket.setDataTransferMode(inet::TCP_TRANSFER_BYTESTREAM); // BYTESTREAM to send bytes!
+        serverSocket.bind(localAddress[0] ? inet::L3AddressResolver().resolve(localAddress) : inet::L3Address(), localPort);
         serverSocket.listen();
-        EV<<"###IN LTE";
+        EV<<"###IN LTE TCPRESTSRV";
+
+//        cModule *ue = getModuleByPath("MecSingleCell.ue[0].udpApp[0]");
+        app = check_and_cast<UEWarningAlertApp_rest*>(getModuleByPath("MecSingleCell.ue[0].udpApp[0]"));
+//        EV<< "## EEE: " << app->getPosition();
+
+
         bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        inet::NodeStatus *nodeStatus = dynamic_cast<inet::NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == inet::NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
 }
 
-
-void TCPRestSrv_mec::sendResponse(cMessage *msg, TCPSocket *socket)
-{
-    cPacket *packet = dynamic_cast<cPacket *>(msg);
-
-    socket->send(msg);
-}
-
-
-//void  TCPRestSrv_mec::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) {
+//void  TCPRestSrv::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) {
 //    EV<<"\n########ECCOLO:  "<< msg;
 //}
-void TCPRestSrv_mec::handleMessage(cMessage *msg)
+void TCPRestSrv::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         delete msg;
     }
     else {
-            TCPSocket *socket = socketMap.findSocketFor(msg);
+            inet::TCPSocket *socket = socketMap.findSocketFor(msg);
 
             if (!socket) {
                 // new connection -- create new socket object and server process
-                socket = new TCPSocket(msg);
+                socket = new inet::TCPSocket(msg);
                 socket->setOutputGate(gate("tcpOut"));
 
 //                const char *serverThreadClass = par("serverThreadClass");
@@ -102,23 +97,22 @@ void TCPRestSrv_mec::handleMessage(cMessage *msg)
                 delete msg;
                 return;
             }
-
-
-            if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
+            if (msg->getKind() == inet::TCP_I_DATA || msg->getKind() == inet::TCP_I_URGENT_DATA) {
                 EV << "## New packet arrived\n";
-                RawPacket *request = check_and_cast<RawPacket *>(msg);
-                char *packet = request->getByteArray().getDataPtr();
-                EV << packet;
+                char* packet = utils::getPacketPayload(msg);
+//                inet::RawPacket *request = check_and_cast<inet::RawPacket *>(msg);
+//                std::string packet(request->getByteArray().getDataPtr());
+                //EV << packet;
                 handleRequest(packet, socket);
             }
-            else if (msg->getKind() == TCP_I_PEER_CLOSED) {
+            else if (msg->getKind() == inet::TCP_I_PEER_CLOSED) {
                 socket->close();
                 socketMap.removeSocket(socket); // delete the pointer?
                 delete socket;
                 EV_INFO <<"Closed connection from: " << socket->getRemoteAddress();
 
             }
-            else if (msg->getKind() == TCP_I_CLOSED) {
+            else if (msg->getKind() == inet::TCP_I_CLOSED) {
                 EV_INFO <<"Removed connection from: " << socket->getRemoteAddress();
             }
             delete msg;
@@ -127,12 +121,13 @@ void TCPRestSrv_mec::handleMessage(cMessage *msg)
 
 }
 
- void TCPRestSrv_mec::handleRequest(char *packet, TCPSocket *socket){
+ void TCPRestSrv::handleRequest(char* packet, inet::TCPSocket *socket){
      std::map<std::string, std::string> request = parseRequest(packet); // e.g. [0] GET [1] URI
      if(request.at("method").compare("GET") == 0)
          handleGetRequest(request.at("uri"), socket); // pass URI
-//     else if(request[0].compare("POST") == 0)
-//         return;
+     else if(request[0].compare("POST") == 0) //subscription
+         handlePostRequest(request.at("uri"), request.at("body"),  socket); // pass URI
+         return;
 //         // TODO handle
 //     else if(request[0].compare("DELETE") == 0)
 //         return;
@@ -142,12 +137,11 @@ void TCPRestSrv_mec::handleMessage(cMessage *msg)
 
 }
 
-std::map<std::string, std::string> TCPRestSrv_mec::parseRequest(char *packet_){
+std::map<std::string, std::string> TCPRestSrv::parseRequest(char* packet_){
 
-    std::string tre(packet_);
-   // std::string packet(packet_);
+    std::string packet(packet_);
     std::map<std::string, std::string> headerFields;
-    std::vector<std::string> splitting = utils::splitString(tre, "\r\n\r\n");
+    std::vector<std::string> splitting = utils::splitString(packet, "\r\n\r\n");
     std::string header = splitting[0];
     std::string body   = splitting[1];
 
@@ -178,17 +172,20 @@ std::map<std::string, std::string> TCPRestSrv_mec::parseRequest(char *packet_){
 }
 
 
-void TCPRestSrv_mec::handleGetRequest(std::string uri, TCPSocket* socket){
+void TCPRestSrv::handleGetRequest(const std::string& uri, inet::TCPSocket* socket){
+    // TODO define routes
+
+    inet::Coord position = app->getPosition();
     // pretend all ok, generate a response
     HTTPRespPacket temp_res = HTTPRespPacket("res");
     temp_res.setResCode(OK);
     temp_res.setContentType("application/json");
     temp_res.setConnection("keep-alive");
     temp_res.addNewLine();
-    temp_res.setBody();
+    temp_res.setBody(position);
 //    delete res;
     EV <<"\n\n\n\n######SEND!!!\n\n\n";
-//    RawPacket *e = new RawPacket("resraw");
+    inet::RawPacket *res = new RawPacket("resraw");
 //    std::string s = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nConnection: keep-alive\r\n\r\n{\n\t\"DIO\" : \"BUONO\"\n}\r\n";
     res->setDataFromBuffer(temp_res.getPacket().c_str(), temp_res.getPacket().size());
     res->setByteLength(temp_res.getPacket().size());
@@ -205,19 +202,46 @@ void TCPRestSrv_mec::handleGetRequest(std::string uri, TCPSocket* socket){
 }
 
 
-void TCPRestSrv_mec::refreshDisplay() const
+void TCPRestSrv::handlePostRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket){
+    /*
+     * check uri until resource:
+     *\ /exampleAPI/location/v1/subscriptions/
+    */
+    if(uri.find("/exampleAPI/location/v1/subscriptions/") != std::string::npos){
+        //send response with bad request
+    }
+
+    /*
+     * find subscription type:
+     * userTracking
+     * zonalTraffic
+     * zonalStatus
+     */
+
+
+    else{
+
+    }
+
+
+
+
+}
+
+void TCPRestSrv::refreshDisplay() const
 {
 // TODO
+    return;
 }
 
-void TCPRestSrv_mec::finish()
+void TCPRestSrv::finish()
 {
+    //TODO
+    return;
 }
 
-TCPRestSrv_mec::~TCPRestSrv_mec(){
+TCPRestSrv::~TCPRestSrv(){
     socketMap.deleteSockets(); //it calls delete, too
 }
 
-
-} // namespace inet
 
