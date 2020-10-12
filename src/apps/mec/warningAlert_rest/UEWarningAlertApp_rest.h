@@ -43,7 +43,7 @@ class UEWarningAlertApp_rest : public cSimpleModule
     inet::L3Address destAddress_;
 
     char* sourceSimbolicAddress;            //Ue[x]
-    char* destSimbolicAddress;              //meHost.virtualisationInfrastructure
+    char* destSimbolicAddress;
 
     // mobility informations
     cModule* ue;
@@ -56,6 +56,7 @@ class UEWarningAlertApp_rest : public cSimpleModule
     double requiredCpu;
 
     //scheduling
+    double stopTime;
     cMessage *selfStart_;
     cMessage *selfSender_;
     cMessage *selfStop_;
@@ -63,15 +64,19 @@ class UEWarningAlertApp_rest : public cSimpleModule
     public:
         ~UEWarningAlertApp_rest();
         UEWarningAlertApp_rest();
-
+        inet::Coord getPosition();
     protected:
 
         virtual int numInitStages() const { return inet::NUM_INIT_STAGES; }
         void initialize(int stage);
+
         virtual void handleMessage(cMessage *msg);
         virtual void finish();
 
-        void sendInfoUEWarningAlertApp();
+        void handleUDPPacket(char *packet);
+        void sendStartUEWarningAlertApp();
+        void sendStopUEWarningAlertApp();
+
 
 };
 

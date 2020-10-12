@@ -14,6 +14,8 @@
 #include "UEWarningAlertApp_rest.h"
 
 #include "inet/common/RawPacket.h"
+#include "apps/mec/restServer/utils/utils.h"
+#include "string.h"
 
 Define_Module(UEWarningAlertApp_rest);
 
@@ -66,6 +68,7 @@ void UEWarningAlertApp_rest::initialize(int stage)
         throw cRuntimeError("UEWarningAlertApp_rest::initialize - \tWARNING: Mobility module NOT FOUND!");
     }
 
+    stopTime = par("stopTime");
     //initializing the auto-scheduling messages
     selfSender_ = new cMessage("selfSender");
     selfStart_ = new cMessage("selfStart");
@@ -74,7 +77,7 @@ void UEWarningAlertApp_rest::initialize(int stage)
     //starting UEWarningAlertApp_rest
     simtime_t startTime = par("startTime");
     EV << "UEWarningAlertApp_rest::initialize - starting sendStartMEWarningAlertApp() in " << startTime << " seconds " << endl;
-    scheduleAt(simTime() + startTime, selfSender_);
+    scheduleAt(simTime() + startTime, selfStart_);
 
     //testing
     EV << "UEWarningAlertApp_rest::initialize - sourceAddress: " << sourceSimbolicAddress << " [" << inet::L3AddressResolver().resolve(sourceSimbolicAddress).str()  <<"]"<< endl;
@@ -88,30 +91,47 @@ void UEWarningAlertApp_rest::handleMessage(cMessage *msg)
     // Sender Side
     if (msg->isSelfMessage())
     {
-       if(!strcmp(msg->getName(), "selfSender"))   sendInfoUEWarningAlertApp();
-
-
-        else    throw cRuntimeError("UEWarningAlertApp_rest::handleMessage - \tWARNING: Unrecognized self message");
+       EV << "####" <<msg->getName() << endl;
+       if(!strcmp(msg->getName(), "selfStart"))   sendStartUEWarningAlertApp();
+       else if(!strcmp(msg->getName(), "selfStop")) sendStopUEWarningAlertApp();
+       else    throw cRuntimeError("UEWarningAlertApp_rest::handleMessage - \tWARNING: Unrecognized self message");
     }
     // Receiver Side
     else{
         EV << "###RICEVUTO: " << msg;
-
         if(msg->getKind() == UDP_I_DATA){
-
-            RawPacket *request = check_and_cast<RawPacket *>(msg);
-            char *packet = request->getByteArray().getDataPtr();
-            EV << packet;
-
-
+            handleUDPPacket(utils::getPacketPayload(msg));
         }
-//        RawPacket* mePkt = check_and_cast<RawPacket*>(msg);
-//        if (mePkt == 0) throw cRuntimeError("UEWarningAlertApp_rest::handleMessage - \tFATAL! Error when casting to MEAppPacket");
-
-
         delete msg;
     }
 }
+
+
+void UEWarningAlertApp_rest::handleUDPPacket(char* payload){
+    // ACK from app
+    if(strstr(payload, "OK START APP") != nullptr){
+        // stop sending START APP
+        if(selfStart_->isScheduled()){
+            cancelEvent(selfStart_);
+        }
+        EV << "##OK START APP\n";
+        //start STOP APP timer
+        scheduleAt(simTime() + stopTime, selfStop_);
+    }
+    else if(strstr(payload, "OK STOP APP") != nullptr){
+        //do nothing
+    }
+    // alert message
+    else if(strstr(payload, "ALERT MESSAGE") != nullptr){
+        EV << payload << endl;
+    }
+
+    // Bad UDP message
+    else{
+        throw cRuntimeError("UEWarningAlertApp_rest::handleMessage - \tWARNING: Unrecognized UDP message");
+    }
+}
+
 
 void UEWarningAlertApp_rest::finish()
 {
@@ -120,23 +140,30 @@ void UEWarningAlertApp_rest::finish()
         cancelEvent(selfStop_);
 }
 
-void UEWarningAlertApp_rest::sendInfoUEWarningAlertApp()
+inet::Coord UEWarningAlertApp_rest::getPosition(){
+    return mobility->getCurrentPosition();
+}
+
+void UEWarningAlertApp_rest::sendStartUEWarningAlertApp()
 {
-    EV << "###UEWarningAlertApp_rest::sendInfoUEInceAlertApp - Sending " << INFO_UEAPP <<" type WarningAlertPacket\n";
+    EV << "###UEWarningAlertApp_rest::sendStartUEWarningAlertApp - Sending\n";
+    std::ostringstream payload;
+    payload << "START APP\nUser: " << getFullName();
 
-    position = mobility->getCurrentPosition();
-
-//    WarningAlertPacket* packet = new WarningAlertPacket();
-    RawPacket *pck  = new RawPacket("udpPacket");
-    std::string payload;
-    std::ostringstream strs;
-    strs << "X: " << position.x << "\n" << "Y: " << position.y << "\n" << "Z: " << position.z << "\n";
-    payload = strs.str();
-
-    pck->setDataFromBuffer(payload.c_str(), payload.size());
-    pck->setByteLength(payload.size());
+    RawPacket *pck  = utils::createUDPPacket(payload.str());
     socket.sendTo(pck, destAddress_, destPort_);
 
     //rescheduling
-    scheduleAt(simTime() + period_, selfSender_);
+    if(selfStart_->isScheduled()) cancelEvent(selfStart_);
+    scheduleAt(simTime() + period_ , selfStart_);
+}
+
+void UEWarningAlertApp_rest::sendStopUEWarningAlertApp(){
+    EV << "###UEWarningAlertApp_rest::sendStopUEWarningAlertApp - Sending\n";
+    std::ostringstream payload;
+    payload << "STOP APP\nUser: " << getFullName();
+
+    RawPacket *pck  = utils::createUDPPacket(payload.str());
+    socket.sendTo(pck, destAddress_, destPort_);
+
 }
