@@ -148,7 +148,7 @@ void UEWarningAlertApp_rest::sendStartUEWarningAlertApp()
 {
     EV << "###UEWarningAlertApp_rest::sendStartUEWarningAlertApp - Sending\n";
     std::ostringstream payload;
-    payload << "START APP\nUser: " << getFullName();
+    payload << "START APP\nUser: " << getFullPath();
 
     RawPacket *pck  = utils::createUDPPacket(payload.str());
     socket.sendTo(pck, destAddress_, destPort_);
@@ -161,7 +161,7 @@ void UEWarningAlertApp_rest::sendStartUEWarningAlertApp()
 void UEWarningAlertApp_rest::sendStopUEWarningAlertApp(){
     EV << "###UEWarningAlertApp_rest::sendStopUEWarningAlertApp - Sending\n";
     std::ostringstream payload;
-    payload << "STOP APP\nUser: " << getFullName();
+    payload << "STOP APP\nUser: " << getFullPath();
 
     RawPacket *pck  = utils::createUDPPacket(payload.str());
     socket.sendTo(pck, destAddress_, destPort_);
