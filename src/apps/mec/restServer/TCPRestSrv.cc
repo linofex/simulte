@@ -174,16 +174,25 @@ std::map<std::string, std::string> TCPRestSrv::parseRequest(char* packet_){
 
 void TCPRestSrv::handleGetRequest(const std::string& uri, inet::TCPSocket* socket){
     // TODO define routes
-
-    inet::Coord position = app->getPosition();
-    // pretend all ok, generate a response
     HTTPRespPacket temp_res = HTTPRespPacket("res");
-    temp_res.setResCode(OK);
-    temp_res.setContentType("application/json");
-    temp_res.setConnection("keep-alive");
-    temp_res.addNewLine();
-    temp_res.setBody(position);
-//    delete res;
+    if(uri.find(app->getFullPath()) != std::string::npos){
+        inet::Coord position = app->getPosition();
+        // pretend all ok, generate a response
+
+        temp_res.setResCode(OK);
+        temp_res.setContentType("application/json");
+        temp_res.setConnection("keep-alive");
+        temp_res.addNewLine();
+        temp_res.setBodyOK(position);
+    }
+
+    else{
+        temp_res.setResCode(NOT_FOUND);
+        temp_res.setContentType("application/json");
+        temp_res.setConnection("keep-alive");
+        temp_res.addNewLine();
+        temp_res.setBodyNOT_FOUND("resource not found");
+    }
     EV <<"\n\n\n\n######SEND!!!\n\n\n";
     inet::RawPacket *res = new RawPacket("resraw");
 //    std::string s = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nConnection: keep-alive\r\n\r\n{\n\t\"DIO\" : \"BUONO\"\n}\r\n";
