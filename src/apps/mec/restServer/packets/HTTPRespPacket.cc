@@ -85,9 +85,8 @@ void HTTPRespPacket::addNewLine(){
     addByteLength(2);
 }
 
-void HTTPRespPacket::setBody(const inet::Coord& pos){
+void HTTPRespPacket::setBodyOK(const inet::Coord& pos){
     std::ostringstream strs;
-
     std::string body;
     strs << "\r\n" << "{\n  \"userInfo\": {\n    \"address\": \"INDIRIZZO\",\n    \"locationInfo\": {\n      \"x\": " << pos.x << ",\n      \"y\": " << pos.y << ",\n      \"z\": " << pos.z << "\n    }\n  }\n}";
     body = strs.str();
@@ -95,6 +94,17 @@ void HTTPRespPacket::setBody(const inet::Coord& pos){
     addByteLength(body.size());
     payload += body;
 }
+
+void HTTPRespPacket::setBodyNOT_FOUND(const std::string& reason){
+    std::ostringstream strs;
+    std::string body;
+    strs << "\r\n" << "{\n  \"ProblemDetails\": {\n    \"reason\": \""<< reason << "\"\n  }\n}";
+    body = strs.str();
+    byteArray.addDataFromBuffer(body.c_str(), body.size());
+    addByteLength(body.size());
+    payload += body;
+}
+
 
 inet::RawPacket* HTTPRespPacket::getRawPacket(){
     return &byteArray;

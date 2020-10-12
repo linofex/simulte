@@ -79,7 +79,9 @@ class HTTPRespPacket : public inet::HTTPRespPacket_Base
     void setConnection(const char *);
     void setHeaderField(const char *); //generic field
     void addNewLine();
-    void setBody(const inet::Coord& pos);
+    void setBodyOK(const inet::Coord& pos);
+    void setBodyNOT_FOUND(const std::string& reason);
+
     ::omnetpp::opp_string& getPacket();
     inet::RawPacket* getRawPacket();
 };
