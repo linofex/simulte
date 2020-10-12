@@ -9,16 +9,16 @@
 #define __INET_HTTPRESPPACKET_H
 
 #include "inet/common/INETDefs.h"
-#include "inet/applications/restServer/packets/HTTPRespPacket_m.h"
+#include "apps/mec/restServer/packets/HTTPRespPacket_m.h"
+#include "inet/common/geometry/common/Coord.h"
 
-namespace inet {
 
 enum response {OK, BAD_REQ, UNAUTH,  FORBIDDEN, NOT_FOUND, NOT_ACC, TOO_REQS};
 
 /**
  * Message that carries raw bytes. Used with emulation-related features.
  */
-class INET_API HTTPRespPacket : public HTTPRespPacket_Base
+class HTTPRespPacket : public inet::HTTPRespPacket_Base
 {
   private:
     ::omnetpp::opp_string HttpVersion = "HTTP/1.1 ";
@@ -79,12 +79,12 @@ class INET_API HTTPRespPacket : public HTTPRespPacket_Base
     void setConnection(const char *);
     void setHeaderField(const char *); //generic field
     void addNewLine();
-    void setBody();
+    void setBody(const inet::Coord& pos);
     ::omnetpp::opp_string& getPacket();
-    RawPacket* getRawPacket();
+    inet::RawPacket* getRawPacket();
 };
 
-} // namespace inet
+
 
 #endif // ifndef __INET_HTTPRESPPACKET_H
 

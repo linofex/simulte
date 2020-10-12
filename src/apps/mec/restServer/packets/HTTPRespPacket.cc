@@ -4,7 +4,6 @@
 
 #include "apps/mec/restServer/packets/HTTPRespPacket.h"
 
-namespace inet {
 
 void HTTPRespPacket::setDataFromBuffer(const void *ptr, unsigned int length)
 {
@@ -86,20 +85,23 @@ void HTTPRespPacket::addNewLine(){
     addByteLength(2);
 }
 
-void HTTPRespPacket::setBody(){
-    ::omnetpp::opp_string newLine("\r\n");
-    ::omnetpp::opp_string body = newLine + "{\n  \"Hello\": \"mondo\"\n}";
+void HTTPRespPacket::setBody(const inet::Coord& pos){
+    std::ostringstream strs;
+
+    std::string body;
+    strs << "\r\n" << "{\n  \"userInfo\": {\n    \"address\": \"INDIRIZZO\",\n    \"locationInfo\": {\n      \"x\": " << pos.x << ",\n      \"y\": " << pos.y << ",\n      \"z\": " << pos.z << "\n    }\n  }\n}";
+    body = strs.str();
     byteArray.addDataFromBuffer(body.c_str(), body.size());
     addByteLength(body.size());
     payload += body;
 }
 
-RawPacket* HTTPRespPacket::getRawPacket(){
+inet::RawPacket* HTTPRespPacket::getRawPacket(){
     return &byteArray;
 }
 
 ::omnetpp::opp_string& HTTPRespPacket::getPacket(){
     return payload;
 }
-} // namespace inet
+
 
