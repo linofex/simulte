@@ -15,7 +15,7 @@
 #include "epc/gtp_common.h"
 #include "corenetwork/binder/LteBinder.h"
 
-#include "inet/applications/restServer/utils/utils.h"
+#include "apps/mec/restServer/utils/utils.h"
 
 /**
  * Objective of the Traffic Flow Filter is mapping IP 4-Tuples to TFT identifiers. This commonly means identifying a bearer and
