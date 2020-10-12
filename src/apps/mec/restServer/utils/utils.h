@@ -1,13 +1,20 @@
 // @Alessandro Noferi
 //
 
-#ifndef __INET_UTILS_H
-#define __INET_UTILS_H
+#ifndef __UTILS_H
+#define __UTILS_H
 
 #include <vector>
 #include <string>
 #include <string.h>
 #include <stdlib.h>
+#include <string>
+
+#include "/opt/omnetpp-5.4.1/include/omnetpp/cmessage.h"
+#include "inet/transportlayer/contract/udp/UDPSocket.h"
+#include "inet/networklayer/common/L3Address.h"
+#include "inet/common/RawPacket.h"
+
 
 #ifdef _WIN32
 # include <io.h>
@@ -17,14 +24,14 @@
 #endif // ifdef _WIN32
 
 
-namespace inet {
 
 namespace utils {
 
-std::vector<std::string> splitString(std::string str, std::string delim);
 
+std::vector<std::string> splitString(std::string str, std::string delim);
+char* getPacketPayload(::omnetpp::cMessage *msg);
+inet::RawPacket* createUDPPacket(const std::string& payload);
 } // namespace httptools
 
-} // namespace inet
 
 #endif // ifndef __INET_HTTPUTILS_H
