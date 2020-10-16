@@ -27,6 +27,9 @@
 #include <map>
 
 
+#include "corenetwork/binder/LteBinder.h"
+
+
 /**
  *
  *
@@ -39,6 +42,9 @@ class TCPRestSrv: public cSimpleModule, public inet::ILifecycle
     inet::TCPSocketMap socketMap; // Stores the connections
     std::map<std::string, std::string> usersLocations;
     UEWarningAlertApp_rest *app; //user
+    LteBinder* binder_;
+
+
     // TODO data structure to save RNI info
 
   protected:

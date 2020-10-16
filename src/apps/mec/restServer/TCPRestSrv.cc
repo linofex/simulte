@@ -24,6 +24,7 @@
 #include "apps/mec/restServer/packets/HTTPRespPacket.h"
 #include "apps/mec/warningAlert_rest/UEWarningAlertApp_rest.h"
 #include "inet/common/RawPacket.h"
+#include "inet/applications/tcpapp/GenericAppMsg_m.h"
 
 
 #include "apps/mec/restServer/utils/utils.h"
@@ -54,10 +55,13 @@ void TCPRestSrv::initialize(int stage)
         serverSocket.setDataTransferMode(inet::TCP_TRANSFER_BYTESTREAM); // BYTESTREAM to send bytes!
         serverSocket.bind(localAddress[0] ? inet::L3AddressResolver().resolve(localAddress) : inet::L3Address(), localPort);
         serverSocket.listen();
-        EV<<"###IN LTE TCPRESTSRV";
+
+        app = check_and_cast<UEWarningAlertApp_rest*>(getModuleByPath("MecSingleCell.ue[0].udpApp[0]"));
+
+
+        binder_ = getBinder();
 
 //        cModule *ue = getModuleByPath("MecSingleCell.ue[0].udpApp[0]");
-        app = check_and_cast<UEWarningAlertApp_rest*>(getModuleByPath("MecSingleCell.ue[0].udpApp[0]"));
 //        EV<< "## EEE: " << app->getPosition();
 
 
@@ -173,18 +177,51 @@ std::map<std::string, std::string> TCPRestSrv::parseRequest(char* packet_){
 
 
 void TCPRestSrv::handleGetRequest(const std::string& uri, inet::TCPSocket* socket){
-    // TODO define routes
     HTTPRespPacket temp_res = HTTPRespPacket("res");
-    if(uri.find(app->getFullPath()) != std::string::npos){
-        inet::Coord position = app->getPosition();
-        // pretend all ok, generate a response
 
-        temp_res.setResCode(OK);
-        temp_res.setContentType("application/json");
-        temp_res.setConnection("keep-alive");
-        temp_res.addNewLine();
-        temp_res.setBodyOK(position);
+    if(uri.find("users/") != std::string::npos){
+       std::string strAddress = utils::splitString(uri,"acr:")[1];
+
+       inet::IPv4Address address(strAddress.c_str());
+
+       MacNodeId nodeId = binder_->getMacNodeId(address);
+
+       if(nodeId == 0){
+           //riposta negativa
+       }
+//       inet::Coord =
+       const char *moduleName = binder_->getModuleNameByMacNodeId(nodeId);
+       cModule *temp = getSimulation()->getModuleByPath(moduleName)->getSubmodule("mobility");
+           inet::IMobility *mobility;
+           if(temp != NULL){
+               mobility = check_and_cast<inet::IMobility*>(temp);
+               inet::Coord position = mobility->getCurrentPosition();
+               temp_res.setResCode(OK);
+               temp_res.setContentType("application/json");
+               temp_res.setConnection("keep-alive");
+               temp_res.addNewLine();
+               temp_res.setBodyOK(position);
+
+           }
+           else {
+                   EV << "UEWarningAlertApp_rest::initialize - \tWARNING: Mobility module NOT FOUND!" << endl;
+                   throw cRuntimeError("UEWarningAlertApp_rest::initialize - \tWARNING: Mobility module NOT FOUND!");
+           }
+
+
     }
+    // TODO define routes
+//    HTTPRespPacket temp_res = HTTPRespPacket("res");
+//    if(uri.find(app->getFullPath()) != std::string::npos){
+//        inet::Coord position = app->getPosition();
+//        // pretend all ok, generate a response
+//
+//        temp_res.setResCode(OK);
+//        temp_res.setContentType("application/json");
+//        temp_res.setConnection("keep-alive");
+//        temp_res.addNewLine();
+//        temp_res.setBodyOK(position);
+//    }
 
     else{
         temp_res.setResCode(NOT_FOUND);
@@ -203,9 +240,7 @@ void TCPRestSrv::handleGetRequest(const std::string& uri, inet::TCPSocket* socke
 //    e->setByteLength(s.size());
 
 //    cPacket *mm = new cPacket("ciao come sta");
-    if(res == nullptr){
-        throw cRuntimeError("Response code not allowed");
-    }
+
       socket->send(res);
 //    temp_res.createRequest();
 }
