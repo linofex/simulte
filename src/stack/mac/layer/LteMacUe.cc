@@ -129,6 +129,11 @@ void LteMacUe::initialize(int stage)
         if(ipv4if == NULL)
             throw new cRuntimeError("no IPv4 interface data - cannot bind node %i", nodeId_);
         binder_->setMacNodeId(ipv4if->getIPAddress(), nodeId_);
+        /*
+         * @autor Alessandro Noferi
+         */
+        const char* moduleName = getParentModule()->getParentModule()->getFullName();
+        binder_->registerName(nodeId_, moduleName);
     }
 }
 
