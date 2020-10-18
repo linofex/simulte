@@ -52,7 +52,8 @@ void TCPRestSrv::initialize(int stage)
 
 
         serverSocket.setOutputGate(gate("tcpOut"));
-        serverSocket.setDataTransferMode(inet::TCP_TRANSFER_BYTESTREAM); // BYTESTREAM to send bytes!
+//        serverSocket.setDataTransferMode(inet::TCP_TRANSFER_BYTESTREAM); // BYTESTREAM to send bytes!
+        serverSocket.readDataTransferModePar(*this);
         serverSocket.bind(localAddress[0] ? inet::L3AddressResolver().resolve(localAddress) : inet::L3Address(), localPort);
         serverSocket.listen();
 
