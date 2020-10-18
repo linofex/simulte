@@ -116,6 +116,8 @@ void UEWarningAlertApp_rest::handleUDPPacket(char* payload){
         }
         EV << "##OK START APP\n";
         //start STOP APP timer
+
+        //        if(selfStop_->isScheduled()) cancelEvent(selfStop_);
         scheduleAt(simTime() + stopTime, selfStop_);
     }
     else if(strstr(payload, "OK STOP APP") != nullptr){
@@ -148,7 +150,7 @@ void UEWarningAlertApp_rest::sendStartUEWarningAlertApp()
 {
     EV << "###UEWarningAlertApp_rest::sendStartUEWarningAlertApp - Sending\n";
     std::ostringstream payload;
-    payload << "START APP\nUser: " << getFullPath();
+    payload << "START APP";
 
     RawPacket *pck  = utils::createUDPPacket(payload.str());
     socket.sendTo(pck, destAddress_, destPort_);
@@ -161,7 +163,7 @@ void UEWarningAlertApp_rest::sendStartUEWarningAlertApp()
 void UEWarningAlertApp_rest::sendStopUEWarningAlertApp(){
     EV << "###UEWarningAlertApp_rest::sendStopUEWarningAlertApp - Sending\n";
     std::ostringstream payload;
-    payload << "STOP APP\nUser: " << getFullPath();
+    payload << "STOP APP";
 
     RawPacket *pck  = utils::createUDPPacket(payload.str());
     socket.sendTo(pck, destAddress_, destPort_);
