@@ -29,6 +29,8 @@ import lte.epc.gtp.GtpUserSimplified;
 import lte.epc.TrafficFlowFilterSimplified;
 import lte.epc.gtp.GtpUserX2;
 
+import lte.corenetwork.statsCollector.EnodeBStatsCollector;
+
 // 
 // eNodeB Module
 //
@@ -89,6 +91,10 @@ module eNodeB
         cellInfo: LteCellInfo {
             @display("p=50,225;is=s");
         }
+        
+        collector: EnodeBStatsCollector {
+            @display("p=50,275;is=s");
+        }
 
         //#
         //# lteNic modules
@@ -98,7 +104,7 @@ module eNodeB
             //d2dCapable = d2dCapable;
             @display("p=250,407");
         }
-        
+
         pppIf: PPPInterface {
             @display("p=501,363");
         }
@@ -235,7 +241,7 @@ module eNodeB
         //#mec	
         //#
         //@author Angelo Buono
-		pppMEHostIf.upperLayerIn <-- networkLayer.ifOut++;
-		pppMEHostIf.upperLayerOut --> networkLayer.ifIn++; 
-		pppMEHost <--> pppMEHostIf.phys; 
+        pppMEHostIf.upperLayerIn <-- networkLayer.ifOut++;
+        pppMEHostIf.upperLayerOut --> networkLayer.ifIn++;
+        pppMEHost <--> pppMEHostIf.phys;
 }
