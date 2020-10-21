@@ -329,15 +329,6 @@ class LteMacEnb : public LteMacBase
     }
 
     virtual ConflictGraph* getConflictGraph();
-
-
-
-    /* @author Alessandro Noferi
-     *
-     * Reference to the eNodeB statistic collector
-     */
-    EnodeBStatsCollector* getCollector();
-
 };
 
 #endif
