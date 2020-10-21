@@ -14,6 +14,7 @@
 #include "stack/mac/layer/LteMacBase.h"
 #include "stack/mac/amc/LteAmc.h"
 #include "common/LteCommon.h"
+#include "corenetwork/statsCollector/EnodeBStatsCollector.h"
 
 class MacBsr;
 class LteSchedulerEnbDl;
@@ -328,6 +329,14 @@ class LteMacEnb : public LteMacBase
     }
 
     virtual ConflictGraph* getConflictGraph();
+
+
+
+    /* @author Alessandro Noferi
+     *
+     * Reference to the eNodeB statistic collector
+     */
+    EnodeBStatsCollector* getCollector();
 
 };
 

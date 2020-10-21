@@ -987,3 +987,10 @@ ConflictGraph* LteMacEnb::getConflictGraph()
 {
     return NULL;
 }
+
+// @author Alessandro Noferi
+EnodeBStatsCollector* LteMacEnb::getCollector(){    // LteNic               eNodeB
+    return check_and_cast<EnodeBStatsCollector* > (getParentModule()->getParentModule()->getSubmodule("collector"));
+}
+
+
