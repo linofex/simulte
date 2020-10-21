@@ -53,6 +53,8 @@ void LteSchedulerEnb::initialize(Direction dir, LteMacEnb* mac)
     direction_ = dir;
     mac_ = mac;
 
+    collector_ = mac_->getCollector();
+
     binder_ = getBinder();
 
     vbuf_ = mac_->getMacBuffers();
@@ -638,11 +640,14 @@ void LteSchedulerEnb::resourceBlockStatistics(bool sleep)
     {
         mac_->emit(cellBlocksUtilizationDl_, utilization);
         mac_->emit(lteAvgServedBlocksDl_, allocatedBlocks);
+
+        collector_->add_dl_total_prb_usage_cell(utilization);
     }
     else if (direction_ == UL)
     {
         mac_->emit(cellBlocksUtilizationUl_, utilization);
         mac_->emit(lteAvgServedBlocksUl_, allocatedBlocks);
+        collector_->add_ul_total_prb_usage_cell(utilization);
     }
     else
     {

@@ -14,6 +14,9 @@
 #include "stack/mac/buffer/harq/LteHarqBufferTx.h"
 #include "stack/mac/allocator/LteAllocatorUtils.h"
 
+#include "corenetwork/statsCollector/EnodeBStatsCollector.h"
+
+
 /// forward declarations
 class LteScheduler;
 class LteAllocationModule;
@@ -70,6 +73,17 @@ class LteSchedulerEnb
 
     // Reference to the LTE Binder
     LteBinder *binder_;
+
+
+    /*
+     * @author Alessandro Noferi
+     *
+     * begin
+     */
+
+    // Reference to the eNodeB statistic collector
+    EnodeBStatsCollector* collector_;
+    //end
 
     // System allocator, carries out the block-allocation functions.
     LteAllocationModule *allocator_;
@@ -314,6 +328,7 @@ class LteSchedulerEnb
      * @param discipline scheduler discipline
      */
     LteScheduler* getScheduler(SchedDiscipline discipline);
+
 };
 
 #endif // _LTE_LTESCHEDULERENB_H_
