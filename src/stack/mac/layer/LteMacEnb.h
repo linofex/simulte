@@ -329,6 +329,10 @@ class LteMacEnb : public LteMacBase
     }
 
     virtual ConflictGraph* getConflictGraph();
+
+    // @author Alessandro Noferi
+    EnodeBStatsCollector* getCollector();
+
 };
 
 #endif
