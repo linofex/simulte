@@ -34,10 +34,10 @@ void EnodeBStatsCollector::add_ul_total_prb_usage_cell(double val){
     ul_total_prb_usage_cell.addValue(val);
 }
 
-double EnodeBStatsCollector::get_dl_total_prb_usage_cell() {
+int EnodeBStatsCollector::get_dl_total_prb_usage_cell() {
     return dl_total_prb_usage_cell.getMean();
 }
 
-double EnodeBStatsCollector::get_ul_total_prb_usage_cell() {
+int EnodeBStatsCollector::get_ul_total_prb_usage_cell() {
     return ul_total_prb_usage_cell.getMean();
 }

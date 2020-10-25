@@ -20,6 +20,7 @@
 #include "corenetwork/binder/PhyPisaData.h"
 #include "corenetwork/nodes/ExtCell.h"
 #include "stack/mac/layer/LteMacBase.h"
+#include <math.h>       /* floor */
 
 using namespace inet;
 
@@ -40,7 +41,7 @@ using namespace inet;
  *
  */
 
-struct L2Meas{
+struct L2MeasGeneric{
     double sum;
     double* values;
     int index, period, size;
@@ -78,12 +79,12 @@ struct L2Meas{
         histogram.collect(mean);
     }
 
-    double getMean(){
+    int getMean(){
         if(index == 0)
             return 0;
             //eccezione;
         else{
-            return sum/size;
+            return (int)floor(sum/size);
         }
 
     }
@@ -95,8 +96,8 @@ class EnodeBStatsCollector: public cSimpleModule
 {
     private:
         unsigned int ttiPeriodPRBUsage_;
-        struct L2Meas dl_total_prb_usage_cell;
-        struct L2Meas ul_total_prb_usage_cell;
+        struct L2MeasGeneric dl_total_prb_usage_cell;
+        struct L2MeasGeneric ul_total_prb_usage_cell;
 
     public:
         EnodeBStatsCollector(){
@@ -111,8 +112,27 @@ class EnodeBStatsCollector: public cSimpleModule
         }
         void add_dl_total_prb_usage_cell(double val);
         void add_ul_total_prb_usage_cell(double val);
-        double get_dl_total_prb_usage_cell();
-        double get_ul_total_prb_usage_cell();
+        int get_dl_total_prb_usage_cell();
+        int get_ul_total_prb_usage_cell();
+
+        int get_dl_gbr_prb_usage_cell() {return -1;}
+        int get_ul_gbr_prb_usage_cell() {return -1;}
+        int get_dl_nongbr_prb_usage_cell() {return -1;}
+        int get_ul_nongbr_prb_usage_cell() {return -1;}
+        int get_received_dedicated_preambles_cell() {return -1;}
+        int get_received_randomly_selected_preambles_low_range_cell() {return -1;}
+        int get_received_randomly_selected_preambles_high_range_cell() {return -1;}
+        int get_number_of_active_ue_dl_gbr_cell() {return -1;}
+        int get_number_of_active_ue_ul_gbr_cell() {return -1;}
+        int get_number_of_active_ue_dl_nongbr_cell() {return -1;}
+        int get_number_of_active_ue_ul_nongbr_cell() {return -1;}
+        int get_dl_gbr_pdr_cell() {return -1;}
+        int get_ul_gbr_pdr_cell() {return -1;}
+        int get_dl_nongbr_pdr_cell() {return -1;}
+        int get_ul_nongbr_pdr_cell() {return -1;}
+
+
+
 
 
     protected:
