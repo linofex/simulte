@@ -145,6 +145,17 @@ class LteCellInfo : public cSimpleModule
     LteCellInfo();
 
     // Getters
+
+    /*
+     * author Alessandro Noferi
+     * begin
+     */
+    MacCellId getMacCellId()
+    {
+        return cellId_;
+    }
+    //end
+
     int getNumRbDl()
     {
         return numRbDl_;
