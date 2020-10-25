@@ -80,6 +80,8 @@ class HTTPRespPacket : public inet::HTTPRespPacket_Base
     void setHeaderField(const char *); //generic field
     void addNewLine();
     void setBodyOK(const inet::Coord& pos);
+    void setBody(const std::string& body);
+
     void setBodyNOT_FOUND(const std::string& reason);
 
     ::omnetpp::opp_string& getPacket();

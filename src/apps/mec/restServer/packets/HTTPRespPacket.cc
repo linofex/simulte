@@ -95,6 +95,12 @@ void HTTPRespPacket::setBodyOK(const inet::Coord& pos){
     payload += body;
 }
 
+void HTTPRespPacket::setBody(const std::string& body){
+    byteArray.addDataFromBuffer(body.c_str(), body.size());
+    addByteLength(body.size());
+    payload += body;
+}
+
 void HTTPRespPacket::setBodyNOT_FOUND(const std::string& reason){
     std::ostringstream strs;
     std::string body;
