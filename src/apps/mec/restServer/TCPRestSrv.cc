@@ -39,6 +39,8 @@
 Define_Module(TCPRestSrv);
 
 
+TCPRestSrv::TCPRestSrv(){}
+
 void TCPRestSrv::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
@@ -58,9 +60,13 @@ void TCPRestSrv::initialize(int stage)
         serverSocket.listen();
 
         app = check_and_cast<UEWarningAlertApp_rest*>(getModuleByPath("MecSingleCell.ue[0].udpApp[0]"));
-
-
         binder_ = getBinder();
+        meHost_ = getParentModule() // virtualizationInfrastructure
+                ->getParentModule(); // MeHost
+
+        this->getConnectedEnodeB();
+        L2MeasResource.addEnodeB(eNodeB_);
+
 
 //        cModule *ue = getModuleByPath("MecSingleCell.ue[0].udpApp[0]");
 //        EV<< "## EEE: " << app->getPosition();
@@ -201,7 +207,11 @@ void TCPRestSrv::handleGetRequest(const std::string& uri, inet::TCPSocket* socke
                temp_res.setContentType("application/json");
                temp_res.setConnection("keep-alive");
                temp_res.addNewLine();
-               temp_res.setBodyOK(position);
+//               temp_res.setBodyOK(position);
+
+               std::string pp = L2MeasResource.toJson().dump(4);
+               temp_res.setBody(pp);
+
 
            }
            else {
@@ -265,7 +275,7 @@ void TCPRestSrv::handlePostRequest(const std::string& uri, const std::string& bo
 
 
     else{
-
+        return;
     }
 
 
@@ -279,6 +289,19 @@ void TCPRestSrv::refreshDisplay() const
     return;
 }
 
+
+
+void TCPRestSrv::getConnectedEnodeB(){
+    int eNodeBsize = meHost_->gateSize("pppENB");
+    for(int i = 0; i < eNodeBsize ; ++i){
+        cModule *eNodebName = meHost_->gate("pppENB$o", i) // pppENB[i] output
+                                     ->getNextGate()       // eNodeB module connected gate
+                                     ->getOwnerModule();   // eBodeB module
+        eNodeB_.push_back(eNodebName);
+    }
+    return;
+}
+
 void TCPRestSrv::finish()
 {
     //TODO
@@ -288,5 +311,7 @@ void TCPRestSrv::finish()
 TCPRestSrv::~TCPRestSrv(){
     socketMap.deleteSockets(); //it calls delete, too
 }
+
+
 
 

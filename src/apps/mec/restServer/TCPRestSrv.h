@@ -26,6 +26,8 @@
 #include <vector>
 #include <map>
 
+#include "resources/L2Meas.h"
+
 
 #include "corenetwork/binder/LteBinder.h"
 
@@ -35,19 +37,30 @@
  *
  *
  */
+
+class L2Meas;
+
 class TCPRestSrv: public cSimpleModule, public inet::ILifecycle
 {
-  protected:
+  private:
     inet::TCPSocket serverSocket; // Used to listen incoming connections
     inet::TCPSocketMap socketMap; // Stores the connections
     std::map<std::string, std::string> usersLocations;
     UEWarningAlertApp_rest *app; //user
     LteBinder* binder_;
+    cModule* meHost_;
+    std::vector<cModule*> eNodeB_;     //eNodeB connected to the ME Host
+    L2Meas L2MeasResource;
+
+    void getConnectedEnodeB();
 
 
     // TODO data structure to save RNI info
 
+  public:
+    TCPRestSrv();
   protected:
+
 
     std::map<std::string, std::string> parseRequest(char *packet_);
     virtual void initialize(int stage) override;
