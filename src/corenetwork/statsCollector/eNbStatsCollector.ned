@@ -21,6 +21,9 @@ simple EnodeBStatsCollector
         
         // time periods for measurements 
         int ttiPeriodPRBUsage = default(5);
+        double samplingPeriod @unit(s) = default(0.05s);
+        int numberOfSamples = default(20);
+        bool movingAverage = default(true);
          
         
         @display("i=block/cogwheel");
