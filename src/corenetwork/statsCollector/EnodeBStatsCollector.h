@@ -45,6 +45,7 @@ struct L2MeasGeneric{
     double sum;
     double* values;
     int index, period, size;
+    bool movingAverage;
     cOutVector outVector;
     cHistogram histogram;
     simsignal_t signal;
@@ -54,11 +55,13 @@ struct L2MeasGeneric{
         signal = signal_;
     }
 
-    void initVector(int length){
+    void init(int length, bool moving){
         values = new double[length];
         period = length;
         size = 0;
         index = 0;
+        sum = 0;
+        movingAverage = moving;
     }
 
     void del(){
@@ -74,17 +77,29 @@ struct L2MeasGeneric{
             sum -= values[index];
         }
         values[index++] = val;
-        double mean = getMean();
-        outVector.record(mean);
-        histogram.collect(mean);
+        if(movingAverage){ // each TTI
+            double mean = getMean();
+            outVector.record(mean);
+            histogram.collect(mean);
+        }
+        else{
+            if(index == period){ // each sample*period
+                double mean = getMean();
+                outVector.record(mean);
+                histogram.collect(mean);
+            }
+        }
     }
 
     int getMean(){
         if(index == 0)
             return 0;
             //eccezione;
+        if(!movingAverage && size < period) // fixed average and no enough data
+            return 0;
         else{
-            return (int)floor(sum/size);
+            int mean = (int)floor(sum/size);
+            return mean < 0? 0: mean;
         }
 
     }
@@ -96,24 +111,37 @@ class EnodeBStatsCollector: public cSimpleModule
 {
     private:
         unsigned int ttiPeriodPRBUsage_;
+        bool movingAverage_;
         struct L2MeasGeneric dl_total_prb_usage_cell;
         struct L2MeasGeneric ul_total_prb_usage_cell;
+        struct L2MeasGeneric number_of_active_ue_dl_nongbr_cell;
+        struct L2MeasGeneric number_of_active_ue_ul_nongbr_cell;
+
 
     public:
         EnodeBStatsCollector(){
             dl_total_prb_usage_cell.values = nullptr;
             ul_total_prb_usage_cell.values = nullptr;
+            number_of_active_ue_dl_nongbr_cell.values = nullptr;
+            number_of_active_ue_dl_nongbr_cell.values = nullptr;
 
         }
         virtual ~EnodeBStatsCollector(){
             dl_total_prb_usage_cell.del();
             ul_total_prb_usage_cell.del();
+            number_of_active_ue_dl_nongbr_cell.del();
+            number_of_active_ue_ul_nongbr_cell.del();
 
         }
         void add_dl_total_prb_usage_cell(double val);
         void add_ul_total_prb_usage_cell(double val);
+        void add_number_of_active_ue_dl_nongbr_cell(int ues);
+        void add_number_of_active_ue_ul_nongbr_cell(int ues);
+
         int get_dl_total_prb_usage_cell();
         int get_ul_total_prb_usage_cell();
+        int get_number_of_active_ue_dl_nongbr_cell();
+        int get_number_of_active_ue_ul_nongbr_cell();
 
         int get_dl_gbr_prb_usage_cell() {return -1;}
         int get_ul_gbr_prb_usage_cell() {return -1;}
@@ -124,8 +152,7 @@ class EnodeBStatsCollector: public cSimpleModule
         int get_received_randomly_selected_preambles_high_range_cell() {return -1;}
         int get_number_of_active_ue_dl_gbr_cell() {return -1;}
         int get_number_of_active_ue_ul_gbr_cell() {return -1;}
-        int get_number_of_active_ue_dl_nongbr_cell() {return -1;}
-        int get_number_of_active_ue_ul_nongbr_cell() {return -1;}
+
         int get_dl_gbr_pdr_cell() {return -1;}
         int get_ul_gbr_pdr_cell() {return -1;}
         int get_dl_nongbr_pdr_cell() {return -1;}
