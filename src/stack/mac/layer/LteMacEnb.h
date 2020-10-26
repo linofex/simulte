@@ -27,6 +27,17 @@ class LteMacEnb : public LteMacBase
     /// Local LteCellInfo
     LteCellInfo *cellInfo_;
 
+    /* @author Alessandro Noferi
+     * begin
+     *
+     * Local EnodeBStatsCollector
+     */
+    EnodeBStatsCollector* collector_;
+    cMessage* periodicCollection_;
+    double samplingPeriod_;
+    // end
+
+
     /// Lte AMC module
     LteAmc *amc_;
 

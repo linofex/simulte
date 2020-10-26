@@ -33,6 +33,7 @@ LteMacEnb::LteMacEnb() :
     LteMacBase()
 {
     cellInfo_ = NULL;
+    collector_ = NULL;
     amc_ = NULL;
     enbSchedulerDl_ = NULL;
     enbSchedulerUl_ = NULL;
@@ -50,6 +51,7 @@ LteMacEnb::~LteMacEnb()
     delete amc_;
     delete enbSchedulerDl_;
     delete enbSchedulerUl_;
+//    cancelAndDelete(periodicCollection_);
 
     LteMacBufferMap::iterator bit;
     for (bit = bsrbuf_.begin(); bit != bsrbuf_.end(); bit++)
@@ -226,6 +228,13 @@ void LteMacEnb::initialize(int stage)
 
         cellId_ = nodeId_;
 
+        // @author Alessandro Noferi
+        collector_ = getCollector();
+        periodicCollection_ = new cMessage("L2MeasSample");
+        periodicCollection_->setSchedulingPriority(1);
+        samplingPeriod_ = collector_->par("samplingPeriod");
+        scheduleAt(NOW + samplingPeriod_, periodicCollection_);
+
         // TODO: read NED parameters, when will be present
         cellInfo_ = getCellInfo();
         /* Get num RB Dl */
@@ -284,6 +293,22 @@ void LteMacEnb::handleMessage(cMessage *msg)
             flushHarqBuffers();
             delete msg;
             return;
+        }
+        else if(strcmp(msg->getName(), "L2MeasSample") == 0)
+        {
+            int size;
+            size = enbSchedulerDl_->activeSetSize();
+            if (size < 0) throw cRuntimeError("LteMacEnb::Number of DL user < 0");
+            collector_->add_number_of_active_ue_dl_nongbr_cell(size);
+
+            size = enbSchedulerUl_->activeSetSize();
+            if (size < 0) throw cRuntimeError("LteMacEnb::Number of UL user < 0");
+            collector_->add_number_of_active_ue_ul_nongbr_cell(size);
+            scheduleAt(NOW + samplingPeriod_, periodicCollection_);
+
+//            delete msg;
+            return;
+
         }
     }
     LteMacBase::handleMessage(msg);
