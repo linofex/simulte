@@ -163,6 +163,13 @@ class LteScheduler
     {
     }
 
+    // @author Alessandro Noferi
+    // begin
+    int activeSetSize(){
+        return activeConnectionSet_.size();
+    }
+    // end
+
     ActiveSet readActiveSet()
     {
         ActiveSet::iterator it = activeConnectionSet_.begin();
