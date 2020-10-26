@@ -163,6 +163,16 @@ class LteSchedulerEnb
      */
     void backlog(MacCid cid);
 
+
+
+
+    /**
+     *  @author Alessandro Noferi
+     * Gets the number of backlogged users
+     */
+    int activeSetSize();
+
+
     /**
      * Get/Set current available Resource Blocks.
      */

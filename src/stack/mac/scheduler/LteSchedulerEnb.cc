@@ -641,12 +641,15 @@ void LteSchedulerEnb::resourceBlockStatistics(bool sleep)
         mac_->emit(cellBlocksUtilizationDl_, utilization);
         mac_->emit(lteAvgServedBlocksDl_, allocatedBlocks);
 
+        //@author Alessandro Noferi
         collector_->add_dl_total_prb_usage_cell(utilization);
     }
     else if (direction_ == UL)
     {
         mac_->emit(cellBlocksUtilizationUl_, utilization);
         mac_->emit(lteAvgServedBlocksUl_, allocatedBlocks);
+
+        //@author Alessandro Noferi
         collector_->add_ul_total_prb_usage_cell(utilization);
     }
     else
@@ -682,3 +685,10 @@ void LteSchedulerEnb::removeActiveConnections(MacNodeId nodeId)
         }
     }
 }
+
+// @author Alessandro Noferi
+int LteSchedulerEnb::activeSetSize(){
+       return scheduler_->activeSetSize();
+   }
+
+
