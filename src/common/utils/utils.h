@@ -1,4 +1,4 @@
-// @Alessandro Noferi
+// @author Alessandro Noferi
 //
 
 #ifndef __UTILS_H

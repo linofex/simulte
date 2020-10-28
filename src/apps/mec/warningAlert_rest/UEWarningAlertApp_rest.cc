@@ -14,8 +14,8 @@
 #include "UEWarningAlertApp_rest.h"
 
 #include "inet/common/RawPacket.h"
-#include "apps/mec/restServer/utils/utils.h"
 #include "string.h"
+#include "../../../common/utils/utils.h"
 
 Define_Module(UEWarningAlertApp_rest);
 
@@ -156,7 +156,7 @@ void UEWarningAlertApp_rest::sendStartUEWarningAlertApp()
     socket.sendTo(pck, destAddress_, destPort_);
 
     //rescheduling
-    if(selfStart_->isScheduled()) cancelEvent(selfStart_);
+//    if(selfStart_->isScheduled()) cancelEvent(selfStart_);
     scheduleAt(simTime() + period_ , selfStart_);
 }
 

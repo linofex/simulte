@@ -2,7 +2,7 @@
 // @ Alessandro Noferi
 //
 
-#include "apps/mec/restServer/packets/HTTPRespPacket.h"
+#include "apps/mec/MeServices/packets/HTTPRespPacket.h"
 
 
 void HTTPRespPacket::setDataFromBuffer(const void *ptr, unsigned int length)
@@ -49,6 +49,9 @@ void HTTPRespPacket::setResCode(const response res){
         case(TOO_REQS):
             response = "429 Too Many Requests";
             break;
+        case(BAD_METHOD):
+                response = "405 Method Not Allowed";
+                break;
         default:
             throw cRuntimeError("Response code not allowed");
     }
@@ -120,4 +123,10 @@ inet::RawPacket* HTTPRespPacket::getRawPacket(){
     return payload;
 }
 
+void HTTPRespPacket::send(inet::TCPSocket *socket){
+    inet::RawPacket *res = new inet::RawPacket("response");
+    res->setDataFromBuffer(payload.c_str(), payload.size());
+    res->setByteLength(payload.size());
+    socket->send(res);
+}
 

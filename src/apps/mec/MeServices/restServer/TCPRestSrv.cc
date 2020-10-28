@@ -21,19 +21,18 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "apps/mec/restServer/packets/HTTPRespPacket.h"
+#include "apps/mec/MeServices/packets/HTTPRespPacket.h"
 #include "apps/mec/warningAlert_rest/UEWarningAlertApp_rest.h"
 #include "inet/common/RawPacket.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
 
 
-#include "apps/mec/restServer/utils/utils.h"
-#include "apps/mec/restServer/TCPRestSrv.h"
+#include "apps/mec/MeServices/restServer/TCPRestSrv.h"
 
 
 #include <string>
 #include <vector>
-
+#include "../../../../common/utils/utils.h"
 
 
 Define_Module(TCPRestSrv);
@@ -184,7 +183,7 @@ std::map<std::string, std::string> TCPRestSrv::parseRequest(char* packet_){
 
 
 void TCPRestSrv::handleGetRequest(const std::string& uri, inet::TCPSocket* socket){
-    HTTPRespPacket temp_res = HTTPRespPacket("res");
+    HTTPRespPacket temp_res = HTTPRespPacket(OK);
 
     if(uri.find("users/") != std::string::npos){
        std::string strAddress = utils::splitString(uri,"acr:")[1];

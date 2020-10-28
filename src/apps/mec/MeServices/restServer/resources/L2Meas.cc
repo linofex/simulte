@@ -19,6 +19,11 @@ void L2Meas::addEnodeB(std::vector<cModule*>& eNodeBs) {
         }
 }
 
+void L2Meas::addEnodeB(cModule* eNodeB) {
+    LteCellInfo *cellInfo = check_and_cast<LteCellInfo *>(eNodeB->getSubmodule("cellInfo"));
+    eNodeBs_.insert(std::pair<MacCellId, CellInfo>(cellInfo->getMacCellId(), CellInfo(eNodeB)));
+}
+
 
 L2Meas::~L2Meas() {}
 

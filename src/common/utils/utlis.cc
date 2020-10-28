@@ -1,7 +1,6 @@
 
 
-#include "apps/mec/restServer/utils/utils.h"
-
+#include "common/utils/utils.h"
 namespace utils {
 
     std::vector<std::string> splitString(std::string str, std::string delim){
@@ -15,6 +14,8 @@ namespace utils {
                 if(str.size() != 0) splitted.push_back(line);
                 last = next + delim.size();
         }
+        // if the delim is at the end of the str, an empty str will be added
+        // side effect useful for the body of the request
         splitted.push_back(str.substr(last, next-last)); // last token
         return splitted;
     }

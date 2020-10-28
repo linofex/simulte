@@ -9,11 +9,11 @@
 #define __INET_HTTPRESPPACKET_H
 
 #include "inet/common/INETDefs.h"
-#include "apps/mec/restServer/packets/HTTPRespPacket_m.h"
+#include "apps/mec/MeServices/packets/HTTPRespPacket_m.h"
 #include "inet/common/geometry/common/Coord.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
-
-enum response {OK, BAD_REQ, UNAUTH,  FORBIDDEN, NOT_FOUND, NOT_ACC, TOO_REQS};
+enum response {OK, BAD_REQ, UNAUTH,  FORBIDDEN, NOT_FOUND, NOT_ACC, TOO_REQS, BAD_METHOD, HTTP_NOT_SUPPORTED};
 
 /**
  * Message that carries raw bytes. Used with emulation-related features.
@@ -23,11 +23,22 @@ class HTTPRespPacket : public inet::HTTPRespPacket_Base
   private:
     ::omnetpp::opp_string HttpVersion = "HTTP/1.1 ";
     ::omnetpp::opp_string payload;
+    ::omnetpp::opp_string method;
+    ::omnetpp::opp_string contentType;
+    ::omnetpp::opp_string connection;
+
+
   public:
     /**
      * Constructor
      */
-    HTTPRespPacket(const char *name = nullptr, int kind = 0) : HTTPRespPacket_Base(name, kind) {}
+    HTTPRespPacket(response res_,const char* contType = "application/json") : HTTPRespPacket_Base("response", 0)
+    {
+        payload = "";
+        setResCode(res_);
+        setContentType(contType);
+        connection = "keep-alive";
+    }
 
     /**
      * Copy constructor
@@ -79,10 +90,14 @@ class HTTPRespPacket : public inet::HTTPRespPacket_Base
     void setConnection(const char *);
     void setHeaderField(const char *); //generic field
     void addNewLine();
+
+
     void setBodyOK(const inet::Coord& pos);
     void setBody(const std::string& body);
 
     void setBodyNOT_FOUND(const std::string& reason);
+
+    void send(inet::TCPSocket *socket);
 
     ::omnetpp::opp_string& getPacket();
     inet::RawPacket* getRawPacket();
