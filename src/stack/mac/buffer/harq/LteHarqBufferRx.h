@@ -111,6 +111,16 @@ class LteHarqBufferRx
      */
     bool isMulticast() { return isMulticast_; }
 
+    /**
+     * @author Alessandro noferi
+     *
+     * Check if the buffer is active
+     *
+     * @return true if the RxHarqPduStatus of all units of all processes is not RXHARQ_PDU_EMPTY
+     */
+
+    bool isHarqBufferActive() const;
+
     virtual ~LteHarqBufferRx();
 
   protected:

@@ -351,3 +351,16 @@ bool LteHarqBufferTx::isInUnitList(unsigned char acid, Codeword cw, UnitList uni
     }
     return false;
 }
+
+// @author Alessandro noferi
+
+bool LteHarqBufferTx::isHarqBufferActive() const {
+    std::vector<LteHarqProcessTx *>::const_iterator it =  processes_->begin();
+    std::vector<LteHarqProcessTx *>::const_iterator end = processes_->end();
+    for(; it != end; ++it){
+        if((*it)->isHarqProcessActive()){
+            return true;
+        }
+    }
+    return false;
+}

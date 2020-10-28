@@ -165,6 +165,18 @@ class LteHarqProcessTx
 
     TxHarqPduStatus getUnitStatus(Codeword cw);
 
+
+    /**
+     * @author Alessandro noferi
+     *
+     * Check if the process is active
+     *
+     * @return true if at least on unit status is not TXHARQ_PDU_EMPTY
+     */
+
+    bool isHarqProcessActive();
+
+
     // 1:1 getters
     void dropPdu(Codeword cw);
     bool isUnitEmpty(Codeword cw);
@@ -175,6 +187,7 @@ class LteHarqProcessTx
     bool isUnitMarked(Codeword cw);
     bool isDropped();
     virtual ~LteHarqProcessTx();
+
 
   protected:
 };

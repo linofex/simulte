@@ -184,3 +184,24 @@ LteHarqProcessRx::getProcessStatus()
     }
     return ret;
 }
+
+
+
+// @author Alessandro noferi
+bool LteHarqProcessRx::isHarqProcessActive()
+{
+    std::vector<RxUnitStatus> ues= getProcessStatus();
+    std::vector<RxUnitStatus>::const_iterator it = ues.begin();
+    std::vector<RxUnitStatus>::const_iterator end = ues.end();
+
+    // when a process is active? (ask professor)
+    for(; it != end; ++it){
+        if ((*it).second != RXHARQ_PDU_EMPTY)
+            return true;
+    }
+    return false;
+
+}
+
+
+
