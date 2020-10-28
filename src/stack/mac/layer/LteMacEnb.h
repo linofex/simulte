@@ -342,7 +342,18 @@ class LteMacEnb : public LteMacBase
     virtual ConflictGraph* getConflictGraph();
 
     // @author Alessandro Noferi
+
+    // reference to the Lte Cell collector module
     EnodeBStatsCollector* getCollector();
+
+    /* Get the number of active users based on the direction.
+     * A user is active (according with TS 136 314 if:
+     * - it has buffered data in MAC RLC or PDCP layers -> ActiveSet
+     * - it has data for which HARQ trasmission has not yet terminated -> !EMPTY HarqBuffer
+     *
+     * @par direction
+     */
+    int getActiveUeSetSize(Direction dir);
 
 };
 

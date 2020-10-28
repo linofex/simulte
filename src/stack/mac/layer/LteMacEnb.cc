@@ -297,11 +297,13 @@ void LteMacEnb::handleMessage(cMessage *msg)
         else if(strcmp(msg->getName(), "L2MeasSample") == 0)
         {
             int size;
-            size = enbSchedulerDl_->activeSetSize();
+//            size = enbSchedulerDl_->activeSetSize();
+            size = getActiveUeSetSize(DL);
             if (size < 0) throw cRuntimeError("LteMacEnb::Number of DL user < 0");
             collector_->add_number_of_active_ue_dl_nongbr_cell(size);
 
-            size = enbSchedulerUl_->activeSetSize();
+//            size = enbSchedulerUl_->activeSetSize();
+            size = getActiveUeSetSize(UL);
             if (size < 0) throw cRuntimeError("LteMacEnb::Number of UL user < 0");
             collector_->add_number_of_active_ue_ul_nongbr_cell(size);
             scheduleAt(NOW + samplingPeriod_, periodicCollection_);
@@ -1016,6 +1018,56 @@ ConflictGraph* LteMacEnb::getConflictGraph()
 // @author Alessandro Noferi
 EnodeBStatsCollector* LteMacEnb::getCollector(){    // LteNic               eNodeB
     return check_and_cast<EnodeBStatsCollector* > (getParentModule()->getParentModule()->getSubmodule("collector"));
+}
+
+int LteMacEnb::getActiveUeSetSize(Direction dir)
+{
+    std::set<MacNodeId> activeUeSet;
+
+    if(dir == DL){
+        ActiveSet::const_iterator it = enbSchedulerDl_->getActiveConnectionSetBeginIt();
+        ActiveSet::const_iterator end = enbSchedulerDl_->getActiveConnectionSetEndIt();
+
+        // from macCid to NodeId
+        for (; it != end ; ++it){
+            activeUeSet.insert(MacCidToNodeId(*it));
+        }
+
+        HarqTxBuffers *harqBuffer = getHarqTxBuffers();
+        HarqTxBuffers::const_iterator itHarq = harqBuffer->begin();
+        HarqTxBuffers::const_iterator endHarq = harqBuffer->end();
+        for(; itHarq != endHarq ; ++itHarq){
+            if(itHarq->second->isHarqBufferActive()){
+                activeUeSet.insert(itHarq->first);
+            }
+        }
+    }
+    else if (dir == UL)
+    {
+        ActiveSet::const_iterator it = enbSchedulerUl_->getActiveConnectionSetBeginIt();
+        ActiveSet::const_iterator end = enbSchedulerUl_->getActiveConnectionSetEndIt();
+
+        // from macCid to NodeId
+        for (; it != end ; ++it){
+            activeUeSet.insert(MacCidToNodeId(*it));
+        }
+
+        HarqRxBuffers *harqBuffer = getHarqRxBuffers();
+        HarqRxBuffers::const_iterator itHarq = harqBuffer->begin();
+        HarqRxBuffers::const_iterator endHarq = harqBuffer->end();
+        for(; itHarq != endHarq ; ++itHarq){
+            if(itHarq->second->isHarqBufferActive()){
+                activeUeSet.insert(itHarq->first);
+            }
+                }
+
+    }
+
+    else {
+        throw cRuntimeError("LteMacEnb::getSchedDiscipline(): unrecognized direction %d", (int) dir);
+    }
+    return activeUeSet.size();
+
 }
 
 
