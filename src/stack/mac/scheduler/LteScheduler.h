@@ -168,6 +168,16 @@ class LteScheduler
     int activeSetSize(){
         return activeConnectionSet_.size();
     }
+
+
+    ActiveSet::const_iterator getActiveConnectionSetBeginIt() const {
+        return activeConnectionSet_.begin();
+    }
+
+    ActiveSet::const_iterator getActiveConnectionSetEndIt() const {
+            return activeConnectionSet_.end();
+        }
+
     // end
 
     ActiveSet readActiveSet()

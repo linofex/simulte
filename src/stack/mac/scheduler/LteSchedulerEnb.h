@@ -173,6 +173,11 @@ class LteSchedulerEnb
     int activeSetSize();
 
 
+    ActiveSet::const_iterator getActiveConnectionSetBeginIt() const;
+    ActiveSet::const_iterator getActiveConnectionSetEndIt() const;
+
+
+
     /**
      * Get/Set current available Resource Blocks.
      */

@@ -687,8 +687,20 @@ void LteSchedulerEnb::removeActiveConnections(MacNodeId nodeId)
 }
 
 // @author Alessandro Noferi
-int LteSchedulerEnb::activeSetSize(){
+int LteSchedulerEnb::activeSetSize()
+{
        return scheduler_->activeSetSize();
-   }
+}
+
+
+ActiveSet::const_iterator LteSchedulerEnb::getActiveConnectionSetBeginIt() const
+{
+    return scheduler_->getActiveConnectionSetBeginIt();
+}
+
+ActiveSet::const_iterator LteSchedulerEnb::getActiveConnectionSetEndIt() const
+{
+    return scheduler_->getActiveConnectionSetEndIt();
+}
 
 
