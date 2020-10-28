@@ -16,37 +16,29 @@
 //
 
 
-package lte.apps.mec.restServer;
+// @author Alessandro Noferi
+
+package lte.apps.mec.MeServices.RNIService;
 
 
 import inet.applications.contract.ITCPApp;
 
 
 //
-// Generic server application for modelling TCP-based request-reply style
-// protocols or applications.
-//
-// Requires message object preserving sendQueue/receiveQueue classes
-// to be used with ~TCP (that is, TCPMsgBasedSendQueue and TCPMsgBasedRcvQueue;
-// TCPVirtualBytesSendQueue/RcvQueue are not good).
-//
-// The module accepts any number of incoming TCP connections, and expects
-// to receive messages of class ~GenericAppMsg on them. A message should
-// contain how large the reply should be (number of bytes). ~TCPGenericSrvApp
-// will just change the length of the received message accordingly, and send
-// back the same message object. The reply can be delayed by a constant time
-// (replyDelay parameter).
-//
-// Compatible with both ~IPv4 and ~IPv6.
-//
+// Radio Network Information Service
+// TCPApp that implements an HTTP server that responds to HTTP requests (e.g GET POST)
+// from MeApplication, or any application that uses TCP connections.
+// It stores all the connections in a map and gets the information for the responds by
+// calling methods of EnodeB. (cross-call methods)
+// 
 // @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
 //
-simple TCPRestSrv like ITCPApp
+simple RNIService like ITCPApp
 {
     parameters:
         string localAddress = default(""); // local address; may be left empty ("")
         int localPort = default(1000);     // localPort number to listen on
-        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytestream");
+        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytestream"); // bytestreamfor emulation
         @display("i=block/app");
 //        @signal[sentPk](type=inet::GenericAppMsg);
 //        @signal[rcvdPk](type=inet::GenericAppMsg);
