@@ -6,9 +6,12 @@
 
 
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "apps/mec/MeServices/packets/HttpResponsePacket.h"
 #include <string>
 
 namespace Http {
+
+void sendPacket(HTTPResponsePacket& pck, inet::TCPSocket *socket);
 
 bool ceckHttpVersion(std::string& httpVersion);
 
