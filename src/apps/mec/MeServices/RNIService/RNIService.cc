@@ -16,22 +16,6 @@
 //
 
 
-//#include "apps/mec/MeServices/RNIService/RNIService.h"
-//
-//#include "inet/networklayer/common/L3AddressResolver.h"
-//#include "inet/common/ModuleAccess.h"
-//#include "inet/common/lifecycle/NodeStatus.h"
-//#include "inet/transportlayer/contract/tcp/TCPSocket.h"
-//#include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-//#include "apps/mec/MeServices/packets/HTTPRespPacket.h"
-//#include "inet/common/RawPacket.h"
-//#include "inet/applications/tcpapp/GenericAppMsg_m.h"
-//
-//
-//#include "apps/mec/MeServices/utils/utils.h"
-//#include <string>
-//#include <vector>
-
 
 
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -39,19 +23,18 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "apps/mec/MeServices/packets/HTTPRespPacket.h"
+#include "apps/mec/MeServices/packets/HttpResponsePacket.h"
 #include "apps/mec/warningAlert_rest/UEWarningAlertApp_rest.h"
 #include "inet/common/RawPacket.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
-
 
 #include "apps/mec/MeServices/RNIService/RNIService.h"
 
 
 #include <string>
 #include <vector>
-#include "../../../../common/utils/utils.h"
-
+#include "apps/mec/MeServices/packets/HttpResponsePacket.h"
+#include "apps/mec/MeServices/httpUtils/httpUtils.h"
 
 Define_Module(RNIService);
 
@@ -77,99 +60,63 @@ void RNIService::handleMessage(cMessage *msg)
 {
     GenericService::handleMessage(msg);
 }
-//
-// void RNIService::handleRequest(char* packet, inet::TCPSocket *socket){
-//     std::map<std::string, std::string> request = parseRequest(packet); // e.g. [0] GET [1] URI
-//     if(request.at("method").compare("GET") == 0)
-//         handleGetRequest(request.at("uri"), socket); // pass URI
-//     else if(request[0].compare("POST") == 0) //subscription
-//         handlePostRequest(request.at("uri"), request.at("body"),  socket); // pass URI
-//         return;
-////         // TODO handle
-////     else if(request[0].compare("DELETE") == 0)
-////         return;
-////         // TODO handle
-////     else
-////         throw cRuntimeError("Response code not allowed");
-//
-//}
-//
-//std::map<std::string, std::string> RNIService::parseRequest(char* packet_){
-//
-//    std::string packet(packet_);
-//    std::map<std::string, std::string> headerFields;
-//    std::vector<std::string> splitting = utils::splitString(packet, "\r\n\r\n"); // bound between header and body
-//    std::string header = splitting[0];
-//    std::string body   = splitting[1];
-//
-//    std::vector<std::string> line;
-//    int i = 0;
-//    std::vector<std::string> lines = utils::splitString(header, "\r\n");
-//    for(std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); ++it) {
-//         if(i++ == 0){ // Request-Line GET / HTTP/1.1
-//             line = utils::splitString(*it, " ");
-//             if(line.size() != 3){
-//                 //BADREQUEST
-//                 //exit
-//             }
-//             headerFields["method"] = line[0];
-//             headerFields["uri"] = line[1];
-//             headerFields["http"] = line[2];
-//         }
-//         else{
-//             line = utils::splitString(*it, ": ");
-//             if(!line.empty())
-//                 headerFields[line[0]] = line[1]; //fieldname -> value
-//             }
-//    }
-//    //TODO also return the body
-//    return headerFields; // maybe better return a pointer
-//}
-//
+
 void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket){
-    HTTPRespPacket temp_res = HTTPRespPacket(OK);
+//    inet::RawPacket *res = new RawPacket("resraw");
+//    std::string e = L2MeasResource.toJson().dump(2);
+//
+//
+//        res->setDataFromBuffer(e.c_str(), e.size());
+//        res->setByteLength(e.size());
+//
+//        socket->send(res);
+//
+    Http::send200Response(socket, L2MeasResource.toJson().dump(2).c_str());
 
-    if(uri.find("users/") != std::string::npos){
-       std::string strAddress = utils::splitString(uri,"acr:")[1];
-
-       inet::IPv4Address address(strAddress.c_str());
-
-       MacNodeId nodeId = binder_->getMacNodeId(address);
-
-       if(nodeId == 0){
-           //riposta negativa
-       }
-       const char *moduleName = binder_->getModuleNameByMacNodeId(nodeId);
-       cModule *temp = getSimulation()->getModuleByPath(moduleName)->getSubmodule("mobility");
-           inet::IMobility *mobility;
-           if(temp != NULL){
-               mobility = check_and_cast<inet::IMobility*>(temp);
-               inet::Coord position = mobility->getCurrentPosition();
-               temp_res.setResCode(BAD_METHOD);
-               temp_res.setContentType("application/json");
-               temp_res.setConnection("keep-alive");
-               temp_res.addNewLine();
-
-               std::string pp = L2MeasResource.toJson().dump(4);
-               temp_res.setBody(pp);
-
-
-           }
-           else {
-                   EV << "UEWarningAlertApp_rest::initialize - \tWARNING: Mobility module NOT FOUND!" << endl;
-                   throw cRuntimeError("UEWarningAlertApp_rest::initialize - \tWARNING: Mobility module NOT FOUND!");
-           }
-
-
-    }
-
-
-    EV <<"\n\n\n\n######SEND!!!\n\n\n";
-    inet::RawPacket *res = new RawPacket("resraw");
-    res->setDataFromBuffer(temp_res.getPacket().c_str(), temp_res.getPacket().size());
-    res->setByteLength(temp_res.getPacket().size());
-
-    socket->send(res);
+//
+//    HTTPRespPacket temp_res = HTTPRespPacket(OK);
+//
+//    if(uri.find("users/") != std::string::npos){
+//       std::string strAddress = utils::splitString(uri,"acr:")[1];
+//
+//       inet::IPv4Address address(strAddress.c_str());
+//
+//       MacNodeId nodeId = binder_->getMacNodeId(address);
+//
+//       if(nodeId == 0){
+//           //riposta negativa
+//       }
+//       const char *moduleName = binder_->getModuleNameByMacNodeId(nodeId);
+//       cModule *temp = getSimulation()->getModuleByPath(moduleName)->getSubmodule("mobility");
+//           inet::IMobility *mobility;
+//           if(temp != NULL){
+//               mobility = check_and_cast<inet::IMobility*>(temp);
+//               inet::Coord position = mobility->getCurrentPosition();
+//               temp_res.setResCode(BAD_METHOD);
+//               temp_res.setContentType("application/json");
+//               temp_res.setConnection("keep-alive");
+//               temp_res.addNewLine();
+//
+//               std::string pp = L2MeasResource.toJson().dump(4);
+//               temp_res.setBody(pp);
+//
+//
+//           }
+//           else {
+//                   EV << "UEWarningAlertApp_rest::initialize - \tWARNING: Mobility module NOT FOUND!" << endl;
+//                   throw cRuntimeError("UEWarningAlertApp_rest::initialize - \tWARNING: Mobility module NOT FOUND!");
+//           }
+//
+//
+//    }
+//
+//
+//    EV <<"\n\n\n\n######SEND!!!\n\n\n";
+//    inet::RawPacket *res = new RawPacket("resraw");
+//    res->setDataFromBuffer(temp_res.getPacket().c_str(), temp_res.getPacket().size());
+//    res->setByteLength(temp_res.getPacket().size());
+//
+//    socket->send(res);
 
 }
 

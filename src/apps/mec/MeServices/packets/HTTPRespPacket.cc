@@ -28,30 +28,30 @@ void HTTPRespPacket::removePrefix(unsigned int length)
 void HTTPRespPacket::setResCode(const response res){
     ::omnetpp::opp_string response;
     switch(res) {
-        case(OK):
+        case(NULLE):
             response = "200 OK";
             break;
-        case(BAD_REQ):
-            response = "400 BadRequest";
-            break;
-        case(UNAUTH):
-            response = "401 Unauthorized";
-            break;
-        case(FORBIDDEN):
-            response = "403 Forbidden";
-            break;
-        case(NOT_FOUND):
-            response = "404 Not Found";
-            break;
-        case(NOT_ACC):
-            response = "406 Not Acceptable";
-            break;
-        case(TOO_REQS):
-            response = "429 Too Many Requests";
-            break;
-        case(BAD_METHOD):
-                response = "405 Method Not Allowed";
-                break;
+//        case(BAD_REQ):
+//            response = "400 BadRequest";
+//            break;
+//        case(UNAUTH):
+//            response = "401 Unauthorized";
+//            break;
+//        case(FORBIDDEN):
+//            response = "403 Forbidden";
+//            break;
+//        case(NOT_FOUND):
+//            response = "404 Not Found";
+//            break;
+//        case(NOT_ACC):
+//            response = "406 Not Acceptable";
+//            break;
+//        case(TOO_REQS):
+//            response = "429 Too Many Requests";
+//            break;
+//        case(BAD_METHOD):
+//                response = "405 Method Not Allowed";
+//                break;
         default:
             throw cRuntimeError("Response code not allowed");
     }

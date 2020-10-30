@@ -13,8 +13,8 @@
 #include "inet/common/geometry/common/Coord.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
-enum response {OK, BAD_REQ, UNAUTH,  FORBIDDEN, NOT_FOUND, NOT_ACC, TOO_REQS, BAD_METHOD, HTTP_NOT_SUPPORTED};
-
+//enum response {OK, BAD_REQ, UNAUTH,  FORBIDDEN, NOT_FOUND, NOT_ACC, TOO_REQS, BAD_METHOD, HTTP_NOT_SUPPORTED};
+enum response {NULLE};
 /**
  * Message that carries raw bytes. Used with emulation-related features.
  */

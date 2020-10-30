@@ -183,7 +183,7 @@ std::map<std::string, std::string> TCPRestSrv::parseRequest(char* packet_){
 
 
 void TCPRestSrv::handleGetRequest(const std::string& uri, inet::TCPSocket* socket){
-    HTTPRespPacket temp_res = HTTPRespPacket(OK);
+    HTTPRespPacket temp_res = HTTPRespPacket(NULLE);
 
     if(uri.find("users/") != std::string::npos){
        std::string strAddress = utils::splitString(uri,"acr:")[1];
@@ -202,7 +202,7 @@ void TCPRestSrv::handleGetRequest(const std::string& uri, inet::TCPSocket* socke
            if(temp != NULL){
                mobility = check_and_cast<inet::IMobility*>(temp);
                inet::Coord position = mobility->getCurrentPosition();
-               temp_res.setResCode(OK);
+               temp_res.setResCode(NULLE);
                temp_res.setContentType("application/json");
                temp_res.setConnection("keep-alive");
                temp_res.addNewLine();
@@ -234,7 +234,7 @@ void TCPRestSrv::handleGetRequest(const std::string& uri, inet::TCPSocket* socke
 //    }
 
     else{
-        temp_res.setResCode(NOT_FOUND);
+        temp_res.setResCode(NULLE);
         temp_res.setContentType("application/json");
         temp_res.setConnection("keep-alive");
         temp_res.addNewLine();

@@ -23,7 +23,6 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "apps/mec/MeServices/packets/HTTPRespPacket.h"
 #include "apps/mec/warningAlert_rest/UEWarningAlertApp_rest.h"
 #include "inet/common/RawPacket.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
