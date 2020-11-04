@@ -354,6 +354,19 @@ class LteBinder : public cSimpleModule
     void addD2DMulticastTransmitter(MacNodeId nodeId);
     // get multicast transmitters
     std::set<MacNodeId>& getD2DMulticastTransmitters();
+
+    /**
+     * @author Alessandro Noferi.
+     *
+     * Ue stats collector management
+     */
+
+    void addUeCollector(MacNodeId ue, MacNodeId cell);
+    void moveUeCollector(MacNodeId ue, MacNodeId oldCell, MacNodeId newCell);
+
+
+
+
     /*
      *  Handover support
      */
@@ -361,6 +374,7 @@ class LteBinder : public cSimpleModule
     bool hasUeHandoverTriggered(MacNodeId nodeId);
     void removeUeHandoverTriggered(MacNodeId nodeId);
     void updateUeInfoCellId(MacNodeId nodeId, MacCellId cellId);
+
 };
 
 #endif

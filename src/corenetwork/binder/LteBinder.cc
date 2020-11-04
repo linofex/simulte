@@ -13,6 +13,7 @@
 
 #include "../lteCellInfo/LteCellInfo.h"
 #include "corenetwork/nodes/InternetMux.h"
+#include "corenetwork/statsCollector/StatsCollector.h"
 
 using namespace std;
 
@@ -420,3 +421,27 @@ void LteBinder::removeUeHandoverTriggered(MacNodeId nodeId)
 {
     ueHandoverTriggered_.erase(nodeId);
 }
+
+
+/**
+ * @author Alessandro Noferi
+ */
+
+void LteBinder::addUeCollector(MacNodeId ue, MacNodeId cell)
+{
+    StatsCollector* collector =  check_and_cast<StatsCollector*>(getSimulation()->getModule(getOmnetId(cell))->getSubmodule("collector"));
+    if(collector != nullptr) collector->addUe(ue);
+}
+
+void LteBinder::moveUeCollector(MacNodeId ue,  MacNodeId oldCell, MacNodeId newCell){
+    StatsCollector* collector =  check_and_cast<StatsCollector*>(getSimulation()->getModule(getOmnetId(oldCell))->getSubmodule("collector"));
+    //check collector null
+    UeCollector * ueCollector = collector->detachUe(ue);
+    if(ueCollector != nullptr){
+        collector = check_and_cast<StatsCollector*>(getSimulation()->getModule(getOmnetId(newCell))->getSubmodule("collector"));
+        // check collector null
+        collector->attachUe(ue, ueCollector);
+    }
+}
+
+

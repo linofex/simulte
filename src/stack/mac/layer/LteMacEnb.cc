@@ -300,12 +300,12 @@ void LteMacEnb::handleMessage(cMessage *msg)
 //            size = enbSchedulerDl_->activeSetSize();
             size = getActiveUeSetSize(DL);
             if (size < 0) throw cRuntimeError("LteMacEnb::Number of DL user < 0");
-            collector_->add_number_of_active_ue_dl_nongbr_cell(size);
+            collector_->getENodeBCollector()->add_number_of_active_ue_dl_nongbr_cell(size);
 
 //            size = enbSchedulerUl_->activeSetSize();
             size = getActiveUeSetSize(UL);
             if (size < 0) throw cRuntimeError("LteMacEnb::Number of UL user < 0");
-            collector_->add_number_of_active_ue_ul_nongbr_cell(size);
+            collector_->getENodeBCollector()->add_number_of_active_ue_ul_nongbr_cell(size);
             scheduleAt(NOW + samplingPeriod_, periodicCollection_);
 
 //            delete msg;
@@ -1016,8 +1016,8 @@ ConflictGraph* LteMacEnb::getConflictGraph()
 }
 
 // @author Alessandro Noferi
-EnodeBStatsCollector* LteMacEnb::getCollector(){    // LteNic               eNodeB
-    return check_and_cast<EnodeBStatsCollector* > (getParentModule()->getParentModule()->getSubmodule("collector"));
+StatsCollector* LteMacEnb::getCollector(){    // LteNic               eNodeB
+    return check_and_cast<StatsCollector* > (getParentModule()->getParentModule()->getSubmodule("collector"));
 }
 
 int LteMacEnb::getActiveUeSetSize(Direction dir)
