@@ -26,10 +26,4 @@ class L2MeasBase {
 
 };
 
-
-
-
-
-
-
 #endif //_L2MEASBASE_H_

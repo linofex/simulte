@@ -15,7 +15,7 @@ package lte.corenetwork.statsCollector;
 // responds to requests
 
 //
-simple EnodeBStatsCollector 
+simple StatsCollector 
 {
     parameters:
         

@@ -10,8 +10,8 @@ struct PRBusage{
     std::vector<double> values;
     int index, period, size;
     bool movingAverage;
-    cOutVector outVector;
-    cHistogram histogram;
+    ::omnetpp::cOutVector outVector;
+    ::omnetpp::cHistogram histogram;
 
     void init(int length, bool moving){
         values = std::vector<double>(length);
@@ -71,8 +71,8 @@ struct ActiveUeSet {
     std::vector<int> values;
     int index, period, size;
     bool movingAverage;
-    cOutVector outVector;
-    cHistogram histogram;
+    ::omnetpp::cOutVector outVector;
+    ::omnetpp::cHistogram histogram;
 
 
     void init(int length, bool moving){
@@ -125,7 +125,6 @@ struct ActiveUeSet {
     }
 
 };
-
 
 
 

@@ -10,11 +10,11 @@
 #ifndef _LTE_LTESCHEDULERENB_H_
 #define _LTE_LTESCHEDULERENB_H_
 
+#include "../../../corenetwork/statsCollector/StatsCollector.h"
 #include "common/LteCommon.h"
 #include "stack/mac/buffer/harq/LteHarqBufferTx.h"
 #include "stack/mac/allocator/LteAllocatorUtils.h"
 
-#include "corenetwork/statsCollector/EnodeBStatsCollector.h"
 
 
 /// forward declarations
@@ -82,7 +82,7 @@ class LteSchedulerEnb
      */
 
     // Reference to the eNodeB statistic collector
-    EnodeBStatsCollector* collector_;
+    StatsCollector* collector_;
     //end
 
     // System allocator, carries out the block-allocation functions.

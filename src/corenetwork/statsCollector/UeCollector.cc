@@ -1,0 +1,21 @@
+//
+//                           SimuLTE
+//
+// This file is part of a software released under the license included in file
+// "license.pdf". This license can be also found at http://www.ltesimulator.com/
+// The above file and the present reference are part of the software itself,
+// and cannot be removed from it.
+//
+
+#include "UeCollector.h"
+#include "corenetwork/statsCollector/StatsCollector.h"
+
+using namespace std;
+
+UeCollector::UeCollector(){}
+
+UeCollector::UeCollector(const StatsCollector* statsCollector){
+        //get parent module for parameters, passed by constructor
+        ttiPeriodPRBUsage_ = statsCollector->par("ttiPeriodPRBUsage");
+        movingAverage_ = statsCollector->par("movingAverage");
+}

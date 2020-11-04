@@ -1,19 +1,20 @@
 #ifndef _CELLINFO_H_
 #define _CELLINFO_H_
 
-#include "corenetwork/statsCollector/EnodeBStatsCollector.h"
-
 #include "AttributeBase.h"
 
 // #include "Ecgi.h"
 //#include "CellUeInfo.h"
 #include <vector>
+#include <omnetpp.h>
 #include <map>
+
+#include "corenetwork/statsCollector/ENodeBCollector.h"
 
 
 class CellInfo : public AttributeBase {
   protected:
-    EnodeBStatsCollector* collector_; // it has the cellCollector and the map <Ipue -> uecollector>
+    ENodeBCollector* collector_; // it has the cellCollector and the map <Ipue -> uecollector>
 
   /**
    * 
@@ -30,7 +31,7 @@ class CellInfo : public AttributeBase {
 
 public:
   CellInfo();
-  CellInfo(cModule* eNodeB);
+  CellInfo(::omnetpp::cModule* eNodeB);
   virtual ~CellInfo();
 
   nlohmann::json toJson() const override;

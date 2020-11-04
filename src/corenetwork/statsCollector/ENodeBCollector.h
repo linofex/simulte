@@ -1,4 +1,3 @@
-
 //
 //                           SimuLTE
 //
@@ -8,18 +7,16 @@
 // and cannot be removed from it.
 //
 
-#ifndef _LTE_ENOBSTATSCOLLECTOR_H_
-#define _LTE_ENOBSTATSCOLLECTOR_H_
+#ifndef _LTE_ENODEBCOLLECTOR_H_
+#define _LTE_ENODEBCOLLECTOR_H_
 
 #include <omnetpp.h>
-#include "common/LteCommon.h"
 #include "corenetwork/statsCollector/L2Measures/L2Measures.h"
 
-using namespace inet;
 
+class StatsCollector;
 
-class EnodeBStatsCollector: public cSimpleModule
-{
+class ENodeBCollector {
     private:
         unsigned int ttiPeriodPRBUsage_;
         bool movingAverage_;
@@ -28,10 +25,12 @@ class EnodeBStatsCollector: public cSimpleModule
         ActiveUeSet number_of_active_ue_dl_nongbr_cell;
         ActiveUeSet number_of_active_ue_ul_nongbr_cell;
 
-
     public:
-        EnodeBStatsCollector(){}
-        virtual ~EnodeBStatsCollector(){}
+        ENodeBCollector();
+//        ENodeBCollector(const StatsCollector* statsCollector);
+        virtual ~ENodeBCollector(){}
+        void initializeParameters(const StatsCollector* statsCollector);
+
         void add_dl_total_prb_usage_cell(double val);
         void add_ul_total_prb_usage_cell(double val);
         void add_number_of_active_ue_dl_nongbr_cell(int ues);
@@ -57,20 +56,6 @@ class EnodeBStatsCollector: public cSimpleModule
         int get_dl_nongbr_pdr_cell() {return -1;}
         int get_ul_nongbr_pdr_cell() {return -1;}
 
-
-    protected:
-        virtual void initialize(int stages);
-
-        virtual int numInitStages() const { return INITSTAGE_LAST; }
-
-        virtual void handleMessage(cMessage *msg)
-        {
-        }
-
 };
 
-
-
-
-
-#endif //_LTE_ENOBSTATSCOLLECTOR_H_
+#endif // _LTE_ENODEBCOLLECTOR_H_

@@ -1,9 +1,10 @@
 #include "CellInfo.h"
+#include "corenetwork/statsCollector/StatsCollector.h"
 
 CellInfo::CellInfo(){}
 
-CellInfo::CellInfo(cModule* eNodeB){
-  collector_ = check_and_cast<EnodeBStatsCollector*>(eNodeB->getSubmodule("collector"));
+CellInfo::CellInfo(::omnetpp::cModule* eNodeB){
+  collector_ = ::omnetpp::check_and_cast<StatsCollector*>(eNodeB->getSubmodule("collector"))->getENodeBCollector();
 //  ueList_ =    eNodeB->getUeListCollectors();
 }
 
