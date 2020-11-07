@@ -9,6 +9,11 @@
 
 #include "stack/pdcp_rrc/layer/LtePdcpRrc.h"
 
+#include "corenetwork/statsCollector/EnodeBStatsCollector.h"
+#include "corenetwork/statsCollector/UeStatsCollector.h"
+#include "stack/packetFlowManager/PacketFlowManager.h"
+
+
 Define_Module(LtePdcpRrcUe);
 Define_Module(LtePdcpRrcEnb);
 Define_Module(LtePdcpRrcRelayUe);
@@ -18,6 +23,8 @@ LtePdcpRrcBase::LtePdcpRrcBase()
 {
     ht_ = new ConnectionsTable();
     lcid_ = 1;
+    pdcpPktCounter_ = 0;
+    packetFlowManager_ = nullptr;
 }
 
 LtePdcpRrcBase::~LtePdcpRrcBase()
@@ -99,13 +106,16 @@ void LtePdcpRrcBase::setTrafficInformation(cPacket* pkt,
 void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
 {
     emit(receivedPacketFromUpperLayer, pkt);
-
+    pdcpPktCounter_ += 1;
     // Control Informations
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pkt->removeControlInfo());
 
     setTrafficInformation(pkt, lteInfo);
     lteInfo->setDestId(getDestId(lteInfo));
     headerCompress(pkt, lteInfo->getHeaderSize()); // header compression
+
+    int64_t sdusize = pkt->getByteLength();
+
 
     // Cid Request
     EV << "LteRrc : Received CID request for Traffic [ " << "Source: "
@@ -206,6 +216,7 @@ void LtePdcpRrcBase::toDataPort(cPacket *pkt)
     emit(sentPacketToUpperLayer, upPkt);
 }
 
+
 void LtePdcpRrcBase::toEutranRrcSap(cPacket *pkt)
 {
     cPacket* upPkt = pkt->decapsulate();
@@ -236,6 +247,7 @@ void LtePdcpRrcBase::initialize(int stage)
         amSap_[OUT] = gate("AM_Sap$o");
 
         binder_ = getBinder();
+        packetFlowManager_ = check_and_cast<PacketFlowManager *> (getParentModule()->getSubmodule("packetFlowManager"));
         headerCompressedSize_ = par("headerCompressedSize"); // Compressed size
         nodeId_ = getAncestorPar("macNodeId");
 
@@ -244,6 +256,16 @@ void LtePdcpRrcBase::initialize(int stage)
         receivedPacketFromLowerLayer = registerSignal("receivedPacketFromLowerLayer");
         sentPacketToUpperLayer = registerSignal("sentPacketToUpperLayer");
         sentPacketToLowerLayer = registerSignal("sentPacketToLowerLayer");
+
+        // timers
+        discardRateTimer_ = new cMessage("discardRateTimer");
+        pktDelayTimer_ = new cMessage("pktDelayPeriod");
+        discardRatePeriod_ = 10; //prenderlo da qualche parte
+        pktDelayPeriod_ = 10;
+
+        scheduleAt(simTime() + discardRatePeriod_ , discardRateTimer_);
+        scheduleAt(simTime() + pktDelayPeriod_ , pktDelayTimer_);
+
 
         // TODO WATCH_MAP(gatemap_);
         WATCH(headerCompressedSize_);
@@ -254,6 +276,23 @@ void LtePdcpRrcBase::initialize(int stage)
 
 void LtePdcpRrcBase::handleMessage(cMessage* msg)
 {
+    // manage statistics timers only for UE AND ENODEB
+    if(getNodeTypeById(nodeId_) == UE || getNodeTypeById(nodeId_) == ENODEB){
+        if(strcmp(msg->getName(), "discardRateTimer") == 0 )
+        {
+            sendDiscardRateStats();
+            scheduleAt(simTime() + discardRatePeriod_, msg);
+            return;
+        }
+
+        if(strcmp(msg->getName(), "pktDelayTimer_") == 0 )
+        {
+            sendPktDelayStats();
+            scheduleAt(simTime() + pktDelayPeriod_, msg);
+            return;
+        }
+    }
+
     cPacket* pkt = check_and_cast<cPacket *>(msg);
     EV << "LtePdcp : Received packet " << pkt->getName() << " from port "
        << pkt->getArrivalGate()->getName() << endl;
@@ -307,18 +346,109 @@ void LtePdcpRrcBase::finish()
     // TODO make-finish
 }
 
+
+
+LtePdcpRrcEnb::LtePdcpRrcEnb():LtePdcpRrcBase() {
+    collector_= nullptr;
+    pdcpPktCounterPerUe_.clear();
+}
+
 void LtePdcpRrcEnb::initialize(int stage)
 {
     LtePdcpRrcBase::initialize(stage);
     if (stage == inet::INITSTAGE_LOCAL)
         nodeId_ = getAncestorPar("macNodeId");
+    else if (stage == 1){ // StatsCollector initializes at INITSTAGE_LOCAL (0) non ci entra niente
+        collector_ = check_and_cast<EnodeBStatsCollector* > (getParentModule()->getParentModule()->getSubmodule("collector"));
+    }
+}
+
+
+
+void LtePdcpRrcEnb::fromDataPort(cPacket* pkt)
+{
+    int64_t pdcpSduSize = pkt->getByteLength();
+    // Control Information
+    FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pkt->getControlInfo());
+    // dest id
+    MacNodeId destId = binder_->getMacNodeId(IPv4Address(lteInfo->getDstAddr()));
+//  MacNodeId destUe = getDestId(lteInfo); // could be the relay
+    pdcpPktCounterPerUe_[destId] += 1; // ue
+
+    LtePdcpRrcBase::fromDataPort(pkt);
+}
+
+
+LtePdcpRrcUe::LtePdcpRrcUe():LtePdcpRrcBase()
+{
+    pdcpSduBytesDl_ = 0;
+    pdcpSduBytesUl_ = 0;
+
 }
 
 void LtePdcpRrcUe::initialize(int stage)
+
 {
     LtePdcpRrcBase::initialize(stage);
     if (stage == inet::INITSTAGE_NETWORK_LAYER_3)
     {
         nodeId_ = getAncestorPar("macNodeId");
     }
+}
+
+
+void LtePdcpRrcUe::fromDataPort(cPacket* pkt)
+{
+    pdcpSduBytesUl_ = pkt->getByteLength();
+    LtePdcpRrcBase::fromDataPort(pkt);
+}
+
+
+void LtePdcpRrcUe::toDataPort(cPacket* pkt)
+{
+    emit(receivedPacketFromLowerLayer, pkt);
+    LtePdcpPdu* pdcpPkt = check_and_cast<LtePdcpPdu*>(pkt);
+    FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(
+        pdcpPkt->removeControlInfo());
+
+    EV << "LtePdcp : Received packet with CID " << lteInfo->getLcid() << "\n";
+    EV << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
+
+    cPacket* upPkt = pdcpPkt->decapsulate(); // Decapsulate packet
+    delete pdcpPkt;
+
+    headerDecompress(upPkt, lteInfo->getHeaderSize()); // Decompress packet header
+
+    // collect L2Meas
+    MacNodeId srcId = binder_->getMacNodeId(IPv4Address(lteInfo->getSrcAddr()));
+    pdcpSduBytesDl_ = upPkt->getByteLength();
+
+
+    handleControlInfo(upPkt, lteInfo);
+
+    EV << "LtePdcp : Sending packet " << upPkt->getName()
+       << " on port DataPort$o\n";
+    // Send message
+    send(upPkt, dataPort_[OUT]);
+    emit(sentPacketToUpperLayer, upPkt);
+}
+
+void LtePdcpRrcUe::sendDiscardRateStats()
+{
+   MacNodeId cellId = getMacUe(nodeId_)->getMacCellId();
+  std::string ueCollectorName; // binder_->getUeCollectorName(nodeId_);
+   cModule *enb = getSimulation()->getModule(getBinder()->getOmnetId(cellId));
+   if(enb->findSubmodule(ueCollectorName.c_str()) == -1)
+   {
+       throw cRuntimeError("LtePdcpRrcUe::sendDiscardRateStats - Ue collector not present in the connected eNodeB [%s]", cellId);
+   }
+
+   UeStatsCollector *ueCollector = check_and_cast<UeStatsCollector *>(enb->getSubmodule(ueCollectorName.c_str()));
+   unsigned int discardedPkt = packetFlowManager_->getDiscartedPkt(nodeId_) * 1000000;
+   ueCollector->add_ul_non_gbr_pdr_ue(discardedPkt/pdcpPktCounter_);
+
+   //reset counters
+   pdcpPktCounter_ = 0;
+//   ueCollector->resetCounter(nodeId_);
+
 }

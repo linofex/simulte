@@ -24,6 +24,8 @@ import lte.stack.handoverManager.LteHandoverManager;
 
 import lte.stack.phy.ChannelModel.LteChannelModelInterface;
 
+import lte.stack.packetFlowManager.PacketFlowManager;
+
 // 
 // Interface for the LTE Stack.
 //
@@ -190,6 +192,12 @@ module LteNicEnb extends LteNicBase
             @display("p=60,142,row");
         }
 
+ 		//#
+        //# Modules used to take trace of PDCP pkt flow
+        //#
+		packetFlowManager: PacketFlowManager {
+			@display("p=104.8, 389.75998");
+		}
     connections:
         //# connections between X2 Manager and its users
         compManager.x2ManagerIn <-- x2Manager.dataPort$o++ if compEnabled;

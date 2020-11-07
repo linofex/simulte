@@ -46,8 +46,21 @@
  * that uniquely identifies a connection in the whole network.
  *
  */
+
+
+class EnodeBStatsCollector;
+class PacketFlowManager;
+
 class LtePdcpRrcBase : public cSimpleModule
 {
+    private:
+        // timers for stats
+        cMessage *discardRateTimer_;
+        cMessage *pktDelayTimer_;
+
+        double discardRatePeriod_;
+        double pktDelayPeriod_;
+
   public:
     /**
      * Initializes the connection table
@@ -141,6 +154,19 @@ class LtePdcpRrcBase : public cSimpleModule
     virtual Direction getDirection() = 0;
     void setTrafficInformation(cPacket* pkt, FlowControlInfo* lteInfo);
 
+    /**
+     * sendDiscardRateStats() and sendPktDelayStats()
+     * are used to send the pkt counter to the
+     * corresponding collector:
+     * - enbCollector for ENODEB
+     * - ueCollector  for UE
+     * Reset the counters, too
+     *
+     * RELAY does nothing
+     */
+    virtual void sendDiscardRateStats() {}
+    virtual void sendPktDelayStats(){}
+
     /*
      * Upper Layer Handlers
      */
@@ -202,6 +228,11 @@ class LtePdcpRrcBase : public cSimpleModule
      * Data structures
      */
 
+    // @author Alessandro Noferi
+    PacketFlowManager *packetFlowManager_;
+    int pdcpPktCounter_;
+
+
     /// Header size after ROHC (RObust Header Compression)
     int headerCompressedSize_;
 
@@ -250,6 +281,16 @@ class LtePdcpRrcBase : public cSimpleModule
 
 class LtePdcpRrcUe : public LtePdcpRrcBase
 {
+  private:
+    unsigned int pdcpSduBytesUl_;
+    unsigned int pdcpSduBytesDl_;
+
+    // timer for stats
+    cMessage BytesCountTimer_;
+    double BytesCountPeriod_;
+
+
+
   protected:
     void handleControlInfo(cPacket* upPkt, FlowControlInfo* lteInfo)
     {
@@ -268,13 +309,38 @@ class LtePdcpRrcUe : public LtePdcpRrcBase
         return UL;
     }
 
+    // overloaded to count pkt byte size UL
+    virtual void fromDataPort(cPacket *pkt);
+    // overloaded to count pkt byte size DL
+    virtual void toDataPort(cPacket *pkt);
+
+    virtual void sendDiscardRateStats();
+    virtual void sendPktDelayStats(){};
+
+
   public:
     virtual void initialize(int stage);
+    LtePdcpRrcUe();
+
 };
 
 class LtePdcpRrcEnb : public LtePdcpRrcBase
 {
+private:
+
+    typedef std::map<MacNodeId, unsigned int> NodeIdToCounterMap;
+    NodeIdToCounterMap pdcpPktCounterPerUe_;
+
   protected:
+
+    /*
+     * @author Alessandro Noferi
+     */
+    EnodeBStatsCollector* collector_; //reference to the ueCollector of the EnodeB
+
+    // overloaded to update pkt counter per UE
+    virtual void fromDataPort(cPacket *pkt);
+
     void handleControlInfo(cPacket* upPkt, FlowControlInfo* lteInfo)
     {
         delete lteInfo;
@@ -300,6 +366,7 @@ class LtePdcpRrcEnb : public LtePdcpRrcBase
     }
   public:
     virtual void initialize(int stage);
+    LtePdcpRrcEnb();
 };
 
 class LtePdcpRrcRelayEnb : public LtePdcpRrcBase

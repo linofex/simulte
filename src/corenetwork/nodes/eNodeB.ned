@@ -29,7 +29,7 @@ import lte.epc.gtp.GtpUserSimplified;
 import lte.epc.TrafficFlowFilterSimplified;
 import lte.epc.gtp.GtpUserX2;
 
-import lte.corenetwork.statsCollector.StatsCollector;
+import lte.corenetwork.statsCollector.EnodeBStatsCollector;
 
 // 
 // eNodeB Module
@@ -92,7 +92,7 @@ module eNodeB
             @display("p=50,225;is=s");
         }
         
-        collector: StatsCollector {
+        collector: EnodeBStatsCollector {
             @display("p=50,275;is=s");
         }
 
