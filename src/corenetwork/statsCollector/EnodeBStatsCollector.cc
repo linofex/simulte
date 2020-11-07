@@ -9,35 +9,55 @@
 
 #include "corenetwork/statsCollector/EnodeBStatsCollector.h"
 
-
-using namespace std;
-
 Define_Module(EnodeBStatsCollector);
 
 
 void EnodeBStatsCollector::initialize(int stage){
     if (stage == inet::INITSTAGE_LOCAL)
        {
-        ttiPeriodPRBUsage_ = par("ttiPeriodPRBUsage");
-        dl_total_prb_usage_cell.initVector(ttiPeriodPRBUsage_);
-        ul_total_prb_usage_cell.initVector(ttiPeriodPRBUsage_);
-
+        dl_total_prb_usage_cell.init("dl_total_prb_usage_cell", par("ttiPeriodPRBUsage"), par("movingAverage"));
+        ul_total_prb_usage_cell.init("ul_total_prb_usage_cell", par("ttiPeriodPRBUsage"), par("movingAverage"));
+        number_of_active_ue_dl_nongbr_cell.init("number_of_active_ue_dl_nongbr_cell", par("numberOfSamples"), false);
+        number_of_active_ue_ul_nongbr_cell.init("number_of_active_ue_ul_nongbr_cell", par("numberOfSamples"), false);
        }
 }
 
 
-void EnodeBStatsCollector::add_dl_total_prb_usage_cell(double val){
-    dl_total_prb_usage_cell.addValue(val);
+void EnodeBStatsCollector::add_dl_total_prb_usage_cell(int value)
+{
+    dl_total_prb_usage_cell.addValue(value);
 }
 
-void EnodeBStatsCollector::add_ul_total_prb_usage_cell(double val){
-    ul_total_prb_usage_cell.addValue(val);
+void EnodeBStatsCollector::add_ul_total_prb_usage_cell(int value){
+    ul_total_prb_usage_cell.addValue(value);
 }
 
-double EnodeBStatsCollector::get_dl_total_prb_usage_cell() {
+
+void EnodeBStatsCollector::add_number_of_active_ue_dl_nongbr_cell(int value)
+{
+    number_of_active_ue_dl_nongbr_cell.addValue(value);
+}
+
+void EnodeBStatsCollector::add_number_of_active_ue_ul_nongbr_cell(int value)
+{
+    number_of_active_ue_ul_nongbr_cell.addValue(value);
+}
+
+
+int EnodeBStatsCollector::get_dl_total_prb_usage_cell() {
     return dl_total_prb_usage_cell.getMean();
 }
 
-double EnodeBStatsCollector::get_ul_total_prb_usage_cell() {
+int EnodeBStatsCollector::get_ul_total_prb_usage_cell() {
     return ul_total_prb_usage_cell.getMean();
 }
+
+int EnodeBStatsCollector::get_number_of_active_ue_dl_nongbr_cell(){
+    return number_of_active_ue_dl_nongbr_cell.getMean();
+}
+
+int EnodeBStatsCollector::get_number_of_active_ue_ul_nongbr_cell(){
+    return number_of_active_ue_ul_nongbr_cell.getMean();
+}
+
+

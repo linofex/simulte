@@ -9,12 +9,11 @@
 #include <omnetpp.h>
 #include <map>
 
-#include "corenetwork/statsCollector/ENodeBCollector.h"
-
+class EnodeBStatsCollector;
 
 class CellInfo : public AttributeBase {
   protected:
-    ENodeBCollector* collector_; // it has the cellCollector and the map <Ipue -> uecollector>
+    EnodeBStatsCollector* collector_; // it has the cellCollector and the map <Ipue -> uecollector>
 
   /**
    * 

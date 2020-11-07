@@ -18,9 +18,15 @@ package lte.corenetwork.statsCollector;
 simple EnodeBStatsCollector 
 {
     parameters:
-        
         // time periods for measurements 
         int ttiPeriodPRBUsage = default(5);
+        double samplingPeriod @unit(s) = default(0.05s);
+        
+        double dataVolumePeriod @unit(s) = default(0.5s);
+        int dataVolumePeriods = default(10);
+        
+        int numberOfSamples = default(20);
+        bool movingAverage = default(false);
          
         
         @display("i=block/cogwheel");

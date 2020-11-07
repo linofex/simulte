@@ -7,15 +7,36 @@
 // and cannot be removed from it.
 //
 
-#include "UeCollector.h"
-#include "corenetwork/statsCollector/StatsCollector.h"
+#include "corenetwork/statsCollector/UeStatsCollector.h"
+
 
 using namespace std;
 
-UeCollector::UeCollector(){}
+Define_Module(UeStatsCollector);
 
-UeCollector::UeCollector(const StatsCollector* statsCollector){
-        //get parent module for parameters, passed by constructor
-        ttiPeriodPRBUsage_ = statsCollector->par("ttiPeriodPRBUsage");
-        movingAverage_ = statsCollector->par("movingAverage");
+
+void UeStatsCollector::initialize(int stage){
+    if (stage == inet::INITSTAGE_LOCAL)
+       {
+        ul_non_gbr_pdr_ue.init("dl_total_prb_usage_cell", par("ttiPeriodPRBUsage"), par("movingAverage"));
+        ul_non_gbr_data_volume_ue.init("ul_total_prb_usage_cell", par("ttiPeriodPRBUsage"), par("movingAverage"));
+       }
 }
+
+
+void UeStatsCollector::add_ul_non_gbr_pdr_ue(int val){
+    ul_non_gbr_pdr_ue.addValue(val);
+}
+
+void UeStatsCollector::add_ul_non_gbr_data_volume_ue(int val){
+    ul_non_gbr_data_volume_ue.addValue(val);
+}
+
+int UeStatsCollector::get_ul_non_gbr_data_volume_ue() {
+    return ul_non_gbr_data_volume_ue.getMean();
+}
+
+int UeStatsCollector::get_ul_non_gbr_pdr_ue() {
+    return ul_non_gbr_pdr_ue.getMean();
+}
+

@@ -12,107 +12,62 @@
 #define _LTE_ENOBSTATSCOLLECTOR_H_
 
 #include <omnetpp.h>
-#include <string>
-
 #include "common/LteCommon.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
-#include "inet/networklayer/common/L3Address.h"
-#include "corenetwork/binder/PhyPisaData.h"
-#include "corenetwork/nodes/ExtCell.h"
-#include "stack/mac/layer/LteMacBase.h"
+#include "corenetwork/statsCollector/L2Measures/L2MeasBase.h"
 
 using namespace inet;
 
 /**
- * The LTE Binder module has one instance in the whole network.
- * It stores global mapping tables with OMNeT++ module IDs,
- * IP addresses, etc.
  *
- * After this it fills the two tables:
- * - nextHop, binding each master node id with its slave
- * - nodeId, binding each node id with the module id used by Omnet.
- * - dMap_, binding each master with all its slaves (used by amc)
- *
- * The binder is accessed to gather:
- * - the nextHop table (by the eNodeB)
- * - the Omnet module id (by any module)
- * - the map of deployed UEs per master (by amc)
- *
+ * TODO
  */
-
-struct L2Meas{
-    double sum;
-    double* values;
-    int index, period, size;
-    cOutVector outVector;
-    cHistogram histogram;
-    simsignal_t signal;
-
-
-    void registerSignale(simsignal_t signal_ ){
-        signal = signal_;
-    }
-
-    void initVector(int length){
-        values = new double[length];
-        period = length;
-        size = 0;
-        index = 0;
-    }
-
-    void del(){
-        delete [] values;
-    }
-
-    void addValue(double val){
-        sum += val;
-        if(size < period)
-            size++;
-        else{
-            index = index%period;
-            sum -= values[index];
-        }
-        values[index++] = val;
-        double mean = getMean();
-        outVector.record(mean);
-        histogram.collect(mean);
-    }
-
-    double getMean(){
-        if(index == 0)
-            return 0;
-            //eccezione;
-        else{
-            return sum/size;
-        }
-
-    }
-
-};
 
 
 class EnodeBStatsCollector: public cSimpleModule
 {
     private:
-        unsigned int ttiPeriodPRBUsage_;
-        struct L2Meas dl_total_prb_usage_cell;
-        struct L2Meas ul_total_prb_usage_cell;
+        L2MeasBase dl_total_prb_usage_cell;
+        L2MeasBase ul_total_prb_usage_cell;
+        L2MeasBase number_of_active_ue_dl_nongbr_cell;
+        L2MeasBase number_of_active_ue_ul_nongbr_cell;
+
+
+        // inserire segnali?
 
     public:
-        EnodeBStatsCollector(){
-            dl_total_prb_usage_cell.values = nullptr;
-            ul_total_prb_usage_cell.values = nullptr;
+        EnodeBStatsCollector(){}
+        virtual ~EnodeBStatsCollector(){}
 
-        }
-        virtual ~EnodeBStatsCollector(){
-            dl_total_prb_usage_cell.del();
-            ul_total_prb_usage_cell.del();
+        void add_dl_total_prb_usage_cell(int val);
+        void add_ul_total_prb_usage_cell(int val);
 
-        }
-        void add_dl_total_prb_usage_cell(double val);
-        void add_ul_total_prb_usage_cell(double val);
-        double get_dl_total_prb_usage_cell();
-        double get_ul_total_prb_usage_cell();
+        int get_dl_total_prb_usage_cell();
+        int get_ul_total_prb_usage_cell();
+
+
+        void add_number_of_active_ue_dl_nongbr_cell(int num);
+        void add_number_of_active_ue_ul_nongbr_cell(int num);
+
+        int get_number_of_active_ue_dl_nongbr_cell();
+        int get_number_of_active_ue_ul_nongbr_cell();
+
+
+
+
+        int get_dl_gbr_prb_usage_cell(){return -1;}
+        int get_ul_gbr_prb_usage_cell(){return -1;}
+        int get_dl_nongbr_prb_usage_cell(){return -1;}
+        int get_ul_nongbr_prb_usage_cell(){return -1;}
+        int get_received_dedicated_preambles_cell(){return -1;}
+        int get_received_randomly_selected_preambles_low_range_cell(){return -1;}
+        int get_received_randomly_selected_preambles_high_range_cell(){return -1;}
+        int get_number_of_active_ue_dl_gbr_cell(){return -1;}
+        int get_number_of_active_ue_ul_gbr_cell(){return -1;}
+
+        int get_dl_gbr_pdr_cell(){return -1;}
+        int get_ul_gbr_pdr_cell(){return -1;}
+        int get_dl_nongbr_pdr_cell(){return -1;}
+        int get_ul_nongbr_pdr_cell(){return -1;}
 
 
     protected:
