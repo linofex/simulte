@@ -592,6 +592,7 @@ LteScheduler* LteSchedulerEnb::getScheduler(SchedDiscipline discipline)
 
 void LteSchedulerEnb::resourceBlockStatistics(bool sleep)
 {
+
     if (sleep)
     {
         if (direction_ == DL)
@@ -642,7 +643,8 @@ void LteSchedulerEnb::resourceBlockStatistics(bool sleep)
         mac_->emit(lteAvgServedBlocksDl_, allocatedBlocks);
 
         //@author Alessandro Noferi
-        collector_->getENodeBCollector()->add_dl_total_prb_usage_cell(utilization);
+        EV << "QUA===========\n==";
+        collector_->add_dl_total_prb_usage_cell(int(utilization*100));
     }
     else if (direction_ == UL)
     {
@@ -650,12 +652,13 @@ void LteSchedulerEnb::resourceBlockStatistics(bool sleep)
         mac_->emit(lteAvgServedBlocksUl_, allocatedBlocks);
 
         //@author Alessandro Noferi
-        collector_->getENodeBCollector()->add_ul_total_prb_usage_cell(utilization);
+        collector_->add_ul_total_prb_usage_cell(int(utilization*100));
     }
     else
     {
         throw cRuntimeError("LteSchedulerEnb::resourceBlockStatistics(): Unrecognized direction %d", direction_);
     }
+
 }
 ActiveSet LteSchedulerEnb::readActiveConnections()
 {

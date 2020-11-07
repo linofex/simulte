@@ -33,7 +33,9 @@ LteMacEnb::LteMacEnb() :
     LteMacBase()
 {
     cellInfo_ = NULL;
-    collector_ = NULL;
+    enbCollector_ = NULL;
+    ueCollector_ = NULL;
+    binder_ = NULL;
     amc_ = NULL;
     enbSchedulerDl_ = NULL;
     enbSchedulerUl_ = NULL;
@@ -229,10 +231,11 @@ void LteMacEnb::initialize(int stage)
         cellId_ = nodeId_;
 
         // @author Alessandro Noferi
-        collector_ = getCollector();
+        enbCollector_ = getCollector();
+        //             LteNic             eNodeB           network
+        binder_ = check_and_cast<LteBinder * >(getParentModule()->getParentModule()->getParentModule()->getSubmodule("binder"));
         periodicCollection_ = new cMessage("L2MeasSample");
-        periodicCollection_->setSchedulingPriority(1);
-        samplingPeriod_ = collector_->par("samplingPeriod");
+        samplingPeriod_ = enbCollector_->par("samplingPeriod");
         scheduleAt(NOW + samplingPeriod_, periodicCollection_);
 
         // TODO: read NED parameters, when will be present
@@ -300,17 +303,14 @@ void LteMacEnb::handleMessage(cMessage *msg)
 //            size = enbSchedulerDl_->activeSetSize();
             size = getActiveUeSetSize(DL);
             if (size < 0) throw cRuntimeError("LteMacEnb::Number of DL user < 0");
-            collector_->getENodeBCollector()->add_number_of_active_ue_dl_nongbr_cell(size);
+            enbCollector_->add_number_of_active_ue_dl_nongbr_cell(size);
 
 //            size = enbSchedulerUl_->activeSetSize();
             size = getActiveUeSetSize(UL);
             if (size < 0) throw cRuntimeError("LteMacEnb::Number of UL user < 0");
-            collector_->getENodeBCollector()->add_number_of_active_ue_ul_nongbr_cell(size);
+            enbCollector_->add_number_of_active_ue_ul_nongbr_cell(size);
             scheduleAt(NOW + samplingPeriod_, periodicCollection_);
-
-//            delete msg;
             return;
-
         }
     }
     LteMacBase::handleMessage(msg);
@@ -1016,8 +1016,8 @@ ConflictGraph* LteMacEnb::getConflictGraph()
 }
 
 // @author Alessandro Noferi
-StatsCollector* LteMacEnb::getCollector(){    // LteNic               eNodeB
-    return check_and_cast<StatsCollector* > (getParentModule()->getParentModule()->getSubmodule("collector"));
+EnodeBStatsCollector* LteMacEnb::getCollector(){    // LteNic               eNodeB
+    return check_and_cast<EnodeBStatsCollector* > (getParentModule()->getParentModule()->getSubmodule("collector"));
 }
 
 int LteMacEnb::getActiveUeSetSize(Direction dir)

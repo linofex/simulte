@@ -13,7 +13,8 @@
 
 #include "../lteCellInfo/LteCellInfo.h"
 #include "corenetwork/nodes/InternetMux.h"
-#include "corenetwork/statsCollector/StatsCollector.h"
+#include "corenetwork/statsCollector/EnodeBStatsCollector.h"
+#include <stdlib.h>     /* atoi */
 
 using namespace std;
 
@@ -427,21 +428,76 @@ void LteBinder::removeUeHandoverTriggered(MacNodeId nodeId)
  * @author Alessandro Noferi
  */
 
+// std::vector<EnbInfo*> enbList_; LISTA DI TUTTE LE CELLE!!
+// since the creation e relocation is managed by only one source,
+// duplicates should not occur
+
 void LteBinder::addUeCollector(MacNodeId ue, MacNodeId cell)
 {
-    StatsCollector* collector =  check_and_cast<StatsCollector*>(getSimulation()->getModule(getOmnetId(cell))->getSubmodule("collector"));
-    if(collector != nullptr) collector->addUe(ue);
+    std::stringstream moduleName;
+    moduleName << "ueCollector[" <<  ue << "]"; // new ueCollector name in the form ueCollector[id]
+    const char * cModuleName = moduleName.str().c_str();
+    cModule *enb = nullptr;
+    std::vector<EnbInfo*>::iterator it = enbList_.begin(), end = enbList_.end();
+    for(; it != end ; ++it){
+        enb = (*it)->eNodeB;
+        if (enb->findSubmodule(moduleName.str().c_str()) != -1)
+        {
+            EV << "LteBinder::addUeCollector - Module [" << cModuleName << "] already present in eNodeB [" << (*it)->id << "]" << endl;
+//            cModule *ueCollector = enb->getSubmodule(cModuleName);
+//            ueCollector->changeParentTo(enb);
+            return; // manage?
+        }
+    }
+
+    // create UeStatsCollector module
+    // since it has not got any gate or something, I can do an all-in-one initialization
+    cModuleType *moduleType = cModuleType::get("lte.corenetwork.statsCollector.UeStatsCollector");
+    enb = getParentModule()->getSubmodule(getModuleNameByMacNodeId(cell));
+    cModule *mod = moduleType->createScheduleInit(moduleName.str().c_str(), enb);
+    std::stringstream display;
+
+    // each separated module has x = 50 and y has gap as 50 ue name name is ue[numId] so atoi starts from the 4th char
+    display << "p=" << 50 << "," << (300+50*atoi(getModuleNameByMacNodeId(ue)+3)) << ";i=block/cogwheel;is=s";
+    mod->setDisplayString(display.str().c_str());
+    mod->setName(moduleName.str().c_str());
+    EV << "LteBinder::addUeCollector - Module [" << moduleName.str().c_str() << "] added to eNodeB [" << cell << "]" << endl;
 }
 
 void LteBinder::moveUeCollector(MacNodeId ue,  MacNodeId oldCell, MacNodeId newCell){
-    StatsCollector* collector =  check_and_cast<StatsCollector*>(getSimulation()->getModule(getOmnetId(oldCell))->getSubmodule("collector"));
-    //check collector null
-    UeCollector * ueCollector = collector->detachUe(ue);
-    if(ueCollector != nullptr){
-        collector = check_and_cast<StatsCollector*>(getSimulation()->getModule(getOmnetId(newCell))->getSubmodule("collector"));
-        // check collector null
-        collector->attachUe(ue, ueCollector);
+    //fix modules casts and check null. manage errors
+    const char* cellModuleName = getModuleNameByMacNodeId(oldCell); // eNodeB module name
+    cModule *oldEnb = getParentModule()->getSubmodule(cellModuleName); //  eNobe module
+    std::stringstream moduleName;
+    moduleName << "ueCollector[" <<  ue << "]";
+    if(oldEnb->findSubmodule(moduleName.str().c_str()) == -1){ // ue collector not present
+        throw cRuntimeError("LteBinder::addUeCollector - Module [%s] not present in eNodeB [%d]",moduleName.str().c_str() , oldCell);
+        EV << "LteBinder::addUeCollector - Module [" << moduleName.str().c_str() << "] not present in eNodeB [" << oldCell << "]" << endl;
+        return;
     }
+
+    //search in other cells
+    cModule *enb = nullptr;
+    std::vector<EnbInfo*>::iterator it = enbList_.begin(), end = enbList_.end();
+    for(; it != end ; ++it){
+        enb = (*it)->eNodeB;
+        if (enb != oldEnb && (enb->findSubmodule(moduleName.str().c_str()) != -1))
+        {
+            throw cRuntimeError("LteBinder::addUeCollector - Module [%s] already present in eNodeB [%d]", moduleName.str().c_str() , (*it)->id);
+            EV << "LteBinder::addUeCollector - Module [" << moduleName.str().c_str() << "] already present in eNodeB [" << (*it)->id << "]" << endl;
+//            cModule *ueCollector = enb->getSubmodule(cModuleName);
+//            ueCollector->changeParentTo(enb);
+            return; // manage?
+        }
+    }
+
+
+    cModule *ueCollector = oldEnb->getSubmodule(moduleName.str().c_str());
+    const char* newCellModuleName = getModuleNameByMacNodeId(newCell); // cell name
+    cModule *neWenb = getParentModule()->getSubmodule(newCellModuleName);
+    ueCollector->changeParentTo(neWenb);
+
+    EV << "LteBinder::addUeCollector - Module [" << moduleName.str().c_str() << "] moved from in eNodeB [" << oldCell  << "] to eNodeb ["<< newCell <<"]"<< endl;
 }
 
 

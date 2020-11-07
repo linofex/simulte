@@ -8,6 +8,8 @@
 //
 
 #include "stack/rlc/um/entity/UmTxEntity.h"
+#include "stack/packetFlowManager/PacketFlowManager.h"
+#include <set>
 
 Define_Module(UmTxEntity);
 
@@ -28,6 +30,11 @@ void UmTxEntity::initialize()
 
     // get the reference to the RLC module
     lteRlc_ = check_and_cast<LteRlcUm*>(getParentModule()->getSubmodule("um"));
+    //                                                          RLC                 LTE Nic
+
+    if(mac->getNodeType() == ENODEB)
+        packetFlowManager_ = check_and_cast<PacketFlowManager *>(getParentModule()->getParentModule()->getSubmodule("packetFlowManager"));
+        // packetFlowManager_ will be implement even for the ues
 }
 
 void UmTxEntity::enque(cPacket* pkt)
@@ -52,6 +59,8 @@ void UmTxEntity::rlcPduMake(int pduLength)
     bool startFrag = firstIsFragment_;
     bool endFrag = false;
 
+    std::set<unsigned int> pdcpSnoSet; // set used by the packetFlowManager
+
     while (!sduQueue_.isEmpty() && pduLength > 0)
     {
         // detach data from the SDU buffer
@@ -59,6 +68,7 @@ void UmTxEntity::rlcPduMake(int pduLength)
         LteRlcSdu* rlcSdu = check_and_cast<LteRlcSdu*>(pkt);
 
         unsigned int sduSequenceNumber = rlcSdu->getSnoMainPacket();
+        pdcpSnoSet.insert(sduSequenceNumber); // add PDCP sno of this RLC PDU
         int sduLength = rlcSdu->getByteLength();
 
         EV << NOW << " UmTxEntity::rlcPduMake - Next data chunk from the queue, sduSno[" << sduSequenceNumber
@@ -144,6 +154,15 @@ void UmTxEntity::rlcPduMake(int pduLength)
 
     // send to MAC layer
     EV << NOW << " UmTxEntity::rlcPduMake - send PDU " << rlcPdu->getPduSequenceNumber() << " with size " << rlcPdu->getByteLength() << " bytes to lower layer" << endl;
+
+    // add RLC PDU to flowpacketmanager
+    if(len != 0 && packetFlowManager_ != nullptr)
+    {
+        FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(rlcPdu->getControlInfo());
+        LogicalCid lcid = lteInfo->getLcid();
+        packetFlowManager_->insertRlcPdu(lcid, sno_ - 1, pdcpSnoSet);
+    }
+
     lteRlc_->sendToLowerLayer(rlcPdu);
 
     // if incoming connection was halted
@@ -188,7 +207,6 @@ void UmTxEntity::enqueHoldingPackets(cPacket* pkt)
     EV << NOW << " UmTxEntity::enqueHoldingPackets - storing new SDU into the holding buffer " << endl;
     sduHoldingQueue_.insert(pkt);
 }
-
 
 void UmTxEntity::resumeDownstreamInPackets()
 {

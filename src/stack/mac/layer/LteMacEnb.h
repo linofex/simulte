@@ -10,7 +10,6 @@
 #ifndef _LTE_LTEMACENB_H_
 #define _LTE_LTEMACENB_H_
 
-#include "../../../corenetwork/statsCollector/StatsCollector.h"
 #include "corenetwork/lteCellInfo/LteCellInfo.h"
 #include "stack/mac/layer/LteMacBase.h"
 #include "stack/mac/amc/LteAmc.h"
@@ -20,6 +19,9 @@ class MacBsr;
 class LteSchedulerEnbDl;
 class LteSchedulerEnbUl;
 class ConflictGraph;
+class LteBinder;
+class UeStatsCollector;
+class EnodeBStatsCollector;
 
 class LteMacEnb : public LteMacBase
 {
@@ -27,12 +29,19 @@ class LteMacEnb : public LteMacBase
     /// Local LteCellInfo
     LteCellInfo *cellInfo_;
 
-    /* @author Alessandro Noferi
-     * begin
-     *
-     * Local EnodeBStatsCollector
-     */
-    StatsCollector* collector_;
+    // @author Alessandro Noferi
+    // begin
+
+    // reference to binder
+
+    LteBinder *binder_;
+
+    // Local EnodeBStatsCollector
+    EnodeBStatsCollector *enbCollector_;
+
+    // Pointer to an UeCollector
+    UeStatsCollector *ueCollector_;
+
     cMessage* periodicCollection_;
     double samplingPeriod_;
     // end
@@ -344,7 +353,11 @@ class LteMacEnb : public LteMacBase
     // @author Alessandro Noferi
 
     // reference to the Lte Cell collector module
-    StatsCollector* getCollector();
+    EnodeBStatsCollector* getCollector();
+
+    // reference to the Ue collector module
+    // @par nodeid
+    UeStatsCollector* getUeCollector(MacNodeId nodeId);
 
     /* Get the number of active users based on the direction.
      * A user is active (according with TS 136 314 if:

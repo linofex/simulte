@@ -15,6 +15,7 @@
 #include "stack/rlc/LteRlcDefs.h"
 
 class LteRlcUm;
+class PacketFlowManager;
 
 /**
  * @class UmTxEntity
@@ -100,6 +101,19 @@ class UmTxEntity : public cSimpleModule
 
     // reference to the parent's RLC layer
     LteRlcUm* lteRlc_;
+
+    /*
+     * @author Alessandro Noferi
+     *
+     * reference to packetFlowManager in order to be able
+     * to count discarded and packet delay
+     *
+     * Be sure to control every time if it is null, this module
+     * it is not mandatory for a correct network simulation.
+     * It is use useful e.g for RNI service within MEC
+     */
+    PacketFlowManager* packetFlowManager_;
+
 
     /*
      * Flow-related info.
