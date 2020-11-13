@@ -35,11 +35,20 @@
 #include <vector>
 #include "apps/mec/MeServices/packets/HttpResponsePacket.h"
 #include "apps/mec/MeServices/httpUtils/httpUtils.h"
+#include "common/utils/utils.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+
 
 Define_Module(RNIService);
 
 
-RNIService::RNIService():L2MeasResource(){}
+RNIService::RNIService():L2MeasResource_(){
+    baseUriQueries_ = "example/rni/v2/queries";
+    baseUriSubscriptions_ = "example/rni/v2/subscriptions";
+    supportedQueryParams_.insert("cell_id");
+    supportedQueryParams_.insert("ue_ipv4_address");
+    // supportedQueryParams_s_.insert("ue_ipv6_address");
+}
 
 void RNIService::initialize(int stage)
 {
@@ -51,7 +60,7 @@ void RNIService::initialize(int stage)
     }
     else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
         GenericService::initialize(stage);
-        L2MeasResource.addEnodeB(eNodeB_);
+        L2MeasResource_.addEnodeB(eNodeB_);
     }
 }
 
@@ -62,70 +71,116 @@ void RNIService::handleMessage(cMessage *msg)
 }
 
 void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket){
-//    inet::RawPacket *res = new RawPacket("resraw");
-//    std::string e = L2MeasResource.toJson().dump(2);
-//
-//
-//        res->setDataFromBuffer(e.c_str(), e.size());
-//        res->setByteLength(e.size());
-//
-//        socket->send(res);
-//
-    Http::send200Response(socket, L2MeasResource.toJson().dump(2).c_str());
+    // check it is a GET for a query or a subscription
+    if(uri.rfind(baseUriQueries_, 0) == 0) //queries
+    {
+        //look for qurery parameters
+        std::vector<std::string> splittedUri = utils::splitString(uri, "?");
+        if(splittedUri.size() == 2) // uri has parameters eg. uriPath?param=value&param1=value,value
+        { 
+            std::vector<std::string> queryParameters = utils::splitString(splittedUri[1], "&");
+            /*
+            * supported paramater:
+            * - cell_id
+            * - ue_ipv4_address 
+            * - ue_ipv6_address // not implemented yet
+            */
 
-//
-//    HTTPRespPacket temp_res = HTTPRespPacket(OK);
-//
-//    if(uri.find("users/") != std::string::npos){
-//       std::string strAddress = utils::splitString(uri,"acr:")[1];
-//
-//       inet::IPv4Address address(strAddress.c_str());
-//
-//       MacNodeId nodeId = binder_->getMacNodeId(address);
-//
-//       if(nodeId == 0){
-//           //riposta negativa
-//       }
-//       const char *moduleName = binder_->getModuleNameByMacNodeId(nodeId);
-//       cModule *temp = getSimulation()->getModuleByPath(moduleName)->getSubmodule("mobility");
-//           inet::IMobility *mobility;
-//           if(temp != NULL){
-//               mobility = check_and_cast<inet::IMobility*>(temp);
-//               inet::Coord position = mobility->getCurrentPosition();
-//               temp_res.setResCode(BAD_METHOD);
-//               temp_res.setContentType("application/json");
-//               temp_res.setConnection("keep-alive");
-//               temp_res.addNewLine();
-//
-//               std::string pp = L2MeasResource.toJson().dump(4);
-//               temp_res.setBody(pp);
-//
-//
-//           }
-//           else {
-//                   EV << "UEWarningAlertApp_rest::initialize - \tWARNING: Mobility module NOT FOUND!" << endl;
-//                   throw cRuntimeError("UEWarningAlertApp_rest::initialize - \tWARNING: Mobility module NOT FOUND!");
-//           }
-//
-//
-//    }
-//
-//
-//    EV <<"\n\n\n\n######SEND!!!\n\n\n";
-//    inet::RawPacket *res = new RawPacket("resraw");
-//    res->setDataFromBuffer(temp_res.getPacket().c_str(), temp_res.getPacket().size());
-//    res->setByteLength(temp_res.getPacket().size());
-//
-//    socket->send(res);
+            std::vector<MacNodeId> cellIds;
+            std::vector<MacNodeId> ues;
+            
+            typedef std::map<std::string, std::vector<std::string>> queryMap;
+            queryMap queryParamsMap; // e.g cell_id -> [0, 1]
+            
+            std::vector<std::string>::iterator it  = queryParameters.begin();
+            std::vector<std::string>::iterator end = queryParameters.end();
+            std::vector<std::string> params;
+            std::vector<std::string> splittedParams;
+            for(; it != end; ++it){
+                if(it->rfind("cell_id", 0) == 0) // cell_id=par1,par2
+                {
+                    params = utils::splitString(*it, "=");
+                    if(params.size()!= 2) //must be param=values
+                    {
+                        Http::send400Response(socket);
+                        return;
+                    }
+                    splittedParams = utils::splitString(*it, ",");
+                    std::vector<std::string>::iterator pit  = splittedParams.begin();
+                    std::vector<std::string>::iterator pend = splittedParams.end();
+                    for(; pit != pend; ++pit){
+                        cellIds.push_back((MacNodeId)std::stoi(*pit));
+                    }
+                }
+                else if(it->rfind("ue_ipv4_address", 0) == 0)
+                {
+                    params = utils::splitString(*it, "=");
+                    if(params.size()!= 2) //must be param=values
+                    {
+                        Http::send400Response(socket);
+                        return;
+                    }
+                    splittedParams = utils::splitString(*it, ",");
+                    std::vector<std::string>::iterator pit  = splittedParams.begin();
+                    std::vector<std::string>::iterator pend = splittedParams.end();
+                    for(; pit != pend; ++pit){
+                       //manage ipv4 address without any macnode id
+                        //or do the conversion inside L2Meas..
+                       ues.push_back(binder_->getMacNodeId(IPv4Address((*pit).c_str())));
+                    }
+                }
+                else // bad parameters
+                {
+                    Http::send400Response(socket);
+                    return;
+                }
 
+            }
+
+            //send response
+            if(!ues.empty() && !cellIds.empty())
+            {
+                Http::send200Response(socket, L2MeasResource_.toJson(cellIds, ues).dump(2).c_str());
+            }
+            else if(ues.empty() && !cellIds.empty())
+            {
+                Http::send200Response(socket, L2MeasResource_.toJson(cellIds).dump(2).c_str());
+            }
+            else if(!ues.empty() && cellIds.empty())
+           {
+               Http::send200Response(socket, L2MeasResource_.toJson(ues).dump(2).c_str());
+           }
+           else
+           {
+               Http::send400Response(socket);
+           }
+
+        }
+        else if (splittedUri.size() == 1 ) //no query params
+            Http::send200Response(socket, L2MeasResource_.toJson().dump(2).c_str());
+        else //bad uri
+        {
+            Http::send404Response(socket);
+        }
+        
+    }
+    else if (uri.rfind(baseUriSubscriptions_, 0) == 0) //subs
+    {
+        // TODO implement subscription?
+        Http::send404Response(socket); 
+    }
+    else // not found
+    {
+        Http::send404Response(socket);
+    }
 }
 
 
 void RNIService::handlePOSTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){}
 
-    void RNIService::handlePUTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){}
+void RNIService::handlePUTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){}
 
-        void RNIService::handleDELETERequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){}
+void RNIService::handleDELETERequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){}
 
 //
 //

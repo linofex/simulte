@@ -182,7 +182,7 @@ std::map<std::string, std::string> TCPRestSrv::parseRequest(char* packet_){
 }
 
 
-void TCPRestSrv::handleGetRequest(const std::string& uri, inet::TCPSocket* socket){
+void TCPRestSrv::handleGetRequest(std::string& uri, inet::TCPSocket* socket){
     HTTPRespPacket temp_res = HTTPRespPacket(NULLE);
 
     if(uri.find("users/") != std::string::npos){

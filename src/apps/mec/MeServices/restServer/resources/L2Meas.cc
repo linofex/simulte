@@ -40,15 +40,20 @@ nlohmann::json L2Meas::toJson() const {
 		jsonArray.push_back(it->second.toJson());
 	}
 
-	if(jsonArray.size() > 0){
+	if(jsonArray.size() > 1){
 		val["cellInfo"] = jsonArray;
     }
+	else if(jsonArray.size() == 1){
+		val["cellInfo"] = jsonArray[0];
+	}
+	//I have to add all the users
+	
 
 	return val;
 }
 
 //
-//nlohmann::json L2Meas::toJson(std::vector<Ipv4>& uesID) const {
+nlohmann::json L2Meas::toJson(std::vector<std::string>& uesID) const {
 //	nlohmann::json val = nlohmann::json::object();
 //
 //	val["timestamp"] = timestamp_.toJson();
@@ -64,9 +69,9 @@ nlohmann::json L2Meas::toJson() const {
 //		val["cellInfo"] = jsonArray;
 //    }
 //	return val;
-//}
+}
 //
-nlohmann::json L2Meas::toJson(std::vector<MacCellId>& cellsID) const {
+nlohmann::json L2Meas::toJson(std::vector<MacNodeId>& cellsID) const {
 	nlohmann::json val = nlohmann::json::object();
 
 //	val["timestamp"] = timestamp_.toJson();
@@ -85,7 +90,7 @@ nlohmann::json L2Meas::toJson(std::vector<MacCellId>& cellsID) const {
 	return val;
 }
 //
-//nlohmann::json L2Meas::toJson(std::vector<NodeId>& cellsID, std::vector<Ipv4>& uesID) const {
+nlohmann::json L2Meas::toJson(std::vector<MacNodeId>& cellsID, std::vector<MacNodeId>& uesID) const {
 //	nlohmann::json val = nlohmann::json::object();
 //
 ////	val["timestamp"] = timestamp_.toJson();
@@ -102,7 +107,7 @@ nlohmann::json L2Meas::toJson(std::vector<MacCellId>& cellsID) const {
 //		val["cellInfo"] = jsonArray;
 //    }
 //	return val;
-//}
+}
 //
 //
 //

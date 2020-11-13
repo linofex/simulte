@@ -69,7 +69,7 @@ class TCPRestSrv: public cSimpleModule, public inet::ILifecycle
     virtual void finish() override;
     virtual void refreshDisplay() const override;
     virtual void handleRequest(char *packet, inet::TCPSocket *socket);
-    virtual void handleGetRequest(const std::string& uri, inet::TCPSocket* socket);
+    virtual void handleGetRequest(std::string& uri, inet::TCPSocket* socket);
     virtual void handlePostRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
 
     virtual ~TCPRestSrv();

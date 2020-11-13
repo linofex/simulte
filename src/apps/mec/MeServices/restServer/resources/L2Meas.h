@@ -23,12 +23,13 @@ class L2Meas : public AttributeBase
 		virtual ~L2Meas();
 
 		nlohmann::json toJson() const override;
-		nlohmann::json toJson(std::vector<MacCellId>& cellsID) const;
+
 		void addEnodeB(std::vector<cModule*>& eNodeBs);
 		void addEnodeB(cModule* eNodeB);
 
-//		nlohmann::json toJson(std::vector<Ipv4>& uesID) const;
-//		nlohmann::json toJson(std::vector<NodeId>& cellsID, std::vector<Ipv4>& uesID) const;
+		nlohmann::json toJson(std::vector<MacNodeId>& cellsID) const;
+		nlohmann::json toJson(std::vector<std::string>& uesID) const;
+		nlohmann::json toJson(std::vector<MacNodeId>& cellsID, std::vector<MacNodeId>& uesID) const;
 		
 
 	protected:

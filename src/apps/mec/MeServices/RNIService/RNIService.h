@@ -43,8 +43,12 @@ class RNIService: public GenericService
 {
   private:
 
-    L2Meas L2MeasResource;
-
+    L2Meas L2MeasResource_;
+    std::string baseUriQueries_;
+    std::string baseUriSubscriptions_;
+    std::set<std::string>supportedQueryParams_;
+    std::set<std::string>supportedSubscriptionParams_;
+    
   public:
     RNIService();
   protected:
