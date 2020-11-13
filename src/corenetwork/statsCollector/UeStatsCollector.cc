@@ -8,6 +8,9 @@
 //
 
 #include "corenetwork/statsCollector/UeStatsCollector.h"
+#include "stack/pdcp_rrc/layer/LtePdcpRrc.h"
+#include "stack/mac/layer/LteMacUe.h"
+
 
 
 using namespace std;
@@ -17,26 +20,98 @@ Define_Module(UeStatsCollector);
 
 void UeStatsCollector::initialize(int stage){
     if (stage == inet::INITSTAGE_LOCAL)
-       {
-        ul_non_gbr_pdr_ue.init("dl_total_prb_usage_cell", par("ttiPeriodPRBUsage"), par("movingAverage"));
-        ul_non_gbr_data_volume_ue.init("ul_total_prb_usage_cell", par("ttiPeriodPRBUsage"), par("movingAverage"));
-       }
+    {
+
+        mac_ = check_and_cast<LteMacUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("mac"));
+        pdcp_ = check_and_cast<LtePdcpRrcUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("pdcpRrc"));
+
+        handover_ = false;
+
+        // packet delay
+         ul_nongbr_delay_ue.init("ul_nongbr_delay_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
+         dl_nongbr_delay_ue.init("dl_nongbr_delay_ue",par("ttiPeriodPRBUsage"), par("movingAverage"));
+        // packet discard rate
+         ul_nongbr_pdr_ue.init("ul_nongbr_pdr_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
+         dl_nongbr_pdr_ue.init("dl_nongbr_pdr_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
+        // scheduled throughput
+         ul_nongbr_throughput_ue.init("ul_nongbr_throughput_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
+         dl_nongbr_throughput_ue.init("dl_nongbr_throughput_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
+        // data volume
+         ul_nongbr_data_volume_ue.init("ul_nongbr_data_volume_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
+         dl_nongbr_data_volume_ue.init("dl_nongbr_data_volume_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
+    }
 }
 
 
-void UeStatsCollector::add_ul_non_gbr_pdr_ue(int val){
-    ul_non_gbr_pdr_ue.addValue(val);
+void UeStatsCollector::add_ul_nongbr_delay_ue(){}
+
+// called by the eNodeBCollector
+void UeStatsCollector::add_dl_nongbr_delay_ue(double value)
+{
+    dl_nongbr_delay_ue.addValue(value);
 }
 
-void UeStatsCollector::add_ul_non_gbr_data_volume_ue(int val){
-    ul_non_gbr_data_volume_ue.addValue(val);
+void UeStatsCollector::add_ul_nongbr_pdr_ue()
+{
+
+}
+// called by the eNodeBCollector
+void UeStatsCollector::add_dl_nongbr_pdr_ue(double value)
+{
+    dl_nongbr_pdr_ue.addValue(value);
 }
 
-int UeStatsCollector::get_ul_non_gbr_data_volume_ue() {
-    return ul_non_gbr_data_volume_ue.getMean();
+// called by the eNodeBCollector
+void UeStatsCollector::add_ul_nongbr_throughput_ue(int value)
+{
+    ul_nongbr_throughput_ue.addValue(value);
+}
+void UeStatsCollector::add_dl_nongbr_throughput_ue(int value)
+{
+    dl_nongbr_throughput_ue.addValue(value);
+}
+// called by the eNodeBCollector
+void UeStatsCollector::add_ul_nongbr_data_volume_ue(unsigned int value)
+{
+    ul_nongbr_data_volume_ue.addValue(value);
+}
+void UeStatsCollector::add_dl_nongbr_data_volume_ue(unsigned int value)
+{
+    dl_nongbr_data_volume_ue.addValue(value);
 }
 
-int UeStatsCollector::get_ul_non_gbr_pdr_ue() {
-    return ul_non_gbr_pdr_ue.getMean();
+
+int UeStatsCollector::get_ul_nongbr_delay_ue()
+{
+    return ul_nongbr_delay_ue.getMean();
+}
+int UeStatsCollector::get_dl_nongbr_delay_ue()
+{
+    return dl_nongbr_delay_ue.getMean();
 }
 
+int UeStatsCollector::get_ul_nongbr_pdr_ue()
+{
+    return ul_nongbr_pdr_ue.getMean();
+}
+int UeStatsCollector::get_dl_nongbr_pdr_ue()
+{
+    return dl_nongbr_pdr_ue.getMean();
+}
+
+int UeStatsCollector::get_ul_nongbr_throughput_ue()
+{
+    return -1;}
+int UeStatsCollector::get_dl_nongbr_throughput_ue()
+{
+    return -1;
+}
+
+int UeStatsCollector::get_ul_nongbr_data_volume_ue()
+{
+    return ul_nongbr_data_volume_ue.getMean();
+}
+int UeStatsCollector::get_dl_nongbr_data_volume_ue()
+{
+    return dl_nongbr_data_volume_ue.getMean();
+}

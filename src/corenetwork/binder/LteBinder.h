@@ -39,6 +39,8 @@ using namespace inet;
  *
  */
 
+class UeStatsCollector;
+
 class LteBinder : public cSimpleModule
 {
   private:
@@ -358,13 +360,11 @@ class LteBinder : public cSimpleModule
     /**
      * @author Alessandro Noferi.
      *
-     * Ue stats collector management
+     * UeStatsCollector management
      */
 
-    void addUeCollector(MacNodeId ue, MacNodeId cell);
+    void addUeCollectorToEnodeB(MacNodeId ue, UeStatsCollector* ueCollector, MacNodeId cell);
     void moveUeCollector(MacNodeId ue, MacNodeId oldCell, MacNodeId newCell);
-
-
 
 
     /*

@@ -14,10 +14,8 @@
 #include <omnetpp.h>
 #include "common/LteCommon.h"
 #include "corenetwork/statsCollector/L2Measures/L2MeasBase.h"
-#include <omnetpp.h>
 #include <string>
 
-#include "corenetwork/statsCollector/L2Measures/L2MeasBase.h"
 
 using namespace inet;
 
@@ -26,25 +24,67 @@ using namespace inet;
  * TODO
  */
 
-
+class LtePdcpRrcUe;
+class LteMacUe;
 
 class UeStatsCollector: public cSimpleModule
 {
     private:
-        L2MeasBase ul_non_gbr_pdr_ue;
-        L2MeasBase ul_non_gbr_data_volume_ue;
+        // LTE Nic layers
+        LtePdcpRrcUe *pdcp_;
+        LteMacUe     *mac_;
 
+        // packet delay
+        L2MeasBase ul_nongbr_delay_ue;
+        L2MeasBase dl_nongbr_delay_ue;
+        // packet discard rate
+        L2MeasBase ul_nongbr_pdr_ue;
+        L2MeasBase dl_nongbr_pdr_ue;
+        // scheduled throughput
+        L2MeasBase ul_nongbr_throughput_ue;
+        L2MeasBase dl_nongbr_throughput_ue;
+        // data volume
+        L2MeasBase ul_nongbr_data_volume_ue;
+        L2MeasBase dl_nongbr_data_volume_ue;
 
         // inserire segnali
+
+        bool handover_;
 
     public:
         UeStatsCollector(){}
         virtual ~UeStatsCollector(){}
-        void add_ul_non_gbr_pdr_ue(int val);
-        int get_ul_non_gbr_pdr_ue();
 
-        void add_ul_non_gbr_data_volume_ue(int val);
-        int get_ul_non_gbr_data_volume_ue();
+        void add_ul_nongbr_delay_ue();
+        void add_dl_nongbr_delay_ue(double value);// called by the eNodeBCollector
+
+        void add_ul_nongbr_pdr_ue();
+        void add_dl_nongbr_pdr_ue(double value); // called by the eNodeBCollector
+
+        void add_ul_nongbr_throughput_ue(int value);
+        void add_dl_nongbr_throughput_ue(int value);
+
+        void add_ul_nongbr_data_volume_ue(unsigned int value); // called by the eNodeBCollector
+        void add_dl_nongbr_data_volume_ue(unsigned int value); // called by the eNodeBCollector
+
+
+        int get_ul_nongbr_delay_ue();
+        int get_dl_nongbr_delay_ue();
+
+        int get_ul_nongbr_pdr_ue();
+        int get_dl_nongbr_pdr_ue();
+
+        int get_ul_nongbr_throughput_ue();
+        int get_dl_nongbr_throughput_ue();
+
+        int get_ul_nongbr_data_volume_ue();
+        int get_dl_nongbr_data_volume_ue();
+
+
+        void sedHandover(bool value)
+        {
+            handover_ = value;
+        }
 
 
 
