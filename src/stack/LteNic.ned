@@ -146,6 +146,9 @@ module LteNicUe extends LteNicBase
         dlFbGen: LteDlFeedbackGenerator {
             @display("p=50,50;is=s");
         }
+        packetFlowManager: PacketFlowManager {
+			@display("p=104.8, 389.75998");
+		}
 }
 
 //
