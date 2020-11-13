@@ -160,7 +160,7 @@ void UmTxEntity::rlcPduMake(int pduLength)
     {
         FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(rlcPdu->getControlInfo());
         LogicalCid lcid = lteInfo->getLcid();
-        packetFlowManager_->insertRlcPdu(lcid, sno_ - 1, pdcpSnoSet);
+        packetFlowManager_->insertRlcPdu(lcid, sno_ - 1, pdcpSnoSet, firstIsFragment_);
     }
 
     lteRlc_->sendToLowerLayer(rlcPdu);

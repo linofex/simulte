@@ -23,6 +23,9 @@
 #include "stack/mac/packet/LteMacSduRequest.h"
 #include "common/LteCommon.h"
 
+#include "stack/packetFlowManager/PacketFlowManager.h"
+
+#include "stack/rlc/packet/LteRlcDataPdu.h"
 Define_Module( LteMacEnb);
 
 /*********************
@@ -33,8 +36,6 @@ LteMacEnb::LteMacEnb() :
     LteMacBase()
 {
     cellInfo_ = NULL;
-    enbCollector_ = NULL;
-    ueCollector_ = NULL;
     binder_ = NULL;
     amc_ = NULL;
     enbSchedulerDl_ = NULL;
@@ -230,16 +231,9 @@ void LteMacEnb::initialize(int stage)
 
         cellId_ = nodeId_;
 
-        // @author Alessandro Noferi
-        enbCollector_ = getCollector();
-        //             LteNic             eNodeB           network
-        binder_ = check_and_cast<LteBinder * >(getParentModule()->getParentModule()->getParentModule()->getSubmodule("binder"));
-        periodicCollection_ = new cMessage("L2MeasSample");
-        samplingPeriod_ = enbCollector_->par("samplingPeriod");
-        scheduleAt(NOW + samplingPeriod_, periodicCollection_);
-
         // TODO: read NED parameters, when will be present
         cellInfo_ = getCellInfo();
+
         /* Get num RB Dl */
         numRbDl_ = cellInfo_->getNumRbDl();
         /* Get num RB Ul */
@@ -295,21 +289,6 @@ void LteMacEnb::handleMessage(cMessage *msg)
         {
             flushHarqBuffers();
             delete msg;
-            return;
-        }
-        else if(strcmp(msg->getName(), "L2MeasSample") == 0)
-        {
-            int size;
-//            size = enbSchedulerDl_->activeSetSize();
-            size = getActiveUeSetSize(DL);
-            if (size < 0) throw cRuntimeError("LteMacEnb::Number of DL user < 0");
-            enbCollector_->add_number_of_active_ue_dl_nongbr_cell(size);
-
-//            size = enbSchedulerUl_->activeSetSize();
-            size = getActiveUeSetSize(UL);
-            if (size < 0) throw cRuntimeError("LteMacEnb::Number of UL user < 0");
-            enbCollector_->add_number_of_active_ue_ul_nongbr_cell(size);
-            scheduleAt(NOW + samplingPeriod_, periodicCollection_);
             return;
         }
     }
@@ -520,6 +499,7 @@ void LteMacEnb::sendGrants(LteMacScheduleList* scheduleList)
     }
 }
 
+
 void LteMacEnb::macHandleRac(cPacket* pkt)
 {
     EV << NOW << " LteMacEnb::macHandleRac" << endl;
@@ -547,6 +527,7 @@ void LteMacEnb::macPduMake(MacCid cid)
     // detaching sdus from real buffers.
 
     macPduList_.clear();
+    SequenceNumberSet rlcPduSet;
 
     //  Build a MAC pdu for each scheduled user on each codeword
     LteMacScheduleList::const_iterator it;
@@ -555,6 +536,7 @@ void LteMacEnb::macPduMake(MacCid cid)
         LteMacPdu* macPkt;
         cPacket* pkt;
         MacCid destCid = it->first.first;
+
 
         if (destCid != cid)
             continue;
@@ -591,6 +573,8 @@ void LteMacEnb::macPduMake(MacCid cid)
                 uinfo->setSourceId(getMacNodeId());
                 uinfo->setDestId(destId);
                 uinfo->setDirection(DL);
+                uinfo->setLcid(MacCidToLcid(cid));
+
 
                 const UserTxParams& txInfo = amc_->computeTxParams(destId, DL);
 
@@ -623,7 +607,7 @@ void LteMacEnb::macPduMake(MacCid cid)
                     destCid, mbuf_[destCid]->getQueueLength(), sduPerCid);
             }
             pkt = mbuf_[destCid]->popFront();
-
+            rlcPduSet.insert(check_and_cast<LteRlcUmDataPdu *>(pkt)->getPduSequenceNumber());
             ASSERT(pkt != NULL);
 
             drop(pkt);
@@ -660,6 +644,7 @@ void LteMacEnb::macPduMake(MacCid cid)
         // pdu transmission here (if any)
         if (txList.second.empty())
         {
+            throw cRuntimeError("EE");
             EV << "macPduMake() : no available process for this MAC pdu in TxHarqBuffer" << endl;
             delete macPkt;
         }
@@ -668,6 +653,14 @@ void LteMacEnb::macPduMake(MacCid cid)
             if (txList.first == HARQ_NONE)
             throw cRuntimeError("LteMacBase: pduMaker sending to uncorrect void H-ARQ process. Aborting");
             txBuf->insertPdu(txList.first, cw, macPkt);
+
+            /*
+             * @author Alessandro Noferi
+             * insert the new MAC pdu in the packet flow manager
+             * TODO finish description
+             */
+            flowManager_->insertMacPdu(MacCidToLcid(cid), macPkt->getId(), rlcPduSet);
+
         }
     }
     EV << "------ END LteMacEnb::macPduMake ------\n";
@@ -1015,10 +1008,6 @@ ConflictGraph* LteMacEnb::getConflictGraph()
     return NULL;
 }
 
-// @author Alessandro Noferi
-EnodeBStatsCollector* LteMacEnb::getCollector(){    // LteNic               eNodeB
-    return check_and_cast<EnodeBStatsCollector* > (getParentModule()->getParentModule()->getSubmodule("collector"));
-}
 
 int LteMacEnb::getActiveUeSetSize(Direction dir)
 {
@@ -1070,4 +1059,18 @@ int LteMacEnb::getActiveUeSetSize(Direction dir)
 
 }
 
+double LteMacEnb::getUtilization(Direction dir)
+{
+    if(dir == DL){
+        return enbSchedulerDl_->getUtilization();
+    }
+    else if(dir == UL)
+    {
+        return enbSchedulerUl_->getUtilization();
+    }
+    else
+    {
+        throw cRuntimeError("LteMacEnb::getSchedDiscipline(): unrecognized direction %d", (int) dir);
+    }
+}
 

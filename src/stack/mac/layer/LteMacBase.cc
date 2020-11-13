@@ -7,6 +7,7 @@
 // and cannot be removed from it.
 //
 
+#include "stack/packetFlowManager/PacketFlowManager.h"
 
 #include "stack/mac/layer/LteMacBase.h"
 #include "stack/mac/buffer/harq/LteHarqBufferTx.h"
@@ -26,6 +27,7 @@ LteMacBase::LteMacBase()
 {
     mbuf_.clear();
     macBuffers_.clear();
+    flowManager_ = NULL;
 }
 
 LteMacBase::~LteMacBase()
@@ -313,6 +315,8 @@ void LteMacBase::initialize(int stage)
         /* Get reference to binder */
         binder_ = getBinder();
 
+        flowManager_ = check_and_cast<PacketFlowManager *>(getParentModule()->getSubmodule("packetFlowManager"));
+
         /* Set The MAC MIB */
 
         muMimo_ = par("muMimo");
@@ -369,6 +373,12 @@ void LteMacBase::handleMessage(cMessage* msg)
         fromRlc(pkt);
     }
     return;
+}
+
+
+void LteMacBase::harqAckToFlowManager(LogicalCid lcid, unsigned int macPdu)
+{
+    flowManager_->macPduArrived(lcid, macPdu);
 }
 
 void LteMacBase::finish()

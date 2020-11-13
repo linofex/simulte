@@ -20,32 +20,14 @@ class LteSchedulerEnbDl;
 class LteSchedulerEnbUl;
 class ConflictGraph;
 class LteBinder;
-class UeStatsCollector;
-class EnodeBStatsCollector;
+
+class PacketFlowManager;
 
 class LteMacEnb : public LteMacBase
 {
   protected:
     /// Local LteCellInfo
     LteCellInfo *cellInfo_;
-
-    // @author Alessandro Noferi
-    // begin
-
-    // reference to binder
-
-    LteBinder *binder_;
-
-    // Local EnodeBStatsCollector
-    EnodeBStatsCollector *enbCollector_;
-
-    // Pointer to an UeCollector
-    UeStatsCollector *ueCollector_;
-
-    cMessage* periodicCollection_;
-    double samplingPeriod_;
-    // end
-
 
     /// Lte AMC module
     LteAmc *amc_;
@@ -57,6 +39,7 @@ class LteMacEnb : public LteMacBase
     LteMacScheduleList* scheduleListDl_;
 
     int eNodeBCount;
+
 
     /**
      * Variable used for Downlink energy consumption computation
@@ -351,14 +334,6 @@ class LteMacEnb : public LteMacBase
     virtual ConflictGraph* getConflictGraph();
 
     // @author Alessandro Noferi
-
-    // reference to the Lte Cell collector module
-    EnodeBStatsCollector* getCollector();
-
-    // reference to the Ue collector module
-    // @par nodeid
-    UeStatsCollector* getUeCollector(MacNodeId nodeId);
-
     /* Get the number of active users based on the direction.
      * A user is active (according with TS 136 314 if:
      * - it has buffered data in MAC RLC or PDCP layers -> ActiveSet
@@ -367,6 +342,11 @@ class LteMacEnb : public LteMacBase
      * @par direction
      */
     int getActiveUeSetSize(Direction dir);
+
+    /* get percentage of block utilized during the last TTI
+     * @param dir UL or DL
+     */
+    double getUtilization(Direction dir);
 
 };
 

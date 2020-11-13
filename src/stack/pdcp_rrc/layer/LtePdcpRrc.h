@@ -48,19 +48,10 @@
  */
 
 
-class EnodeBStatsCollector;
 class PacketFlowManager;
 
 class LtePdcpRrcBase : public cSimpleModule
 {
-    private:
-        // timers for stats
-        cMessage *discardRateTimer_;
-        cMessage *pktDelayTimer_;
-
-        double discardRatePeriod_;
-        double pktDelayPeriod_;
-
   public:
     /**
      * Initializes the connection table
@@ -71,6 +62,20 @@ class LtePdcpRrcBase : public cSimpleModule
      * Cleans the connection table
      */
     virtual ~LtePdcpRrcBase();
+
+
+    /**
+       * getDiscardRateStats() is used by the collector
+       * to get statistics about the discarded PDCP pcks
+       * - enbCollector for ENODEB
+       * - ueCollector  for UE
+       * Reset the counters, too
+       *
+       * RELAY does nothing
+       */
+      virtual double getDiscardRateStats();
+      virtual void resetPckCounter();
+
 
   protected:
 
@@ -153,19 +158,6 @@ class LtePdcpRrcBase : public cSimpleModule
      */
     virtual Direction getDirection() = 0;
     void setTrafficInformation(cPacket* pkt, FlowControlInfo* lteInfo);
-
-    /**
-     * sendDiscardRateStats() and sendPktDelayStats()
-     * are used to send the pkt counter to the
-     * corresponding collector:
-     * - enbCollector for ENODEB
-     * - ueCollector  for UE
-     * Reset the counters, too
-     *
-     * RELAY does nothing
-     */
-    virtual void sendDiscardRateStats() {}
-    virtual void sendPktDelayStats(){}
 
     /*
      * Upper Layer Handlers
@@ -281,16 +273,6 @@ class LtePdcpRrcBase : public cSimpleModule
 
 class LtePdcpRrcUe : public LtePdcpRrcBase
 {
-  private:
-    unsigned int pdcpSduBytesUl_;
-    unsigned int pdcpSduBytesDl_;
-
-    // timer for stats
-    cMessage BytesCountTimer_;
-    double BytesCountPeriod_;
-
-
-
   protected:
     void handleControlInfo(cPacket* upPkt, FlowControlInfo* lteInfo)
     {
@@ -309,18 +291,8 @@ class LtePdcpRrcUe : public LtePdcpRrcBase
         return UL;
     }
 
-    // overloaded to count pkt byte size UL
-    virtual void fromDataPort(cPacket *pkt);
-    // overloaded to count pkt byte size DL
-    virtual void toDataPort(cPacket *pkt);
-
-    virtual void sendDiscardRateStats();
-    virtual void sendPktDelayStats(){};
-
-
   public:
     virtual void initialize(int stage);
-    LtePdcpRrcUe();
 
 };
 
@@ -330,16 +302,14 @@ private:
 
     typedef std::map<MacNodeId, unsigned int> NodeIdToCounterMap;
     NodeIdToCounterMap pdcpPktCounterPerUe_;
+    NodeIdToCounterMap pdcpSduBytesUl_;
+    NodeIdToCounterMap pdcpSduBytesDl_;
 
   protected:
 
-    /*
-     * @author Alessandro Noferi
-     */
-    EnodeBStatsCollector* collector_; //reference to the ueCollector of the EnodeB
-
     // overloaded to update pkt counter per UE
     virtual void fromDataPort(cPacket *pkt);
+    virtual void toDataPort(cPacket* pkt);
 
     void handleControlInfo(cPacket* upPkt, FlowControlInfo* lteInfo)
     {
@@ -367,6 +337,32 @@ private:
   public:
     virtual void initialize(int stage);
     LtePdcpRrcEnb();
+
+    /**
+     * getDiscardRateStatsPerUe is used by the collector to
+     * get statistics about a specific UE
+     * - enbCollector for ENODEB
+     * - ueCollector  for UE
+     * Reset the counters, too
+     *
+     * RELAY does nothing
+     *
+     * @param id of the UE
+     */
+    virtual double getDiscardRateStatsPerUe(MacNodeId id);
+    virtual void resetPckCounterPerUe(MacNodeId id);
+
+    /**
+      * getPdcpBytesUlPerUe() and getPdcpBytesDlPerUe()
+      * are used by the collector to get
+      * statistics about the bytes of pdcp pck
+      *
+      */
+    unsigned int getPdcpBytesUlPerUe(MacNodeId id);
+    unsigned int getPdcpBytesDlPerUe(MacNodeId id);
+    void resetPdcpBytesDlPerUe(MacNodeId id);
+    void resetPdcpBytesUlPerUe(MacNodeId id);
+
 };
 
 class LtePdcpRrcRelayEnb : public LtePdcpRrcBase
@@ -408,6 +404,7 @@ class LtePdcpRrcRelayUe : public LtePdcpRrcBase
         WATCH(destId_);
     }
 
+
     void handleControlInfo(cPacket* upPkt, FlowControlInfo* lteInfo)
     {
         upPkt->setControlInfo(lteInfo);
@@ -429,6 +426,7 @@ class LtePdcpRrcRelayUe : public LtePdcpRrcBase
         // Error: Relay doesn't set direction!
         return UNKNOWN_DIRECTION;
     }
+
 };
 
 #endif

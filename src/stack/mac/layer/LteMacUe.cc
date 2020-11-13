@@ -135,7 +135,8 @@ void LteMacUe::initialize(int stage)
         const char* moduleName = getParentModule()->getParentModule()->getFullName();
         binder_->registerName(nodeId_, moduleName);
         // provisional
-        binder_->addUeCollector(nodeId_, cellId_);
+        UeStatsCollector *ue;
+        binder_->addUeCollectorToEnodeB(nodeId_, ue,cellId_);
 
 
     }

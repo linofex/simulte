@@ -53,7 +53,6 @@ void LteSchedulerEnb::initialize(Direction dir, LteMacEnb* mac)
     direction_ = dir;
     mac_ = mac;
 
-    collector_ = mac_->getCollector();
 
     binder_ = getBinder();
 
@@ -610,7 +609,7 @@ void LteSchedulerEnb::resourceBlockStatistics(bool sleep)
     std::vector<std::vector<unsigned int> >::const_iterator planeItEnd =
         allocator_->getAllocatedBlocksEnd();
 
-    double utilization = 0.0;
+    utilization_ = 0.0;
     double allocatedBlocks = 0;
     unsigned int plane = 0;
     unsigned int antenna = 0;
@@ -626,7 +625,7 @@ void LteSchedulerEnb::resourceBlockStatistics(bool sleep)
             if (direction_ == DL)
                 mac_->allocatedRB(*antennaIt);
         // collect the antenna utilization for current Layer
-        utilization += (double) (*antennaIt);
+        utilization_ += (double) (*antennaIt);
 
         allocatedBlocks += (double) (*antennaIt);
 
@@ -636,23 +635,16 @@ void LteSchedulerEnb::resourceBlockStatistics(bool sleep)
     //    }
     // antenna here is the number of antennas used; the same applies for plane;
     // Compute average OFDMA utilization between layers and antennas
-    utilization /= (((double) (antenna)) * ((double) resourceBlocks_));
+    utilization_ /= (((double) (antenna)) * ((double) resourceBlocks_));
     if (direction_ == DL)
     {
-        mac_->emit(cellBlocksUtilizationDl_, utilization);
+        mac_->emit(cellBlocksUtilizationDl_, utilization_);
         mac_->emit(lteAvgServedBlocksDl_, allocatedBlocks);
-
-        //@author Alessandro Noferi
-        EV << "QUA===========\n==";
-        collector_->add_dl_total_prb_usage_cell(int(utilization*100));
     }
     else if (direction_ == UL)
     {
-        mac_->emit(cellBlocksUtilizationUl_, utilization);
+        mac_->emit(cellBlocksUtilizationUl_, utilization_);
         mac_->emit(lteAvgServedBlocksUl_, allocatedBlocks);
-
-        //@author Alessandro Noferi
-        collector_->add_ul_total_prb_usage_cell(int(utilization*100));
     }
     else
     {
@@ -705,5 +697,11 @@ ActiveSet::const_iterator LteSchedulerEnb::getActiveConnectionSetEndIt() const
 {
     return scheduler_->getActiveConnectionSetEndIt();
 }
+
+double LteSchedulerEnb::getUtilization()
+{
+    return utilization_;
+}
+
 
 

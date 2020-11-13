@@ -75,16 +75,6 @@ class LteSchedulerEnb
     LteBinder *binder_;
 
 
-    /*
-     * @author Alessandro Noferi
-     *
-     * begin
-     */
-
-    // Reference to the eNodeB statistic collector
-    EnodeBStatsCollector* collector_;
-    //end
-
     // System allocator, carries out the block-allocation functions.
     LteAllocationModule *allocator_;
 
@@ -124,6 +114,8 @@ class LteSchedulerEnb
 
     // pre-made BandLimit structure used when the no band limit is given to the scheduler
     std::vector<BandLimit> emptyBandLim_;
+
+    double utilization_; // records the utilization in the last TTI
 
   public:
 
@@ -343,6 +335,9 @@ class LteSchedulerEnb
      * @param discipline scheduler discipline
      */
     LteScheduler* getScheduler(SchedDiscipline discipline);
+
+  public:
+    double getUtilization();
 
 };
 
