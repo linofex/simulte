@@ -12,6 +12,9 @@ src/Makefile.vc
 *.qtenvrc
 .settings/
 
+#ignore vscode  folder
+.vscode/
+
 # ignore binary files
 out/
 *.so
