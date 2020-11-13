@@ -77,6 +77,8 @@ LteHarqFeedback *LteHarqProcessRx::createFeedback(Codeword cw)
     UserControlInfo *fbInfo = new UserControlInfo();
     fbInfo->setSourceId(pduInfo->getDestId());
     fbInfo->setDestId(pduInfo->getSourceId());
+    // @author Alessandro Noferi
+    fbInfo->setLcid(pduInfo->getLcid());
     fbInfo->setFrameType(HARQPKT);
     fb->setControlInfo(fbInfo);
 
