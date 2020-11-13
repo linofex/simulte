@@ -151,8 +151,25 @@ void GenericService::parseRequest(char* packet_, inet::TCPSocket *socket, reqMap
     std::string packet(packet_);
 
     std::vector<std::string> splitting = utils::splitString(packet, "\r\n\r\n"); // bound between header and body
-    std::string header = splitting[0];
-    std::string body   = splitting[1];
+    std::string header;
+    std::string body;
+    
+    if(splitting.size() == 2)
+    {
+        header = splitting[0];
+        body   = splitting[1];
+        request->insert( std::pair<std::string, std::string>("body", body) );
+    }
+    else if(splitting.size() == 1) // no body
+    {
+        header = splitting[0];
+    }
+    else //incorrect request
+    {
+       Http::send400Response(socket); // bad request
+       return;
+    }
+    
 
     std::vector<std::string> line;
     std::vector<std::string> lines = utils::splitString(header, "\r\n");
@@ -176,8 +193,6 @@ void GenericService::parseRequest(char* packet_, inet::TCPSocket *socket, reqMap
         if(!line.empty())
             request->insert( std::pair<std::string, std::string>(line[0], line[1]) );
     }
-
-    request->insert( std::pair<std::string, std::string>("body", body) );
 
     return;
 }

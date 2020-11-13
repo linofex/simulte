@@ -19,6 +19,8 @@ void send200Response(inet::TCPSocket *socket, const char* body);
 
 void send405Response(inet::TCPSocket *socket, const char *methods =  "" );
 void send400Response(inet::TCPSocket *socket);
+void send404Response(inet::TCPSocket *socket);
+
 void send505Response(inet::TCPSocket *socket);
 
 

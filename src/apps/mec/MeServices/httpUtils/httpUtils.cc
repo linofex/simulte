@@ -47,6 +47,12 @@ namespace Http {
         HTTPResponsePacket resp = HTTPResponsePacket(BAD_REQ);
         sendPacket(resp, socket);
     }
+
+    void send404Response(inet::TCPSocket *socket){
+        HTTPResponsePacket resp = HTTPResponsePacket(NOT_FOUND);
+        sendPacket(resp, socket);
+    }
+
     void send505Response(inet::TCPSocket *socket){
         HTTPResponsePacket resp = HTTPResponsePacket(HTTP_NOT_SUPPORTED);
         sendPacket(resp, socket);
