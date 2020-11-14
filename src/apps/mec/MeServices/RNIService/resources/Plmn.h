@@ -2,7 +2,7 @@
 #define _PLMN_H_
 
 #include "../../../../../common/MecCommon.h"
-#include "AttributeBase.h"
+#include "../../RNIService/resources/AttributeBase.h"
 
 // https://en.wikipedia.org/wiki/Mobile_country_code
 
@@ -12,7 +12,7 @@ class Plmn : public AttributeBase {
     std::string mcc_; // 3 decimal digits
     std::string mnc_; // 2 or 3 decimal digits
 
-    nlohmann::json toJsonCell() const; //should be private?
+    nlohmann::ordered_json toJsonCell() const; //should be private?
   /* data */
 
 
@@ -27,7 +27,7 @@ public:
     std::string getMnc() const;
     
     
-  nlohmann::json toJson() const override;
+  nlohmann::ordered_json toJson() const override;
 
 };
 

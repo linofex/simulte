@@ -1,4 +1,4 @@
-#include "Plmn.h"
+#include "../../RNIService/resources/Plmn.h"
 
 Plmn::Plmn()
 {
@@ -35,9 +35,9 @@ std::string Plmn::getMnc() const
     return mnc_;
 }
 
-nlohmann::json Plmn::toJson() const
+nlohmann::ordered_json Plmn::toJson() const
 {
-    nlohmann::json val = nlohmann::json::object();
+    nlohmann::ordered_json val;
     val["mcc"] = mcc_;
     val["mnc"] = mnc_;
 

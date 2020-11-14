@@ -1,4 +1,5 @@
-#include "CellInfo.h"
+#include "../../RNIService/resources/CellInfo.h"
+
 #include "corenetwork/statsCollector/EnodeBStatsCollector.h"
 
 CellInfo::CellInfo(){}
@@ -12,8 +13,8 @@ CellInfo::CellInfo(::omnetpp::cModule* eNodeB){
 CellInfo::~CellInfo(){}
 
 
-nlohmann::json CellInfo::toJsonCell() const  {
-    nlohmann::json val = nlohmann::json::object();
+nlohmann::ordered_json CellInfo::toJsonCell() const  {
+    nlohmann::ordered_json val;
 	val["ecgi"] = ecgi_.toJson();
 
 	int value;
@@ -74,14 +75,14 @@ nlohmann::json CellInfo::toJsonCell() const  {
 }
 
 
-nlohmann::json CellInfo::toJson() const {
-	nlohmann::json val = toJsonCell();
+nlohmann::ordered_json CellInfo::toJson() const {
+	nlohmann::ordered_json val = toJsonCell();
 	
 //	// per UE
 //	std::map<ipv4, ueCollector>::const_iterator it = ueList_->getBeginIterator();
 //	std::map<ipv4, ueCollector>::const_iterator endIt = ueList_->getBeginIterator();
 //
-//    nlohmann::json jsonArray;
+//    nlohmann::ordered_json jsonArray;
 //
 //	for(; it != endIt; ++it){
 //		CellUeInfo ue(&(it->second));
@@ -96,9 +97,9 @@ nlohmann::json CellInfo::toJson() const {
 }
 
 
-//nlohmann::json CellInfo::toJson(std::vector<Ipv4>& uesID) const {
-//	nlohmann::json val = toJsonCell();
-//	nlohmann::json jsonArray;
+//nlohmann::ordered_json CellInfo::toJson(std::vector<Ipv4>& uesID) const {
+//	nlohmann::ordered_json val = toJsonCell();
+//	nlohmann::ordered_json jsonArray;
 //	std::vector<Ipv4>&::const_iterator it = uesID.begin();
 //	for(; it != uesID.end() ; ++it){
 //		if(ueList_.findUeByIpv4(*it) != false){

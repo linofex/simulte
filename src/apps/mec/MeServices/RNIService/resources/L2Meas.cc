@@ -1,4 +1,5 @@
-#include "L2Meas.h"
+#include "../../RNIService/resources/L2Meas.h"
+
 #include "corenetwork/lteCellInfo/LteCellInfo.h"
 
 L2Meas::L2Meas() {}
@@ -28,15 +29,17 @@ void L2Meas::addEnodeB(cModule* eNodeB) {
 L2Meas::~L2Meas() {}
 
 
-nlohmann::json L2Meas::toJson() const {
-	nlohmann::json val = nlohmann::json::object();
+nlohmann::ordered_json L2Meas::toJson() const {
+	nlohmann::ordered_json val ;
+	nlohmann::ordered_json l2Meas;
+
 
 	if (timestamp_.isValid())
 	{
 //		timestamp_.setSeconds();
 		val["timestamp"] = timestamp_.toJson();
 	}
-	nlohmann::json jsonArray;
+	nlohmann::ordered_json jsonArray;
 
 	std::map<MacCellId, CellInfo>::const_iterator it = eNodeBs_.begin();
 	for(; it != eNodeBs_.end() ; ++it){
@@ -51,17 +54,17 @@ nlohmann::json L2Meas::toJson() const {
 	}
 	//I have to add all the users
 	
-
-	return val;
+	l2Meas["L2Meas"] = val;
+	return l2Meas;
 }
 
 //
-nlohmann::json L2Meas::toJson(std::vector<std::string>& uesID) const {
-//	nlohmann::json val = nlohmann::json::object();
+nlohmann::ordered_json L2Meas::toJson(std::vector<std::string>& uesID) const {
+//	nlohmann::ordered_json val = nlohmann::ordered_json::object();
 //
 //	val["timestamp"] = timestamp_.toJson();
 //
-//	nlohmann::json jsonArray;
+//	nlohmann::ordered_json jsonArray;
 //
 //	std::map<NodeId, CellInfo>::const_iterator it = eNodeBs_.begin();
 //	for(; it != eNodeBs_.end() ; ++it){
@@ -74,12 +77,12 @@ nlohmann::json L2Meas::toJson(std::vector<std::string>& uesID) const {
 //	return val;
 }
 //
-nlohmann::json L2Meas::toJson(std::vector<MacNodeId>& cellsID) const {
-	nlohmann::json val = nlohmann::json::object();
+nlohmann::ordered_json L2Meas::toJson(std::vector<MacNodeId>& cellsID) const {
+	nlohmann::ordered_json val;
 
 //	val["timestamp"] = timestamp_.toJson();
 	
-	nlohmann::json jsonArray;
+	nlohmann::ordered_json jsonArray;
 
 	std::vector<MacCellId>::const_iterator it = cellsID.begin();
 	for(; it != cellsID.end() ; ++it){
@@ -93,12 +96,11 @@ nlohmann::json L2Meas::toJson(std::vector<MacNodeId>& cellsID) const {
 	return val;
 }
 //
-nlohmann::json L2Meas::toJson(std::vector<MacNodeId>& cellsID, std::vector<MacNodeId>& uesID) const {
-//	nlohmann::json val = nlohmann::json::object();
-//
+nlohmann::ordered_json L2Meas::toJson(std::vector<MacNodeId>& cellsID, std::vector<MacNodeId>& uesID) const {
+//	nlohmann::ordered_json val ;
 ////	val["timestamp"] = timestamp_.toJson();
 //
-//	nlohmann::json jsonArray;
+//	nlohmann::ordered_json jsonArray;
 //
 //	std::vector<NodeId>::const_iterator it = cellsID.begin();
 //	for(; it != cellsID.end() ; ++it){

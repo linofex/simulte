@@ -1,4 +1,4 @@
-#include "AttributeBase.h"
+#include "../../RNIService/resources/AttributeBase.h"
 
 AttributeBase::AttributeBase()
 {
@@ -39,7 +39,7 @@ bool AttributeBase::toJson( bool value )
     return value;
 }
 
-nlohmann::json AttributeBase::toJson( AttributeBase&  content )
+nlohmann::ordered_json AttributeBase::toJson( AttributeBase&  content )
 {
     return  content.toJson();
 }

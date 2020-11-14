@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include "AttributeBase.h"
-#include "Plmn.h"
+#include "../../RNIService/resources/AttributeBase.h"
+#include "../../RNIService/resources/Plmn.h"
 
 
 class Ecgi : public AttributeBase {
@@ -12,7 +12,7 @@ class Ecgi : public AttributeBase {
     std::string cellId_;
     Plmn plmn_;
 
-    nlohmann::json toJsonCell() const; //should be private?
+    nlohmann::ordered_json toJsonCell() const; //should be private?
 
 public:
   Ecgi();
@@ -27,7 +27,7 @@ public:
   std::string getCellId() const;
   Plmn getPlmn() const;
 
-  nlohmann::json toJson() const override;
+  nlohmann::ordered_json toJson() const override;
 
 };
 

@@ -2,7 +2,7 @@
 #define _TIMESTAMP_H_
 
 
-#include "AttributeBase.h"
+#include "../../RNIService/resources/AttributeBase.h"
 
 
 /// <summary>
@@ -25,7 +25,7 @@ class  TimeStamp: public AttributeBase
 
         bool isValid() const;
 
-        nlohmann::json toJson() const override;
+        nlohmann::ordered_json toJson() const override;
        
         /// <summary>
         /// The seconds part of the time. Time is defined as Unix-time since January 1, 1970, 00:00:00 UTC

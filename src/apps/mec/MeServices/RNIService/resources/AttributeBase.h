@@ -2,9 +2,10 @@
 #define _ATTRIBUTEBASE_H_
 
 
-#include "json.hpp"
 #include <ctime>
 #include <string>
+
+#include "../../RNIService/resources/json.hpp"
 #include "common/LteCommon.h"
 
 
@@ -13,8 +14,8 @@ class AttributeBase
     public:
         AttributeBase();
         virtual ~AttributeBase();
-        virtual nlohmann::json toJson() const = 0;
-//        virtual void fromJson(nlohmann::json& json) = 0;
+        virtual nlohmann::ordered_json toJson() const = 0;
+//        virtual void fromJson(nlohmann::ordered_json& json) = 0;
 
         static std::string toJson( const std::string& value );
         static std::string toJson( const std::time_t& value );
@@ -22,7 +23,7 @@ class AttributeBase
         static int64_t toJson( int64_t value );
         static double toJson( double value );
         static bool toJson( bool value );
-        static nlohmann::json toJson(AttributeBase& content );
+        static nlohmann::ordered_json toJson(AttributeBase& content );
 };
 
 #endif // _ATTRIBUTEBASE_H_

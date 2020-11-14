@@ -1,4 +1,4 @@
-#include "Ecgi.h"
+#include "../../RNIService/resources/Ecgi.h"
 
 
 Ecgi::Ecgi():plmn_()
@@ -41,11 +41,13 @@ Plmn Ecgi::getPlmn() const
 }
 
 
-nlohmann::json Ecgi::toJson() const
+nlohmann::ordered_json Ecgi::toJson() const
 {
-    nlohmann::json val = nlohmann::json::object();
-    
-    val["plmn"] = plmn_.toJson();
+    nlohmann::ordered_json val;
     val["cellId"] = cellId_;
+    val["plmn"] = plmn_.toJson();
+    
+
+    return val;
 }
 

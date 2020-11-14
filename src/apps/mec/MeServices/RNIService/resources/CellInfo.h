@@ -1,13 +1,11 @@
 #ifndef _CELLINFO_H_
 #define _CELLINFO_H_
 
-#include "AttributeBase.h"
-
-#include "Ecgi.h"
-//#include "CellUeInfo.h"
 #include <vector>
 #include <omnetpp.h>
 #include <map>
+#include "../../RNIService/resources/AttributeBase.h"
+#include "../../RNIService/resources/Ecgi.h"
 
 class EnodeBStatsCollector;
 
@@ -25,7 +23,7 @@ class CellInfo : public AttributeBase {
 //    UeList* ueList_;
 //    //Ecgi ecgi_;
 
-    nlohmann::json toJsonCell() const; //should be private?
+    nlohmann::ordered_json toJsonCell() const; //should be private?
   /* data */
 
 
@@ -34,8 +32,8 @@ public:
   CellInfo(::omnetpp::cModule* eNodeB);
   virtual ~CellInfo();
 
-  nlohmann::json toJson() const override;
-//  nlohmann::json toJson(std::vector<Ipv4>& uesID) const;
+  nlohmann::ordered_json toJson() const override;
+//  nlohmann::ordered_json toJson(std::vector<Ipv4>& uesID) const;
 
 };
 

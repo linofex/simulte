@@ -3,7 +3,8 @@
 */
 
 
-#include "TimeStamp.h"
+#include "../../RNIService/resources/TimeStamp.h"
+
 #include "time.h"
 
 TimeStamp::TimeStamp()
@@ -27,9 +28,9 @@ bool TimeStamp::isValid() const
     return valid_;
 }
 
-nlohmann::json TimeStamp::toJson() const
+nlohmann::ordered_json TimeStamp::toJson() const
 {
-    nlohmann::json val = nlohmann::json::object();
+    nlohmann::ordered_json val;
     
     val["seconds"] = time(NULL);
     val["nanoSeconds"] = nanoSeconds_;
