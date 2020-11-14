@@ -50,6 +50,7 @@ class EnodeBStatsCollector: public cSimpleModule
         L2MeasBase number_of_active_ue_dl_nongbr_cell;
         L2MeasBase number_of_active_ue_ul_nongbr_cell;
         L2MeasBase dl_nongbr_pdr_cell;
+        L2MeasBase ul_nongbr_pdr_cell;
 
         // inserire segnali?
 

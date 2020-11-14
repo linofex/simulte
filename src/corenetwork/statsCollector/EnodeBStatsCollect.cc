@@ -46,6 +46,7 @@ void EnodeBStatsCollector::initialize(int stage){
         number_of_active_ue_dl_nongbr_cell.init("number_of_active_ue_dl_nongbr_cell", par("activeUserPeriods"), false);
         number_of_active_ue_ul_nongbr_cell.init("number_of_active_ue_ul_nongbr_cell", par("activeUserPeriods"), false);
         dl_nongbr_pdr_cell.init("dl_nongbr_pdr_cell", par("discardRatePeriods"), false);
+        ul_nongbr_pdr_cell.init("ul_nongbr_pdr_cell", par("discardRatePeriods"), false);
 
         // setup timer
         prbUsage_ = new cMessage("prbUsage_");
@@ -286,13 +287,12 @@ void EnodeBStatsCollector::add_dl_nongbr_data_volume_ue_perUser()
 }
 
 
-int EnodeBStatsCollector::get_ul_nongbr_pdr_cell(){}
+int EnodeBStatsCollector::get_ul_nongbr_pdr_cell(){return 0;}
 
 
 int EnodeBStatsCollector::get_dl_nongbr_pdr_cell()
 {
-    double discard = pdcp_->getDiscardRateStats();
-    dl_nongbr_pdr_cell.addValue(discard);
+    return dl_nongbr_pdr_cell.getMean();
 }
 
 // since GBR rab has not been implemented nongbr = total

@@ -136,7 +136,7 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
         ht_->create_entry(lteInfo->getSrcAddr(), lteInfo->getDstAddr(),
             lteInfo->getSrcPort(), lteInfo->getDstPort(), mylcid);
 
-        // create lcid in pakcet flow manager
+        // create lcid in packet flow manager
         packetFlowManager_->initLcid(mylcid, lteInfo->getDestId());
     }
 
@@ -332,7 +332,7 @@ void LtePdcpRrcBase::resetPckCounter()
 
 double LtePdcpRrcBase::getDiscardRateStats()
 {
-    return (double)packetFlowManager_->getTotalDiscardedPck() / pdcpPktCounter_;
+    return (double)(packetFlowManager_->getTotalDiscardedPck() * 1000000) / pdcpPktCounter_;
 }
 
 
@@ -387,7 +387,7 @@ double LtePdcpRrcEnb::getDiscardRateStatsPerUe(MacNodeId id)
     NodeIdToCounterMap::iterator it = pdcpPktCounterPerUe_.find(id);
     if(it != pdcpPktCounterPerUe_.end())
     {
-        return (double)packetFlowManager_->getTotalDiscardedPckPerUe(id) / it->second;
+        return (double)(packetFlowManager_->getTotalDiscardedPckPerUe(id) * 1000000 ) / it->second;
     }
     else
     {

@@ -19,7 +19,12 @@ PacketFlowManager::PacketFlowManager()
     lcidToNodeIdmap_.clear();
     pktDiscardCounterPerUe_.clear();
     pdcpDelay_.clear();
-//    times_.setName("delay times");
+//    //times_.setName("delay times");
+}
+
+PacketFlowManager::~PacketFlowManager()
+{
+//times_.clear();
 }
 
 void PacketFlowManager::initialize(int stage)
@@ -60,7 +65,7 @@ void PacketFlowManager::initLcid(LogicalCid lcid, MacNodeId nodeId)
       strs << nodeId -1025;
       std::string temp_str = strs.str();
       char* char_type = (char*) temp_str.c_str();
-    times_[nodeId].setName(char_type);
+    //times_[nodeId].setName(char_type);
 
 
 
@@ -271,9 +276,18 @@ EV_INFO << NOW << " PacketFlowManager::macPduArrived - MAC PDU "<< macPdu << " o
     // === STEP 1 ==================================================== //
     // === recover the set of RLC PDU SN from the above MAC PDU ID === //
 
-    std::map<unsigned int, SequenceNumberSet>::iterator mit = desc->macSdusPerPdu_.find(macPdu);
+    unsigned int macPduId = desc->macPduPerProcess_[macPdu];
+    if (macPduId == 0)
+    {
+        EV << NOW << " D2DLocalSwitchManager::notifyHarqProcess - The process does not contain entire SDUs" << endl;
+        return;
+    }
+
+    desc->macPduPerProcess_[macPdu] = 0; // reset
+
+    std::map<unsigned int, SequenceNumberSet>::iterator mit = desc->macSdusPerPdu_.find(macPduId);
     if (mit == desc->macSdusPerPdu_.end())
-        throw cRuntimeError("PacketFlowManager::macPduArrived - MAC PDU ID %d not present for logical CID %d. Aborting", macPdu, lcid);
+        throw cRuntimeError("PacketFlowManager::macPduArrived - MAC PDU ID %d not present for logical CID %d. Aborting", macPduId, lcid);
     SequenceNumberSet rlcSnoSet = mit->second;
 
     // === STEP 2 ========================================================== //
@@ -347,7 +361,7 @@ EV_INFO << NOW << " PacketFlowManager::macPduArrived - MAC PDU "<< macPdu << " o
                     int time = (simTime() - tit->second).dbl() *1000;
 
                     EV_INFO << NOW << " PacketFlowManager::macPduArrived - PDCP PDU "<< pdcpPduSno << " of lcid " << lcid << " acknowledged. Delay time: " << time << "ms"<< endl;
-                    times_[lcidToNodeIdmap_[lcid]].record(time);
+                    //times_[lcidToNodeIdmap_[lcid]].record(time);
                     dit->second.first += (simTime() - tit->second);
                     dit->second.second += 1;
 
@@ -363,7 +377,6 @@ EV_INFO << NOW << " PacketFlowManager::macPduArrived - MAC PDU "<< macPdu << " o
                 }
             }
         }
-
         nit->second.clear();
         desc->rlcSdusPerPdu_.erase(nit); // erase RLC PDU SN
 
@@ -373,10 +386,9 @@ EV_INFO << NOW << " PacketFlowManager::macPduArrived - MAC PDU "<< macPdu << " o
 
     mit->second.clear();
     desc->macSdusPerPdu_.erase(mit); // erase MAC PDU ID
-
 }
 
-void PacketFlowManager::resetCounterPerUe(MacNodeId id)
+void PacketFlowManager::resetDiscardCounterPerUe(MacNodeId id)
 {
     std::map<MacNodeId, int>::iterator it = pktDiscardCounterPerUe_.find(id);
     if (it == pktDiscardCounterPerUe_.end())
@@ -387,7 +399,7 @@ void PacketFlowManager::resetCounterPerUe(MacNodeId id)
     it->second = 0;
 }
 
-void PacketFlowManager::resetCounter()
+void PacketFlowManager::resetDiscardCounter()
 {
     pktDiscardCounterTotal_ = 0;
 }
@@ -409,6 +421,33 @@ int PacketFlowManager::getTotalDiscardedPck()
     return pktDiscardCounterTotal_;
 }
 
+
+
+void PacketFlowManager::insertHarqProcess(LogicalCid lcid, unsigned int harqProcId, unsigned int macPduId)
+{
+    std::map<LogicalCid, StatusDescriptor>::iterator cit = connectionMap_.find(lcid);
+    if (cit == connectionMap_.end())
+    {
+        // this may occur after a handover, when data structures are cleared
+        EV << NOW << " D2DLocalSwitchManager::insertHarqProcess - Logical CID " << lcid << " not present." << endl;
+        return;
+    }
+
+    // get the descriptor for this connection
+    StatusDescriptor* desc = &cit->second;
+
+    // record the associaton MAC PDU - HARQ process only if the MAC PDU contains a RLC PDU that, in turn, contains at least one entire SDU
+    // the condition holds if the MAC PDU ID is stored in the data structure macSdusPerPdu_
+    if (desc->macSdusPerPdu_.find(macPduId) != desc->macSdusPerPdu_.end())
+    {
+        // store the MAC PDU ID included into the given HARQ process
+        desc->macPduPerProcess_[harqProcId] = macPduId;
+        EV << NOW << " D2DLocalSwitchManager::insertMacPdu - lcid[" << lcid << "], insert MAC PDU " << macPduId << " in HARQ PROCESS " << harqProcId << endl;
+    }
+}
+
+
+
 double PacketFlowManager::getDelayStatsPerUe(MacNodeId id)
 {
     delayMap::iterator it = pdcpDelay_.find(id);
@@ -419,7 +458,7 @@ double PacketFlowManager::getDelayStatsPerUe(MacNodeId id)
         return 0;
     }
 
-    double totalMs = (it->second.first.dbl())*1000;
+    double totalMs = (it->second.first.dbl())*1000; // ms
     double delayMean = totalMs / it->second.second;
     return delayMean;
 }

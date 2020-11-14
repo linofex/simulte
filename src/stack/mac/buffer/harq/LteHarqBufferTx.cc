@@ -208,15 +208,17 @@ void LteHarqBufferTx::receiveHarqFeedback(LteHarqFeedback *fbpkt)
         throw cRuntimeError("H-ARQ TX: fb is not for the pdu in this unit, maybe the addressed one was dropped");
     }
 
-    if(macOwner_->getNodeType() == ENODEB && result  == true)
-    {
-        UserControlInfo* fb = check_and_cast<UserControlInfo *>(fbpkt->getControlInfo());
-        macOwner_->harqAckToFlowManager(fb->getLcid(), fbPduId);
-    }
+
 
     bool reset = (*processes_)[acid]->pduFeedback(harqResult, cw);
     if (reset)
     numEmptyProc_++;
+    if(macOwner_->getNodeType() == ENODEB && reset  == true)
+        {
+            UserControlInfo* fb = check_and_cast<UserControlInfo *>(fbpkt->getControlInfo());
+            macOwner_->harqAckToFlowManager(fb->getLcid(), acid);
+        }
+
 
     // debug output
     const char *ack = result ? "ACK" : "NACK";

@@ -32,9 +32,9 @@ void UmTxEntity::initialize()
     lteRlc_ = check_and_cast<LteRlcUm*>(getParentModule()->getSubmodule("um"));
     //                                                          RLC                 LTE Nic
 
-    if(mac->getNodeType() == ENODEB)
-        packetFlowManager_ = check_and_cast<PacketFlowManager *>(getParentModule()->getParentModule()->getSubmodule("packetFlowManager"));
-        // packetFlowManager_ will be implement even for the ues
+
+    packetFlowManager_ = check_and_cast<PacketFlowManager *>(getParentModule()->getParentModule()->getSubmodule("packetFlowManager"));
+
 }
 
 void UmTxEntity::enque(cPacket* pkt)

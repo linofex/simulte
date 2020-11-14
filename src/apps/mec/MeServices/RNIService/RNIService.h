@@ -26,9 +26,9 @@
 #include <vector>
 #include <map>
 
-#include "apps/mec/MeServices/restServer/resources/L2Meas.h"
 #include "apps/mec/MeServices/GenericService/GenericService.h"
 #include "corenetwork/binder/LteBinder.h"
+#include "resources/L2Meas.h"
 
 
 /**

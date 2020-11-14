@@ -26,9 +26,7 @@
 #include <vector>
 #include <map>
 
-#include "resources/L2Meas.h"
-
-
+#include "../RNIService/resources/L2Meas.h"
 #include "corenetwork/binder/LteBinder.h"
 
 

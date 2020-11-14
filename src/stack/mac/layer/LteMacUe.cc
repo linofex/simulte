@@ -21,6 +21,7 @@
 #include "corenetwork/binder/LteBinder.h"
 #include "stack/phy/layer/LtePhyBase.h"
 #include "stack/mac/packet/LteMacSduRequest.h"
+#include "corenetwork/statsCollector/UeStatsCollector.h"
 
 Define_Module(LteMacUe);
 
@@ -135,7 +136,7 @@ void LteMacUe::initialize(int stage)
         const char* moduleName = getParentModule()->getParentModule()->getFullName();
         binder_->registerName(nodeId_, moduleName);
         // provisional
-        UeStatsCollector *ue;
+        UeStatsCollector *ue = check_and_cast<UeStatsCollector *> (getParentModule()->getParentModule()->getSubmodule("ueCollector"));
         binder_->addUeCollectorToEnodeB(nodeId_, ue,cellId_);
 
 

@@ -133,7 +133,7 @@ class PacketFlowManager : public cSimpleModule
      */
     void discardRlcPdu(LogicalCid lcid, unsigned int rlcSno);
 
-//    void insertHarqProcess(LogicalCid lcid, unsigned int harqProcId, unsigned int macPduId);
+    void insertHarqProcess(LogicalCid lcid, unsigned int harqProcId, unsigned int macPduId);
 
     // invoked by the MAC layer to notify that harqProcId is completed.
     // This method need to go back up the chain of sequence numbers to identify which
@@ -151,12 +151,15 @@ class PacketFlowManager : public cSimpleModule
 
     int getTotalDiscardedPckPerUe(MacNodeId id);
     int getTotalDiscardedPck();
-    void resetCounter();
-    void resetCounterPerUe(MacNodeId id);
+    void resetDiscardCounter();
+    void resetDiscardCounterPerUe(MacNodeId id);
 
     double getDelayStatsPerUe(MacNodeId);
     void resetDelayCounterPerUe(MacNodeId id);
     void deleteUe(MacNodeId id);
+
+  public:
+        virtual ~PacketFlowManager();
 
 };
 #endif

@@ -18,8 +18,8 @@ class L2MeasBase
 {
     private:
         std::string name_;
-        std::vector<int> values_;
-        int sum_;
+        std::vector<double> values_;
+        double sum_;
         int mean_;
         int index_;
         int period_;
@@ -33,7 +33,7 @@ class L2MeasBase
         L2MeasBase();
         virtual void init(std::string name, int period, bool movingAverage);
         virtual ~L2MeasBase();
-        virtual void addValue(int value);
+        virtual void addValue(double value);
         virtual int computeMean();
         virtual int getMean();
 };

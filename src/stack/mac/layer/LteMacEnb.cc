@@ -644,7 +644,6 @@ void LteMacEnb::macPduMake(MacCid cid)
         // pdu transmission here (if any)
         if (txList.second.empty())
         {
-            throw cRuntimeError("EE");
             EV << "macPduMake() : no available process for this MAC pdu in TxHarqBuffer" << endl;
             delete macPkt;
         }
@@ -660,6 +659,7 @@ void LteMacEnb::macPduMake(MacCid cid)
              * TODO finish description
              */
             flowManager_->insertMacPdu(MacCidToLcid(cid), macPkt->getId(), rlcPduSet);
+            flowManager_->insertHarqProcess(MacCidToLcid(cid), txList.first, macPkt->getId());
 
         }
     }
@@ -1062,11 +1062,11 @@ int LteMacEnb::getActiveUeSetSize(Direction dir)
 double LteMacEnb::getUtilization(Direction dir)
 {
     if(dir == DL){
-        return enbSchedulerDl_->getUtilization();
+        return enbSchedulerDl_->getUtilization()*100;
     }
     else if(dir == UL)
     {
-        return enbSchedulerUl_->getUtilization();
+        return enbSchedulerUl_->getUtilization()*100;
     }
     else
     {

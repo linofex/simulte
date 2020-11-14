@@ -15,7 +15,7 @@ L2MeasBase::L2MeasBase(){};
 void L2MeasBase::init(std::string name, int period, bool movingAverage)
 {
     name_ = name;
-    values_.resize(period);
+    values_.resize(period, 0.);
     period_ = period;
     size_ = 0;
     index_ = 0;
@@ -31,7 +31,7 @@ L2MeasBase::~L2MeasBase()
 //    histogram_.recordAs(name_.c_str());
     }
 
-void L2MeasBase::addValue(int value){
+void L2MeasBase::addValue(double value){
     sum_ += value;
     if(size_ < period_)
     {
@@ -57,7 +57,7 @@ int L2MeasBase::computeMean()
     if(!movingAverage_ && size_ < period_) // no enough data
         return 0;
     else{
-        int mean = floor((sum_* 100)/size_);
+        int mean = floor(sum_/size_);
         return mean < 0 ? 0: mean; // round could returns -0.00 -> -1
     }
 }
