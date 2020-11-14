@@ -38,8 +38,8 @@ std::string Plmn::getMnc() const
 nlohmann::ordered_json Plmn::toJson() const
 {
     nlohmann::ordered_json val;
-    val["mcc"] = mcc_;
-    val["mnc"] = mnc_;
+    val["mcc"] = getMcc();
+    val["mnc"] = getMnc();
 
     return val;
 

@@ -24,10 +24,14 @@ using namespace inet;
  * TODO
  */
 
+
+
 class UeStatsCollector;
 class LteMacEnb;
 class LtePdcpRrcEnb;
 class PacketFlowManager;
+
+typedef std::map<MacNodeId, UeStatsCollector*> UeStatsCollectorMap;
 
 class EnodeBStatsCollector: public cSimpleModule
 {
@@ -41,7 +45,7 @@ class EnodeBStatsCollector: public cSimpleModule
         LteMacEnb     *mac_;
         PacketFlowManager *flowManager_;
 
-        typedef std::map<MacNodeId, UeStatsCollector*> UeStatsCollectorMap;
+        
         UeStatsCollectorMap ueCollectors_;
 
         // L2 Measures per EnodeB
@@ -110,6 +114,7 @@ class EnodeBStatsCollector: public cSimpleModule
          * @param id relative to a UeStatsCollector
          */
         UeStatsCollector* getUeCollector(MacNodeId id);
+        UeStatsCollectorMap* getCollectorMap();
 
         /*
          * hasUeCollector returns true if the EnodeB

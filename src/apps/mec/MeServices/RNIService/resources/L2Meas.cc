@@ -1,6 +1,7 @@
 #include "../../RNIService/resources/L2Meas.h"
-
+#include "CellUEInfo.h"
 #include "corenetwork/lteCellInfo/LteCellInfo.h"
+
 
 L2Meas::L2Meas() {}
 
@@ -32,27 +33,44 @@ L2Meas::~L2Meas() {}
 nlohmann::ordered_json L2Meas::toJson() const {
 	nlohmann::ordered_json val ;
 	nlohmann::ordered_json l2Meas;
-
+	nlohmann::ordered_json cellArray;
+	nlohmann::ordered_json ueArray;
 
 	if (timestamp_.isValid())
 	{
 //		timestamp_.setSeconds();
 		val["timestamp"] = timestamp_.toJson();
 	}
-	nlohmann::ordered_json jsonArray;
+
+
 
 	std::map<MacCellId, CellInfo>::const_iterator it = eNodeBs_.begin();
 	for(; it != eNodeBs_.end() ; ++it){
-		jsonArray.push_back(it->second.toJson());
+	    UeStatsCollectorMap *ueMap = it->second.getCollectorMap();
+        UeStatsCollectorMap::const_iterator uit = ueMap->begin();
+        UeStatsCollectorMap::const_iterator end = ueMap->end();
+        for(; uit != end ; ++uit)
+        {
+            CellUEInfo cellUeInfo = CellUEInfo(uit->second, it->second.getEcgi());
+            ueArray.push_back(cellUeInfo.toJson());
+        }
+		cellArray.push_back(it->second.toJson());
 	}
 
-	if(jsonArray.size() > 1){
-		val["cellInfo"] = jsonArray;
+	if(cellArray.size() > 1){
+		val["cellInfo"] = cellArray;
     }
-	else if(jsonArray.size() == 1){
-		val["cellInfo"] = jsonArray[0];
+	else if(cellArray.size() == 1){
+		val["cellInfo"] = cellArray[0];
 	}
-	//I have to add all the users
+
+	if(ueArray.size() > 1){
+		val["CellUEInfo"] = ueArray;
+    }
+	else if(ueArray.size() == 1){
+		val["CellUEInfo"] = ueArray[0];
+	}
+
 	
 	l2Meas["L2Meas"] = val;
 	return l2Meas;

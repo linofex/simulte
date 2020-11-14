@@ -1,19 +1,20 @@
-#ifndef _CELLINFO_H_
-#define _CELLINFO_H_
+#ifndef _CELLUEINFO_H_
+#define _CELLUEINFO_H_
+
 
 #include <vector>
 #include <omnetpp.h>
 #include <map>
 #include "../../RNIService/resources/AttributeBase.h"
 #include "../../RNIService/resources/Ecgi.h"
-#include "corenetwork/statsCollector/UeStatsCollector.h"
-#include "corenetwork/statsCollector/EnodeBStatsCollector.h"
+#include "AssociateId.h"
 
+class UeStatsCollector;
 
-
-class CellInfo : public AttributeBase {
+class CellUEInfo : public AttributeBase {
   protected:
-    EnodeBStatsCollector* collector_; // it has the cellCollector and the map <Ipue -> uecollector>
+    UeStatsCollector *ueCollector_;
+    AssociateId associateId_;
     Ecgi ecgi_;
 
   /**
@@ -25,23 +26,24 @@ class CellInfo : public AttributeBase {
 //    UeList* ueList_;
 //    //Ecgi ecgi_;
 
-    nlohmann::ordered_json toJsonCell() const; //should be private?
-  /* data */
+    nlohmann::ordered_json toJsonCell() const;
 
 
 public:
-  CellInfo();
-  CellInfo(::omnetpp::cModule* eNodeB);
-  virtual ~CellInfo();
-
-  UeStatsCollectorMap* getCollectorMap() const;
-  
-  Ecgi getEcgi() const;
+  CellUEInfo();
+  CellUEInfo(UeStatsCollector* ueCollector, const Ecgi& ecgi);
+  virtual ~CellUEInfo();
 
   nlohmann::ordered_json toJson() const override;
 //  nlohmann::ordered_json toJson(std::vector<Ipv4>& uesID) const;
 
 };
 
-#endif // _CELLINFO_H_
 
+
+
+
+
+
+
+#endif

@@ -71,8 +71,6 @@ void EnodeBStatsCollector::initialize(int stage){
 }
 
 
-
-
 void EnodeBStatsCollector::handleMessage(cMessage *msg)
 {
     if(msg->isSelfMessage())
@@ -198,6 +196,11 @@ UeStatsCollector* EnodeBStatsCollector::getUeCollector(MacNodeId id)
     {
        throw cRuntimeError("EnodeBStatsCollector::removeUeCollector - UeStatsCollector not present for UE nodeid[%d]", id);
     }
+}
+
+UeStatsCollectorMap* EnodeBStatsCollector::getCollectorMap()
+{
+    return &ueCollectors_;
 }
 
 bool EnodeBStatsCollector::hasUeCollector(MacNodeId id)

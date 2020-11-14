@@ -20,7 +20,7 @@ Define_Module(UeStatsCollector);
 void UeStatsCollector::initialize(int stage){
     if (stage == INITSTAGE_NETWORK_LAYER_3) // same as lteMacUe, when read the interface entry
     {
-        associateId_.value = "1"; // UE_IPV4_ADDRESS
+        associateId_.type = "1"; // UE_IPV4_ADDRESS
         // find interface entry and use its address
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         // TODO: how do we find the LTE interface?

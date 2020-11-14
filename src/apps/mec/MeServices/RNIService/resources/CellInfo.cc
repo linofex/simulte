@@ -74,6 +74,16 @@ nlohmann::ordered_json CellInfo::toJsonCell() const  {
 	return val;
 }
 
+UeStatsCollectorMap* CellInfo::getCollectorMap() const
+{
+	return collector_->getCollectorMap();
+}
+
+Ecgi CellInfo::getEcgi() const
+{
+	return ecgi_;
+}
+
 
 nlohmann::ordered_json CellInfo::toJson() const {
 	nlohmann::ordered_json val = toJsonCell();

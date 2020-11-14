@@ -86,12 +86,25 @@ class UeStatsCollector: public cSimpleModule
         int get_ul_nongbr_data_volume_ue();
         int get_dl_nongbr_data_volume_ue();
 
+        int get_dl_gbr_delay_ue(){return -1;}
+        int get_ul_gbr_delay_ue(){return -1;}
+        int get_dl_gbr_pdr_ue(){return -1;}
+        int get_ul_gbr_pdr_ue(){return -1;}
+        int get_dl_gbr_throughput_ue(){return -1;}
+        int get_ul_gbr_throughput_ue(){return -1;}
+        int get_dl_gbr_data_volume_ue(){return -1;}
+        int get_ul_gbr_data_volume_ue(){return -1;}
+
 
         void sedHandover(bool value)
         {
             handover_ = value;
         }
 
+        mec::AssociateId getAssociateId() const
+        {
+            return associateId_;
+        }
 
 
     protected:
