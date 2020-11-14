@@ -6,7 +6,7 @@
 
 #include "CellInfo.h"
 #include "common/LteCommon.h"
-// #include "TimeStamp.h"
+#include "TimeStamp.h"
 // #include "CellUeInfo.h"
 #include <vector>
 #include <map>
@@ -35,9 +35,9 @@ class L2Meas : public AttributeBase
 	protected:
 		//better mappa <cellID, Cellingo>
 
-		// TimeStamp timestamp_; // decide where to put the cardinality 0,1 (flag)
+		TimeStamp timestamp_;
 		std::map<MacCellId, CellInfo> eNodeBs_;
-		// std::vector<CellInfo> eNodeBs_;
+
 		
 
 };

@@ -13,27 +13,154 @@
 
 #include "stack/pdcp_rrc/layer/LtePdcpRrc.h"
 #include "stack/mac/layer/LteMacEnb.h"
-
+#include <string>
 
 Define_Module(EnodeBStatsCollector);
 
+EnodeBStatsCollector::~EnodeBStatsCollector()
+{
+    cancelAndDelete(pdcpBytes_);
+    cancelAndDelete(prbUsage_);
+    cancelAndDelete(discardRate_);
+    cancelAndDelete(activeUsers_);
+    cancelAndDelete(packetDelay_);
+
+}
 
 void EnodeBStatsCollector::initialize(int stage){
     if (stage == inet::INITSTAGE_LOCAL)
     {
+
+        ecgi_.cellId = getAncestorPar("macCellId").str();
+        ecgi_.plmn.mcc = getAncestorPar("mcc").str();
+        ecgi_.plmn.mnc = getAncestorPar("mnc").str();
+
+
+
         mac_ = check_and_cast<LteMacEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("mac"));
         pdcp_ = check_and_cast<LtePdcpRrcEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("pdcpRrc"));
         flowManager_ = check_and_cast<PacketFlowManager *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("packetFlowManager"));
 
-        dl_total_prb_usage_cell.init("dl_total_prb_usage_cell", par("ttiPeriodPRBUsage"), par("movingAverage"));
-        ul_total_prb_usage_cell.init("ul_total_prb_usage_cell", par("ttiPeriodPRBUsage"), par("movingAverage"));
-        number_of_active_ue_dl_nongbr_cell.init("number_of_active_ue_dl_nongbr_cell", par("numberOfSamples"), false);
-        number_of_active_ue_ul_nongbr_cell.init("number_of_active_ue_ul_nongbr_cell", par("numberOfSamples"), false);
+        dl_total_prb_usage_cell.init("dl_total_prb_usage_cell", par("prbUsagePeriods"), par("movingAverage"));
+        ul_total_prb_usage_cell.init("ul_total_prb_usage_cell", par("prbUsagePeriods"), par("movingAverage"));
+        number_of_active_ue_dl_nongbr_cell.init("number_of_active_ue_dl_nongbr_cell", par("activeUserPeriods"), false);
+        number_of_active_ue_ul_nongbr_cell.init("number_of_active_ue_ul_nongbr_cell", par("activeUserPeriods"), false);
+        dl_nongbr_pdr_cell.init("dl_nongbr_pdr_cell", par("discardRatePeriods"), false);
+
+        // setup timer
+        prbUsage_ = new cMessage("prbUsage_");
+        activeUsers_ = new cMessage("activeUsers_");
+        discardRate_ = new cMessage("discardRate_");
+        packetDelay_ = new cMessage("packetDelay_");
+        pdcpBytes_ = new cMessage("pdcpBytes_");
+
+        prbUsagePeriod_    = par("prbUsagePeriod");
+        activeUsersPeriod_ = par("activeUserPeriod");
+        discardRatePeriod_ = par("discardRatePeriod");
+        delayPacketPeriod_ = par("delayPacketPeriod");
+        dataVolumePeriod_   = par("dataVolumePeriod");
+
+        // start scheduling the l2 meas
+        scheduleAt(NOW + prbUsagePeriod_, prbUsage_);
+        scheduleAt(NOW + activeUsersPeriod_, activeUsers_);
+        scheduleAt(NOW + discardRatePeriod_, discardRate_);
+        scheduleAt(NOW + delayPacketPeriod_, packetDelay_);
+        scheduleAt(NOW + dataVolumePeriod_, pdcpBytes_);
     }
 }
 
-// UeStatsCollector management methods
 
+
+
+void EnodeBStatsCollector::handleMessage(cMessage *msg)
+{
+    if(msg->isSelfMessage())
+    {
+        if(strcmp(msg->getName(),"prbUsage_") == 0)
+        {
+            add_dl_total_prb_usage_cell();
+            add_ul_total_prb_usage_cell();
+            scheduleAt(NOW + prbUsagePeriod_, prbUsage_);
+        }
+        else if(strcmp(msg->getName(), "activeUsers_") == 0)
+        {
+            add_number_of_active_ue_dl_nongbr_cell();
+            add_number_of_active_ue_ul_nongbr_cell();
+            scheduleAt(NOW + activeUsersPeriod_, activeUsers_);
+
+        }
+        else if(strcmp(msg->getName(), "discardRate_") == 0)
+        {
+            add_dl_nongbr_pdr_cell();
+
+            // add packet discard rate stats for each user
+            add_dl_nongbr_pdr_cell_perUser();
+
+            //reset counters
+            pdcp_->resetPckCounter();
+            flowManager_->resetDiscardCounter();
+            resetDiscardCounterPerUe();
+            scheduleAt(NOW + discardRatePeriod_, discardRate_);
+
+        }
+        else if(strcmp(msg->getName(), "packetDelay_") == 0)
+        {
+            add_dl_nongbr_delay_perUser();
+            //reset counter
+            resetDelayCountrerPerUe();
+            scheduleAt(NOW + delayPacketPeriod_, packetDelay_);
+        }
+        else if(strcmp(msg->getName(), "pdcpBytes_") == 0)
+        {
+            add_ul_nongbr_data_volume_ue_perUser();
+            add_dl_nongbr_data_volume_ue_perUser();
+            resetBytesCountersPerUe();
+            scheduleAt(NOW + dataVolumePeriod_, pdcpBytes_);
+        }
+        else
+        {
+          delete msg;
+        }
+
+    }
+
+}
+
+
+void EnodeBStatsCollector::resetDiscardCounterPerUe()
+{
+    UeStatsCollectorMap::iterator it = ueCollectors_.begin();
+    UeStatsCollectorMap::iterator end = ueCollectors_.end();
+    for(; it != end ; ++it)
+    {
+        pdcp_->resetPckCounterPerUe(it->first);
+        flowManager_->resetDiscardCounterPerUe(it->first);
+    }
+}
+
+void EnodeBStatsCollector::resetDelayCountrerPerUe()
+{
+    UeStatsCollectorMap::iterator it = ueCollectors_.begin();
+    UeStatsCollectorMap::iterator end = ueCollectors_.end();
+    for(; it != end ; ++it)
+    {
+        flowManager_->resetDelayCounterPerUe(it->first);
+    }
+}
+
+void EnodeBStatsCollector::resetBytesCountersPerUe()
+{
+    UeStatsCollectorMap::iterator it = ueCollectors_.begin();
+    UeStatsCollectorMap::iterator end = ueCollectors_.end();
+    for(; it != end ; ++it)
+    {
+        pdcp_->resetPdcpBytesDlPerUe(it->first);
+        pdcp_->resetPdcpBytesUlPerUe(it->first);
+    }
+}
+
+
+// UeStatsCollector management methods
 void EnodeBStatsCollector::addUeCollector(MacNodeId id, UeStatsCollector* ueCollector)
 {
     if(ueCollectors_.find(id) == ueCollectors_.end())
@@ -45,7 +172,6 @@ void EnodeBStatsCollector::addUeCollector(MacNodeId id, UeStatsCollector* ueColl
         throw cRuntimeError("EnodeBStatsCollector::addUeCollector - UeStatsCollector already present for UE nodeid[%d]", id);
     }
 }
-
 
 void EnodeBStatsCollector::removeUeCollector(MacNodeId id)
 {
@@ -72,7 +198,6 @@ UeStatsCollector* EnodeBStatsCollector::getUeCollector(MacNodeId id)
        throw cRuntimeError("EnodeBStatsCollector::removeUeCollector - UeStatsCollector not present for UE nodeid[%d]", id);
     }
 }
-
 
 bool EnodeBStatsCollector::hasUeCollector(MacNodeId id)
 {
@@ -106,6 +231,8 @@ void EnodeBStatsCollector::add_dl_nongbr_pdr_cell()
     double discard = pdcp_->getDiscardRateStats();
     dl_nongbr_pdr_cell.addValue(discard);
 }
+
+void EnodeBStatsCollector::add_ul_nongbr_pdr_cell(){}
 
 // for each user save stats
 //TODO handover management
@@ -159,9 +286,6 @@ void EnodeBStatsCollector::add_dl_nongbr_data_volume_ue_perUser()
 }
 
 
-void EnodeBStatsCollector::add_ul_nongbr_pdr_cell(){}
-
-
 int EnodeBStatsCollector::get_ul_nongbr_pdr_cell(){}
 
 
@@ -188,7 +312,6 @@ int EnodeBStatsCollector::get_ul_nongbr_prb_usage_cell() {
     return ul_total_prb_usage_cell.getMean();
 }
 
-
 int EnodeBStatsCollector::get_number_of_active_ue_dl_nongbr_cell(){
     return number_of_active_ue_dl_nongbr_cell.getMean();
 }
@@ -197,4 +320,6 @@ int EnodeBStatsCollector::get_number_of_active_ue_ul_nongbr_cell(){
     return number_of_active_ue_ul_nongbr_cell.getMean();
 }
 
-
+mec::Ecgi& EnodeBStatsCollector::getEcgi(){
+    return ecgi_;
+}

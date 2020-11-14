@@ -3,7 +3,7 @@
 
 #include "AttributeBase.h"
 
-// #include "Ecgi.h"
+#include "Ecgi.h"
 //#include "CellUeInfo.h"
 #include <vector>
 #include <omnetpp.h>
@@ -14,6 +14,7 @@ class EnodeBStatsCollector;
 class CellInfo : public AttributeBase {
   protected:
     EnodeBStatsCollector* collector_; // it has the cellCollector and the map <Ipue -> uecollector>
+    Ecgi ecgi_;
 
   /**
    * 

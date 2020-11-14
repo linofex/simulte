@@ -13,8 +13,11 @@
 
 #include <omnetpp.h>
 #include "common/LteCommon.h"
+#include "common/MecCommon.h"
 #include "corenetwork/statsCollector/L2Measures/L2MeasBase.h"
 #include <string>
+#include "corenetwork/statsCollector/UeStatsCollector.h"
+
 
 
 using namespace inet;
@@ -30,6 +33,9 @@ class LteMacUe;
 class UeStatsCollector: public cSimpleModule
 {
     private:
+        // Used by the RNI service
+        mec::AssociateId associateId_;
+
         // LTE Nic layers
         LtePdcpRrcUe *pdcp_;
         LteMacUe     *mac_;

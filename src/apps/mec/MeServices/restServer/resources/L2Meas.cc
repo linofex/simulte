@@ -31,8 +31,11 @@ L2Meas::~L2Meas() {}
 nlohmann::json L2Meas::toJson() const {
 	nlohmann::json val = nlohmann::json::object();
 
-//	val["timestamp"] = timestamp_.toJson();
-
+	if (timestamp_.isValid())
+	{
+//		timestamp_.setSeconds();
+		val["timestamp"] = timestamp_.toJson();
+	}
 	nlohmann::json jsonArray;
 
 	std::map<MacCellId, CellInfo>::const_iterator it = eNodeBs_.begin();

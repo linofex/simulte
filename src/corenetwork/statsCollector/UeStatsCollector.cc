@@ -10,18 +10,26 @@
 #include "corenetwork/statsCollector/UeStatsCollector.h"
 #include "stack/pdcp_rrc/layer/LtePdcpRrc.h"
 #include "stack/mac/layer/LteMacUe.h"
+#include "inet/networklayer/ipv4/IPv4InterfaceData.h"
+#include "inet/common/ModuleAccess.h"
 
-
-
-using namespace std;
 
 Define_Module(UeStatsCollector);
 
 
 void UeStatsCollector::initialize(int stage){
-    if (stage == inet::INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_NETWORK_LAYER_3) // same as lteMacUe, when read the interface entry
     {
-
+        associateId_.value = "1"; // UE_IPV4_ADDRESS
+        // find interface entry and use its address
+        IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        // TODO: how do we find the LTE interface?
+        InterfaceEntry * interfaceEntry = interfaceTable->getInterfaceByName("wlan");
+//
+        IPv4InterfaceData* ipv4if = interfaceEntry->ipv4Data();
+        if(ipv4if == nullptr)
+            throw cRuntimeError("UeStatsCollector::initialize - no IPv4 interface data");
+        associateId_.value = ipv4if->getIPAddress().str();
         mac_ = check_and_cast<LteMacUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("mac"));
         pdcp_ = check_and_cast<LtePdcpRrcUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("pdcpRrc"));
 

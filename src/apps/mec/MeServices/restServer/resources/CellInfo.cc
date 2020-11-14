@@ -5,6 +5,7 @@ CellInfo::CellInfo(){}
 
 CellInfo::CellInfo(::omnetpp::cModule* eNodeB){
   collector_ = ::omnetpp::check_and_cast<EnodeBStatsCollector*>(eNodeB->getSubmodule("collector"));
+  ecgi_.setEcgi(collector_->getEcgi());
 //  ueList_ =    eNodeB->getUeListCollectors();
 }
 
@@ -13,7 +14,8 @@ CellInfo::~CellInfo(){}
 
 nlohmann::json CellInfo::toJsonCell() const  {
     nlohmann::json val = nlohmann::json::object();
-	//val["ecgi"] = ecgi_.getJson();
+	val["ecgi"] = ecgi_.toJson();
+
 	int value;
 	value = collector_->get_dl_gbr_prb_usage_cell();
 	if(value != -1) val["dl_gbr_prb_usage_cell"] = value;

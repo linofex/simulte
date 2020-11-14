@@ -13,6 +13,7 @@
 
 #include <omnetpp.h>
 #include "common/LteCommon.h"
+#include "common/MecCommon.h"
 #include <map>
 #include "corenetwork/statsCollector/L2Measures/L2MeasBase.h"
 
@@ -31,6 +32,10 @@ class PacketFlowManager;
 class EnodeBStatsCollector: public cSimpleModule
 {
     private:
+
+        // used by the RNI service
+        mec::Ecgi ecgi_;
+
         // LTE Nic layers
         LtePdcpRrcEnb *pdcp_;
         LteMacEnb     *mac_;
@@ -55,13 +60,27 @@ class EnodeBStatsCollector: public cSimpleModule
          * - # active UEs
          * - Discard rate
          * - Packet delay
+         * - PDCP bytes
          */
 
+        cMessage *prbUsage_;
+        cMessage *activeUsers_;
+        cMessage *discardRate_;
+        cMessage *packetDelay_;
+        cMessage *pdcpBytes_;
 
+        double prbUsagePeriod_;
+        double activeUsersPeriod_;
+        double discardRatePeriod_;
+        double delayPacketPeriod_;
+        double dataVolumePeriod_;
 
     public:
         EnodeBStatsCollector(){}
-        virtual ~EnodeBStatsCollector(){}
+        virtual ~EnodeBStatsCollector();
+
+        mec::Ecgi& getEcgi();
+
 
         // UeStatsCollector management methods
 
@@ -135,15 +154,17 @@ class EnodeBStatsCollector: public cSimpleModule
         int get_ul_gbr_pdr_cell(){return -1;}
 
 
+        void resetDiscardCounterPerUe();
+        void resetDelayCountrerPerUe();
+        void resetBytesCountersPerUe();
+
 
     protected:
         virtual void initialize(int stages);
 
         virtual int numInitStages() const { return INITSTAGE_LAST; }
 
-        virtual void handleMessage(cMessage *msg)
-        {
-        }
+        virtual void handleMessage(cMessage *msg);
 
 };
 

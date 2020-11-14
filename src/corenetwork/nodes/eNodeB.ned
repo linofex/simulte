@@ -64,6 +64,10 @@ module eNodeB
         //@author Alessandro Noferi
         //use it in case of emulation
         string meHostExtConn = default("192.168.1.0/24"); // Network Address of the external MeApp IP/mask
+        //Plmn params
+        string mcc = default("001");
+        string mnc = default("01");
+        
 
     gates:
         inout ppp;                // connection to the Core Network

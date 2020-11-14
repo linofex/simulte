@@ -20,6 +20,8 @@ import inet.transportlayer.tcp.TCP;
 import inet.transportlayer.udp.UDP;
 import lte.stack.ILteNic;
 
+import lte.corenetwork.statsCollector.UeStatsCollector;
+
 // 
 // User Equipment Module
 //
@@ -87,6 +89,9 @@ module Ue
         networkLayer: <networkLayerType> like INetworkLayer {
             parameters:
                 @display("p=250,258");
+        }
+        ueCollector:UeStatsCollector{
+            @display("p=50,225;is=s");
         }
     connections allowunconnected:
         //# 

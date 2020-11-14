@@ -18,6 +18,8 @@ package lte.corenetwork.statsCollector;
 simple UeStatsCollector 
 {
     parameters:
+        string interfaceTableModule;
+        
         
         // time periods for measurements 
         int ttiPeriodPRBUsage = default(5);

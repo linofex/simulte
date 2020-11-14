@@ -5,6 +5,7 @@
 #include "json.hpp"
 #include <ctime>
 #include <string>
+#include "common/LteCommon.h"
 
 
 class AttributeBase 

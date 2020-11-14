@@ -18,16 +18,22 @@ package lte.corenetwork.statsCollector;
 simple EnodeBStatsCollector 
 {
     parameters:
-        // time periods for measurements 
-        int ttiPeriodPRBUsage = default(5);
-        double samplingPeriod @unit(s) = default(0.05s);
+
+		bool movingAverage = default(false);
         
-        double dataVolumePeriod @unit(s) = default(0.5s);
-        int dataVolumePeriods = default(10);
-        
-        int numberOfSamples = default(20);
-        bool movingAverage = default(false);
-         
-        
+        // used to calculate l2meas as averages 
+        int prbUsagePeriods = default(5);
+        int dataVolumePeriods = default(2);
+        int activeUserPeriods = default(10); //10*100ms = 1s
+        int delayPacketPeriods = default(2); //used by the ue collector, remove 
+        int discardRatePeriods = default(2);
+
+		// period duration for each l2 meas
+		double prbUsagePeriod  @unit(ms)   = default(1ms); // TTI period
+        double activeUserPeriod @unit(ms)  = default(100ms);
+        double dataVolumePeriod @unit(s)   = default(60s);
+        double delayPacketPeriod @unit(s)  = default(0.5s);
+        double discardRatePeriod @unit(s) = default(60s);
+
         @display("i=block/cogwheel");
 }
