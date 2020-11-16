@@ -16,7 +16,7 @@
 #include "common/MecCommon.h"
 #include <map>
 #include "corenetwork/statsCollector/L2Measures/L2MeasBase.h"
-
+#include "corenetwork/lteCellInfo/LteCellInfo.h"
 using namespace inet;
 
 /**
@@ -30,6 +30,7 @@ class UeStatsCollector;
 class LteMacEnb;
 class LtePdcpRrcEnb;
 class PacketFlowManager;
+class LteCellInfo;
 
 typedef std::map<MacNodeId, UeStatsCollector*> UeStatsCollectorMap;
 
@@ -45,6 +46,7 @@ class EnodeBStatsCollector: public cSimpleModule
         LteMacEnb     *mac_;
         PacketFlowManager *flowManager_;
 
+        LteCellInfo *cellInfo_;
         
         UeStatsCollectorMap ueCollectors_;
 
@@ -84,7 +86,9 @@ class EnodeBStatsCollector: public cSimpleModule
         EnodeBStatsCollector(){}
         virtual ~EnodeBStatsCollector();
 
-        mec::Ecgi& getEcgi();
+        const mec::Ecgi& getEcgi() const;
+        MacCellId getCellId() const;
+
 
 
         // UeStatsCollector management methods

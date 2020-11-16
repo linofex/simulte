@@ -28,19 +28,18 @@ EnodeBStatsCollector::~EnodeBStatsCollector()
 }
 
 void EnodeBStatsCollector::initialize(int stage){
-    if (stage == inet::INITSTAGE_LOCAL)
+    if (stage == 4)//inet::INITSTAGE_LOCAL)
     {
 
-        ecgi_.cellId = getAncestorPar("macCellId").str();
-        ecgi_.plmn.mcc = getAncestorPar("mcc").str();
-        ecgi_.plmn.mnc = getAncestorPar("mnc").str();
-
-
+        ecgi_.plmn.mcc = getAncestorPar("mcc").stdstringValue();
+        ecgi_.plmn.mnc = getAncestorPar("mnc").stdstringValue();
 
         mac_ = check_and_cast<LteMacEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("mac"));
         pdcp_ = check_and_cast<LtePdcpRrcEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("pdcpRrc"));
         flowManager_ = check_and_cast<PacketFlowManager *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("packetFlowManager"));
 
+        cellInfo_ = check_and_cast<LteCellInfo *>(getParentModule()->getSubmodule("cellInfo"));
+        ecgi_.cellId = std::to_string(cellInfo_->getMacCellId());
         dl_total_prb_usage_cell.init("dl_total_prb_usage_cell", par("prbUsagePeriods"), par("movingAverage"));
         ul_total_prb_usage_cell.init("ul_total_prb_usage_cell", par("prbUsagePeriods"), par("movingAverage"));
         number_of_active_ue_dl_nongbr_cell.init("number_of_active_ue_dl_nongbr_cell", par("activeUserPeriods"), false);
@@ -323,6 +322,12 @@ int EnodeBStatsCollector::get_number_of_active_ue_ul_nongbr_cell(){
     return number_of_active_ue_ul_nongbr_cell.getMean();
 }
 
-mec::Ecgi& EnodeBStatsCollector::getEcgi(){
+const mec::Ecgi& EnodeBStatsCollector::getEcgi() const
+{
     return ecgi_;
+}
+
+MacCellId EnodeBStatsCollector::getCellId()const
+{
+    return cellInfo_->getMacCellId();
 }

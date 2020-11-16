@@ -43,8 +43,8 @@ Define_Module(RNIService);
 
 
 RNIService::RNIService():L2MeasResource_(){
-    baseUriQueries_ = "example/rni/v2/queries";
-    baseUriSubscriptions_ = "example/rni/v2/subscriptions";
+    baseUriQueries_ = "/example/rni/v2/queries";
+    baseUriSubscriptions_ = "/example/rni/v2/subscriptions";
     supportedQueryParams_.insert("cell_id");
     supportedQueryParams_.insert("ue_ipv4_address");
     // supportedQueryParams_s_.insert("ue_ipv6_address");
@@ -71,27 +71,28 @@ void RNIService::handleMessage(cMessage *msg)
 }
 
 void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket){
+
     // check it is a GET for a query or a subscription
     if(uri.rfind(baseUriQueries_, 0) == 0) //queries
     {
         //look for qurery parameters
         std::vector<std::string> splittedUri = utils::splitString(uri, "?");
         if(splittedUri.size() == 2) // uri has parameters eg. uriPath?param=value&param1=value,value
-        { 
+        {
             std::vector<std::string> queryParameters = utils::splitString(splittedUri[1], "&");
             /*
             * supported paramater:
             * - cell_id
-            * - ue_ipv4_address 
+            * - ue_ipv4_address
             * - ue_ipv6_address // not implemented yet
             */
 
             std::vector<MacNodeId> cellIds;
             std::vector<MacNodeId> ues;
-            
+
             typedef std::map<std::string, std::vector<std::string>> queryMap;
             queryMap queryParamsMap; // e.g cell_id -> [0, 1]
-            
+
             std::vector<std::string>::iterator it  = queryParameters.begin();
             std::vector<std::string>::iterator end = queryParameters.end();
             std::vector<std::string> params;
@@ -105,7 +106,7 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
                         Http::send400Response(socket);
                         return;
                     }
-                    splittedParams = utils::splitString(*it, ",");
+                    splittedParams = utils::splitString(params[1], ",");
                     std::vector<std::string>::iterator pit  = splittedParams.begin();
                     std::vector<std::string>::iterator pend = splittedParams.end();
                     for(; pit != pend; ++pit){
@@ -120,7 +121,7 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
                         Http::send400Response(socket);
                         return;
                     }
-                    splittedParams = utils::splitString(*it, ",");
+                    splittedParams = utils::splitString(params[1], ",");
                     std::vector<std::string>::iterator pit  = splittedParams.begin();
                     std::vector<std::string>::iterator pend = splittedParams.end();
                     for(; pit != pend; ++pit){
@@ -144,11 +145,11 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
             }
             else if(ues.empty() && !cellIds.empty())
             {
-                Http::send200Response(socket, L2MeasResource_.toJson(cellIds).dump(2).c_str());
+                Http::send200Response(socket, L2MeasResource_.toJsonCell(cellIds).dump(2).c_str());
             }
             else if(!ues.empty() && cellIds.empty())
            {
-               Http::send200Response(socket, L2MeasResource_.toJson(ues).dump(2).c_str());
+               Http::send200Response(socket, L2MeasResource_.toJsonUe(ues).dump(2).c_str());
            }
            else
            {
@@ -156,22 +157,24 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
            }
 
         }
-        else if (splittedUri.size() == 1 ) //no query params
-            Http::send200Response(socket, L2MeasResource_.toJson().dump(2).c_str());
+        else if (splittedUri.size() == 1 ){ //no query params
+            Http::send200Response(socket,L2MeasResource_.toJson().dump(2).c_str());
+            return;
+        }
         else //bad uri
         {
             Http::send404Response(socket);
         }
-        
     }
     else if (uri.rfind(baseUriSubscriptions_, 0) == 0) //subs
     {
-        // TODO implement subscription?
-        Http::send404Response(socket); 
-    }
-    else // not found
-    {
-        Http::send404Response(socket);
+//        // TODO implement subscription?
+//        Http::send404Response(socket);
+//    }
+//    else // not found
+//    {
+//        Http::send404Response(socket);
+//    }
     }
 }
 

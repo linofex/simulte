@@ -15,6 +15,7 @@ HTTPResponsePacket::HTTPResponsePacket(const responseCode res, const char *name,
     setStatus(res);
     setContentType("application/json");
     setConnection("keep-alive");
+    setBody("\r\n");
     setPayload("");
 
 }
