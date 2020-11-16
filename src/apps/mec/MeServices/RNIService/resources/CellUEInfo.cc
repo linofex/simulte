@@ -12,6 +12,13 @@ associateId_(), ecgi_(ecgi)
     associateId_.setAssociateId(ueCollector->getAssociateId());
 }
 
+CellUEInfo::CellUEInfo(UeStatsCollector* ueCollector, const mec::Ecgi& ecgi):
+associateId_(), ecgi_(ecgi)
+{
+    ueCollector_ = ueCollector;
+    associateId_.setAssociateId(ueCollector->getAssociateId());
+}
+
 CellUEInfo::~CellUEInfo(){}
 
 nlohmann::ordered_json CellUEInfo::toJson() const

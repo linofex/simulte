@@ -6,6 +6,7 @@
 #include <omnetpp.h>
 #include <map>
 #include "../../RNIService/resources/AttributeBase.h"
+#include "common/MecCommon.h"
 #include "../../RNIService/resources/Ecgi.h"
 #include "AssociateId.h"
 
@@ -32,6 +33,8 @@ class CellUEInfo : public AttributeBase {
 public:
   CellUEInfo();
   CellUEInfo(UeStatsCollector* ueCollector, const Ecgi& ecgi);
+  CellUEInfo(UeStatsCollector* ueCollector, const mec::Ecgi& ecgi);
+
   virtual ~CellUEInfo();
 
   nlohmann::ordered_json toJson() const override;

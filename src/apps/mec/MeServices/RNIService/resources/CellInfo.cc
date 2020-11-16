@@ -4,8 +4,8 @@
 
 CellInfo::CellInfo(){}
 
-CellInfo::CellInfo(::omnetpp::cModule* eNodeB){
-  collector_ = ::omnetpp::check_and_cast<EnodeBStatsCollector*>(eNodeB->getSubmodule("collector"));
+CellInfo::CellInfo(EnodeBStatsCollector* eNodeB){
+  collector_ = eNodeB;
   ecgi_.setEcgi(collector_->getEcgi());
 //  ueList_ =    eNodeB->getUeListCollectors();
 }

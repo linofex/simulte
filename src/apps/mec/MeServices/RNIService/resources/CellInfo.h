@@ -31,7 +31,7 @@ class CellInfo : public AttributeBase {
 
 public:
   CellInfo();
-  CellInfo(::omnetpp::cModule* eNodeB);
+  CellInfo(EnodeBStatsCollector* eNodeB);
   virtual ~CellInfo();
 
   UeStatsCollectorMap* getCollectorMap() const;

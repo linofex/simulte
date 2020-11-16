@@ -16,6 +16,12 @@ Ecgi::Ecgi(std::string& cellId, Plmn& plmn):plmn_(plmn)
     setCellId(cellId);
 }
 
+Ecgi::Ecgi(const mec::Ecgi ecgi)
+{
+  setEcgi(ecgi);
+}
+
+
 Ecgi::~Ecgi(){}
 
 void Ecgi::setCellId(const std::string& cellId)

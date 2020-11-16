@@ -8,6 +8,8 @@
 #include "../../RNIService/resources/CellInfo.h"
 #include "../../RNIService/resources/TimeStamp.h"
 
+class EnodeBStatsCollector;
+
 class L2Meas : public AttributeBase
 {
 	public:
@@ -24,8 +26,8 @@ class L2Meas : public AttributeBase
 		void addEnodeB(std::vector<cModule*>& eNodeBs);
 		void addEnodeB(cModule* eNodeB);
 
-		nlohmann::ordered_json toJson(std::vector<MacNodeId>& cellsID) const;
-		nlohmann::ordered_json toJson(std::vector<std::string>& uesID) const;
+		nlohmann::ordered_json toJsonCell(std::vector<MacCellId>& cellsID) const;
+		nlohmann::ordered_json toJsonUe(std::vector<MacNodeId>& uesID) const;
 		nlohmann::ordered_json toJson(std::vector<MacNodeId>& cellsID, std::vector<MacNodeId>& uesID) const;
 		
 
@@ -33,7 +35,7 @@ class L2Meas : public AttributeBase
 		//better mappa <cellID, Cellingo>
 
 		TimeStamp timestamp_;
-		std::map<MacCellId, CellInfo> eNodeBs_;
+		std::map<MacCellId, EnodeBStatsCollector*> eNodeBs_;
 
 		
 

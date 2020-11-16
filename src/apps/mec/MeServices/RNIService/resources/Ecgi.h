@@ -17,6 +17,8 @@ class Ecgi : public AttributeBase {
 public:
   Ecgi();
   Ecgi(std::string& cellId);
+  Ecgi(const mec::Ecgi ecgi);
+
   Ecgi(std::string& cellId, Plmn& plmn);
   
   virtual ~Ecgi();
