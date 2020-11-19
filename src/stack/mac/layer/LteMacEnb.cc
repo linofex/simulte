@@ -792,6 +792,10 @@ bool LteMacEnb::bufferizePacket(cPacket* pkt)
             }
 
             EV << "LteMacBuffers : Dropped packet: queue" << cid << " is full\n";
+            // @author Alessandro Noferi
+            // discard the RLC
+            unsigned int rlcSno = check_and_cast<LteRlcUmDataPdu *>(pkt)->getPduSequenceNumber();
+            flowManager_->discardRlcPdu(lteInfo->getLcid(),rlcSno);
             delete pkt;
             return false;
         }

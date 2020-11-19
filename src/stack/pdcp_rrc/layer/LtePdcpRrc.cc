@@ -137,6 +137,7 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
             lteInfo->getSrcPort(), lteInfo->getDstPort(), mylcid);
 
         // create lcid in packet flow manager
+        //check if it is the UE the node id i src
         packetFlowManager_->initLcid(mylcid, lteInfo->getDestId());
     }
 

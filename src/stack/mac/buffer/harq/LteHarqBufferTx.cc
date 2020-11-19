@@ -188,6 +188,10 @@ void LteHarqBufferTx::receiveHarqFeedback(LteHarqFeedback *fbpkt)
     long fbPduId = fbpkt->getFbMacPduId(); // id of the pdu that should receive this fb
     long unitPduId = (*processes_)[acid]->getPduId(cw);
 
+    EV << "LteHarqBufferTx::receiveHarqFeedback - " << (result ? "HARQACK": "HARQNACK") <<" received for mac pdu: " << fbPduId << " on cw: " << cw << endl;
+
+
+
     // After handover or a D2D mode switch, the process nay have been dropped. The received feedback must be ignored.
     if ((*processes_)[acid]->isDropped())
     {
@@ -213,10 +217,10 @@ void LteHarqBufferTx::receiveHarqFeedback(LteHarqFeedback *fbpkt)
     bool reset = (*processes_)[acid]->pduFeedback(harqResult, cw);
     if (reset)
     numEmptyProc_++;
-    if(macOwner_->getNodeType() == ENODEB && reset  == true)
+    if(macOwner_->getNodeType() == ENODEB && result  == true)
         {
             UserControlInfo* fb = check_and_cast<UserControlInfo *>(fbpkt->getControlInfo());
-            macOwner_->harqAckToFlowManager(fb->getLcid(), acid);
+            macOwner_->harqAckToFlowManager(fb->getLcid(), fbPduId);
         }
 
 

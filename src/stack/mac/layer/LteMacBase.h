@@ -168,6 +168,9 @@ class LteMacBase : public cSimpleModule
         take(obj);
     }
 
+
+    // @author Alessandro Noferi
+    void discardMacPdu(LogicalCid lcid, unsigned int macPduId);
     void harqAckToFlowManager(LogicalCid lcid, unsigned int macPdu);
 
     /*

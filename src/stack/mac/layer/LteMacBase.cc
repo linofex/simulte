@@ -375,10 +375,15 @@ void LteMacBase::handleMessage(cMessage* msg)
     return;
 }
 
-
+// @author Alessandro Noferi
 void LteMacBase::harqAckToFlowManager(LogicalCid lcid, unsigned int macPdu)
 {
     flowManager_->macPduArrived(lcid, macPdu);
+}
+
+void LteMacBase::discardMacPdu(LogicalCid lcid, unsigned int macPduId)
+{
+    flowManager_->discardMacPdu(lcid, macPduId);
 }
 
 void LteMacBase::finish()

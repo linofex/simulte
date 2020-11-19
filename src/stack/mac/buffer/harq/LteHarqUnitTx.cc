@@ -137,6 +137,11 @@ bool LteHarqUnitTx::pduFeedback(HarqAcknowledgment a)
             EV << NOW << " LteHarqUnitTx::pduFeedback H-ARQ process  " << (unsigned int)acid_ << " Codeword " << cw_ << " PDU "
                << pdu_->getId() << " discarded "
             "(max retransmissions reached) : " << maxHarqRtx_ << endl;
+
+
+            // @author Alessandro Noferi
+            // discard macPduId
+            macOwner_->discardMacPdu(lteInfo->getLcid(), pdu_->getId());
             resetUnit();
             reset = true;
         }

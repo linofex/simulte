@@ -16,6 +16,18 @@
 
 typedef std::set<unsigned int> SequenceNumberSet;
 
+
+
+struct pdcpStatus
+{
+    bool hasArrivedAll;
+    bool discardedAtRlc;
+    bool discardedAtMac;
+    bool sentOverTheAir;
+    simtime_t entryTime;
+
+};
+
 /*
  * This module is responsible for keep trace of all PDCP SDUs.
  * A PDCP SDU passes the following state while it is going down
@@ -38,6 +50,7 @@ typedef std::set<unsigned int> SequenceNumberSet;
  *    corresponding seq number.  
  */
 
+class LteRlcUmDataPdu;
 
 class PacketFlowManager : public cSimpleModule
 {
@@ -47,8 +60,7 @@ class PacketFlowManager : public cSimpleModule
      */
     typedef struct {
         MacNodeId nodeId_; // dest node of this lcid
-        std::map<unsigned int, bool> allPdcdSduToRlc_; // a pdcp pdu can be fragmented in many rlc that could be sent and ack in different time (this prevent early remove on ack)
-        std::map<unsigned int, simtime_t> pdcpSduEntryTime_; // for each pdcp save the time when it enter the pdcp layer
+        std::map<unsigned int, pdcpStatus> pdcpStatus_; // a pdcp pdu can be fragmented in many rlc that could be sent and ack in different time (this prevent early remove on ack)
         std::map<unsigned int, SequenceNumberSet> rlcPdusPerSdu_;  // for each RLC SDU, stores the RLC PDUs where the former was fragmented
         std::map<unsigned int, SequenceNumberSet> rlcPdusPerSduDiscard_;  // for each RLC SDU, stores the RLC PDUs where the former was fragmented used for discarding
         std::map<unsigned int, SequenceNumberSet> rlcSdusPerPdu_;  // for each RLC PDU, stores the included RLC SDUs
@@ -73,8 +85,17 @@ class PacketFlowManager : public cSimpleModule
     unsigned int nextRlcSno_;
 
     std::map<MacNodeId,cOutVector> times_;
+    //debug var to be deleted
+    cOutVector ee;
+    cOutVector ii;
+    cOutVector ww;
 
-  protected:
+
+    std::set<unsigned int> myset;
+
+    void initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, simtime_t& arrivalTime);
+
+    protected:
 
     virtual int numInitStages() const { return 2; }
     virtual void initialize(int stage);
@@ -109,6 +130,9 @@ class PacketFlowManager : public cSimpleModule
     */
     void insertRlcPdu(LogicalCid lcid, unsigned int rlcSno, SequenceNumberSet& pdcpSnoSet, bool lastIsFrag);
     
+
+    void insertRlcPdu(LogicalCid lcid, LteRlcUmDataPdu* rlcPdu);
+
     /* 
     * This method insert a new macPduId Omnet id and the corresponding rlc pdus inside it
     * @param lcid 
@@ -126,12 +150,22 @@ class PacketFlowManager : public cSimpleModule
     void macPduArrived(LogicalCid lcid, unsigned int macPduId);
 
     /*
+    * This method is called after maxHarqTrasmission of a MAC PDU ID has been
+    * reached. The PDCP, RLC, sno referred to the macPdu are cleared from the
+    * data structures
+    * @param lcid
+    * @param macPduId Omnet id of the mac pdu to be discarded
+    */
+    void discardMacPdu(LogicalCid lcid, unsigned int macPduId);
+
+    /*
      * This method is used to take trace of all discarded RLC pdus. If all rlc pdus
      * that compose a PCDP SDU have been discarded the discarded counters are updated
      * @param lcid
-     * @parm rlcSno sequence number of the rlc pdu
+     * @param rlcSno sequence number of the rlc pdu
+     * @param fromMac used when this method is called by discardMacPdu
      */
-    void discardRlcPdu(LogicalCid lcid, unsigned int rlcSno);
+    void discardRlcPdu(LogicalCid lcid, unsigned int rlcSno, bool fromMac = false);
 
     void insertHarqProcess(LogicalCid lcid, unsigned int harqProcId, unsigned int macPduId);
 
@@ -160,6 +194,7 @@ class PacketFlowManager : public cSimpleModule
 
   public:
         virtual ~PacketFlowManager();
+        virtual void finish();
 
 };
 #endif
