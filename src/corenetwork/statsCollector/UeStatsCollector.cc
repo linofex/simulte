@@ -12,7 +12,7 @@
 #include "stack/mac/layer/LteMacUe.h"
 #include "inet/networklayer/ipv4/IPv4InterfaceData.h"
 #include "inet/common/ModuleAccess.h"
-
+#include "stack/packetFlowManager/PacketFlowManagerUe.h"
 
 Define_Module(UeStatsCollector);
 
@@ -32,7 +32,7 @@ void UeStatsCollector::initialize(int stage){
         associateId_.value = ipv4if->getIPAddress().str();
         mac_ = check_and_cast<LteMacUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("mac"));
         pdcp_ = check_and_cast<LtePdcpRrcUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("pdcpRrc"));
-
+        flowManager_ = check_and_cast<PacketFlowManagerUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("packetFlowManager"));
         handover_ = false;
 
         // packet delay
@@ -59,9 +59,9 @@ void UeStatsCollector::add_dl_nongbr_delay_ue(double value)
     dl_nongbr_delay_ue.addValue(value);
 }
 
-void UeStatsCollector::add_ul_nongbr_pdr_ue()
+void UeStatsCollector::add_ul_nongbr_pdr_ue(double value)
 {
-
+    ul_nongbr_pdr_ue.addValue(value);
 }
 // called by the eNodeBCollector
 void UeStatsCollector::add_dl_nongbr_pdr_ue(double value)
@@ -70,11 +70,11 @@ void UeStatsCollector::add_dl_nongbr_pdr_ue(double value)
 }
 
 // called by the eNodeBCollector
-void UeStatsCollector::add_ul_nongbr_throughput_ue(int value)
+void UeStatsCollector::add_ul_nongbr_throughput_ue(double value)
 {
     ul_nongbr_throughput_ue.addValue(value);
 }
-void UeStatsCollector::add_dl_nongbr_throughput_ue(int value)
+void UeStatsCollector::add_dl_nongbr_throughput_ue(double value)
 {
     dl_nongbr_throughput_ue.addValue(value);
 }
@@ -122,4 +122,13 @@ int UeStatsCollector::get_ul_nongbr_data_volume_ue()
 int UeStatsCollector::get_dl_nongbr_data_volume_ue()
 {
     return dl_nongbr_data_volume_ue.getMean();
+}
+
+DiscardedPkts UeStatsCollector::getULDiscardedPkt()
+{
+    DiscardedPkts pair;
+    pair = flowManager_->getDiscardedPkt();
+    double rate = pair.discarded * 1000000 / pair.total;
+    add_ul_nongbr_pdr_ue(rate);
+    return pair;
 }

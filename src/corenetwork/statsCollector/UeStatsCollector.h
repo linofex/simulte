@@ -29,16 +29,21 @@ using namespace inet;
 
 class LtePdcpRrcUe;
 class LteMacUe;
-
+class PacketFlowManagerUe;
 class UeStatsCollector: public cSimpleModule
 {
     private:
+
+
+
+
         // Used by the RNI service
         mec::AssociateId associateId_;
 
         // LTE Nic layers
         LtePdcpRrcUe *pdcp_;
         LteMacUe     *mac_;
+        PacketFlowManagerUe *flowManager_;
 
         // packet delay
         L2MeasBase ul_nongbr_delay_ue;
@@ -64,11 +69,12 @@ class UeStatsCollector: public cSimpleModule
         void add_ul_nongbr_delay_ue();
         void add_dl_nongbr_delay_ue(double value);// called by the eNodeBCollector
 
-        void add_ul_nongbr_pdr_ue();
+        void add_ul_nongbr_pdr_ue(double value); // called by this module, but from a method
         void add_dl_nongbr_pdr_ue(double value); // called by the eNodeBCollector
+        DiscardedPkts getULDiscardedPkt();
 
-        void add_ul_nongbr_throughput_ue(int value);
-        void add_dl_nongbr_throughput_ue(int value);
+        void add_ul_nongbr_throughput_ue(double value);
+        void add_dl_nongbr_throughput_ue(double value);
 
         void add_ul_nongbr_data_volume_ue(unsigned int value); // called by the eNodeBCollector
         void add_dl_nongbr_data_volume_ue(unsigned int value); // called by the eNodeBCollector

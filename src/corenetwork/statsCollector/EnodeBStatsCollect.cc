@@ -9,7 +9,7 @@
 
 #include "corenetwork/statsCollector/EnodeBStatsCollector.h"
 #include "corenetwork/statsCollector/UeStatsCollector.h"
-#include "stack/packetFlowManager/PacketFlowManager.h"
+#include "stack/packetFlowManager/PacketFlowManagerEnb.h"
 
 #include "stack/pdcp_rrc/layer/LtePdcpRrc.h"
 #include "stack/mac/layer/LteMacEnb.h"
@@ -36,7 +36,7 @@ void EnodeBStatsCollector::initialize(int stage){
 
         mac_ = check_and_cast<LteMacEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("mac"));
         pdcp_ = check_and_cast<LtePdcpRrcEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("pdcpRrc"));
-        flowManager_ = check_and_cast<PacketFlowManager *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("packetFlowManager"));
+        flowManager_ = check_and_cast<PacketFlowManagerEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("packetFlowManager"));
 
         cellInfo_ = check_and_cast<LteCellInfo *>(getParentModule()->getSubmodule("cellInfo"));
         ecgi_.cellId = std::to_string(cellInfo_->getMacCellId());
@@ -95,7 +95,7 @@ void EnodeBStatsCollector::handleMessage(cMessage *msg)
             add_dl_nongbr_pdr_cell_perUser();
 
             //reset counters
-            pdcp_->resetPckCounter();
+            pdcp_->resetPktCounter();
             flowManager_->resetDiscardCounter();
             resetDiscardCounterPerUe();
             scheduleAt(NOW + discardRatePeriod_, discardRate_);
@@ -105,7 +105,7 @@ void EnodeBStatsCollector::handleMessage(cMessage *msg)
         {
             add_dl_nongbr_delay_perUser();
             //reset counter
-            resetDelayCountrerPerUe();
+            resetDelayCounterPerUe();
             scheduleAt(NOW + delayPacketPeriod_, packetDelay_);
         }
         else if(strcmp(msg->getName(), "pdcpBytes_") == 0)
@@ -131,12 +131,12 @@ void EnodeBStatsCollector::resetDiscardCounterPerUe()
     UeStatsCollectorMap::iterator end = ueCollectors_.end();
     for(; it != end ; ++it)
     {
-        pdcp_->resetPckCounterPerUe(it->first);
+        pdcp_->resetPktCounterPerUe(it->first);
         flowManager_->resetDiscardCounterPerUe(it->first);
     }
 }
 
-void EnodeBStatsCollector::resetDelayCountrerPerUe()
+void EnodeBStatsCollector::resetDelayCounterPerUe()
 {
     UeStatsCollectorMap::iterator it = ueCollectors_.begin();
     UeStatsCollectorMap::iterator end = ueCollectors_.end();
@@ -144,6 +144,17 @@ void EnodeBStatsCollector::resetDelayCountrerPerUe()
     {
         flowManager_->resetDelayCounterPerUe(it->first);
     }
+}
+
+
+void EnodeBStatsCollector::resetThroughputCountersPerUe()
+{
+    UeStatsCollectorMap::iterator it = ueCollectors_.begin();
+        UeStatsCollectorMap::iterator end = ueCollectors_.end();
+        for(; it != end ; ++it)
+        {
+            flowManager_->resetThroughputCounterPerUe(it->first);
+        }
 }
 
 void EnodeBStatsCollector::resetBytesCountersPerUe()
@@ -231,11 +242,29 @@ void EnodeBStatsCollector::add_number_of_active_ue_ul_nongbr_cell()
 }
 void EnodeBStatsCollector::add_dl_nongbr_pdr_cell()
 {
-    double discard = pdcp_->getDiscardRateStats();
+    double discard = flowManager_->getDiscardedPkt();
     dl_nongbr_pdr_cell.addValue(discard);
 }
 
-void EnodeBStatsCollector::add_ul_nongbr_pdr_cell(){}
+void EnodeBStatsCollector::add_ul_nongbr_pdr_cell()
+{
+    double pdr = 0;
+    DiscardedPkts pair = {0,0};
+    DiscardedPkts temp = {0,0};
+
+    UeStatsCollectorMap::iterator it = ueCollectors_.begin();
+    UeStatsCollectorMap::iterator end = ueCollectors_.end();
+
+    for(; it != end ; ++it)
+    {
+        temp = it->second->getULDiscardedPkt();
+        pair.discarded += temp.discarded;
+        pair.total += temp.total;
+    }
+
+    pdr = pair.discarded * 1000000/ pair.total;
+    ul_nongbr_pdr_cell.addValue(pdr);
+}
 
 // for each user save stats
 //TODO handover management
@@ -247,7 +276,7 @@ void EnodeBStatsCollector::add_dl_nongbr_pdr_cell_perUser()
     double discard;
     for(; it != end ; ++it)
     {
-        discard = pdcp_->getDiscardRateStatsPerUe(it->first);
+        discard = flowManager_->getDiscardedPktPerUe(it->first);
         it->second->add_dl_nongbr_pdr_ue(discard);
     }
 }
@@ -285,6 +314,18 @@ void EnodeBStatsCollector::add_dl_nongbr_data_volume_ue_perUser()
     {
         bytes = pdcp_->getPdcpBytesDlPerUe(it->first);
         it->second->add_dl_nongbr_data_volume_ue(bytes);
+    }
+}
+
+void EnodeBStatsCollector::add_dl_nongbr_throughput_ue_perUser()
+{
+    UeStatsCollectorMap::iterator it = ueCollectors_.begin();
+    UeStatsCollectorMap::iterator end = ueCollectors_.end();
+    double throughput;
+    for(; it != end ; ++it)
+    {
+        throughput = flowManager_->getThroughputStatsPerUe(it->first);
+        it->second->add_dl_nongbr_throughput_ue(throughput);
     }
 }
 
