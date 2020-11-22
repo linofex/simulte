@@ -13,9 +13,10 @@
 #include <omnetpp.h>
 #include "stack/rlc/um/LteRlcUm.h"
 #include "stack/rlc/LteRlcDefs.h"
+#include "common/LteCommon.h"
 
 class LteRlcUm;
-class PacketFlowManager;
+class PacketFlowManagerBase;
 
 /**
  * @class UmTxEntity
@@ -112,8 +113,8 @@ class UmTxEntity : public cSimpleModule
      * it is not mandatory for a correct network simulation.
      * It is use useful e.g for RNI service within MEC
      */
-    PacketFlowManager* packetFlowManager_;
-
+    PacketFlowManagerBase* packetFlowManager_;
+    RlcBurstStatus burstStatus_;
 
     /*
      * Flow-related info.

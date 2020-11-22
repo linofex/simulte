@@ -17,7 +17,8 @@ class LteHarqBufferRx;
 class LteBinder;
 class FlowControlInfo;
 class LteMacBuffer;
-class PacketFlowManager;
+class PacketFlowManagerBase;
+
 /**
  * Map associating a nodeId with the corresponding TX H-ARQ buffer.
  * Used in eNB, where there is more than one TX H-ARQ buffer.
@@ -74,7 +75,7 @@ class LteMacBase : public cSimpleModule
 
     // @author Alessandro Noferi
     /// PacketFlowManager
-    PacketFlowManager * flowManager_;
+    PacketFlowManagerBase * flowManager_;
 
     /*
      * Gates
@@ -170,8 +171,10 @@ class LteMacBase : public cSimpleModule
 
 
     // @author Alessandro Noferi
+    // TODO move them to lteMacENB
     void discardMacPdu(LogicalCid lcid, unsigned int macPduId);
-    void harqAckToFlowManager(LogicalCid lcid, unsigned int macPdu);
+    void harqAckToFlowManager(LogicalCid lcid, unsigned int macPduId);
+//    void beginTransmission(LogicalCid lcid, unsigned int macPduId);
 
     /*
      * Getters

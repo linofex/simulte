@@ -16,6 +16,14 @@
 package lte.stack.packetFlowManager;
 
 //
-simple PacketFlowManager
+simple PacketFlowManagerBase
 {
+}
+
+simple PacketFlowManagerEnb extends PacketFlowManagerBase {
+    @class("PacketFlowManagerEnb");
+}
+
+simple PacketFlowManagerUe extends PacketFlowManagerBase {
+    @class("PacketFlowManagerUe");
 }

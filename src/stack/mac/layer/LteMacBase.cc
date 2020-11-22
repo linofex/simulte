@@ -7,8 +7,6 @@
 // and cannot be removed from it.
 //
 
-#include "stack/packetFlowManager/PacketFlowManager.h"
-
 #include "stack/mac/layer/LteMacBase.h"
 #include "stack/mac/buffer/harq/LteHarqBufferTx.h"
 #include "stack/mac/buffer/harq_d2d/LteHarqBufferRxD2D.h"
@@ -20,6 +18,7 @@
 #include "stack/mac/packet/LteHarqFeedback_m.h"
 #include "stack/mac/buffer/LteMacBuffer.h"
 #include "assert.h"
+#include "stack/packetFlowManager/PacketFlowManagerBase.h"
 
 #include "../../../corenetwork/lteCellInfo/LteCellInfo.h"
 
@@ -27,7 +26,6 @@ LteMacBase::LteMacBase()
 {
     mbuf_.clear();
     macBuffers_.clear();
-    flowManager_ = NULL;
 }
 
 LteMacBase::~LteMacBase()
@@ -315,7 +313,6 @@ void LteMacBase::initialize(int stage)
         /* Get reference to binder */
         binder_ = getBinder();
 
-        flowManager_ = check_and_cast<PacketFlowManager *>(getParentModule()->getSubmodule("packetFlowManager"));
 
         /* Set The MAC MIB */
 
@@ -375,20 +372,19 @@ void LteMacBase::handleMessage(cMessage* msg)
     return;
 }
 
-// @author Alessandro Noferi
-void LteMacBase::harqAckToFlowManager(LogicalCid lcid, unsigned int macPdu)
+void LteMacBase::finish()
 {
-    flowManager_->macPduArrived(lcid, macPdu);
 }
 
 void LteMacBase::discardMacPdu(LogicalCid lcid, unsigned int macPduId)
 {
     flowManager_->discardMacPdu(lcid, macPduId);
 }
-
-void LteMacBase::finish()
+void LteMacBase::harqAckToFlowManager(LogicalCid lcid, unsigned int macPduId)
 {
+    flowManager_->macPduArrived(lcid, macPduId);
 }
+
 
 void LteMacBase::deleteModule(){
     cancelAndDelete(ttiTick_);

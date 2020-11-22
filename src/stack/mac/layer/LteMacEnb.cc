@@ -23,7 +23,7 @@
 #include "stack/mac/packet/LteMacSduRequest.h"
 #include "common/LteCommon.h"
 
-#include "stack/packetFlowManager/PacketFlowManager.h"
+#include "stack/packetFlowManager/PacketFlowManagerEnb.h"
 
 #include "stack/rlc/packet/LteRlcDataPdu.h"
 Define_Module( LteMacEnb);
@@ -278,6 +278,9 @@ void LteMacEnb::initialize(int stage)
         // register the pair <id,name> to the binder
         const char* moduleName = getParentModule()->getParentModule()->getFullName();
         binder_->registerName(nodeId_, moduleName);
+
+        flowManager_ = check_and_cast<PacketFlowManagerEnb *>(getParentModule()->getSubmodule("packetFlowManager"));
+
     }
 }
 
@@ -573,7 +576,7 @@ void LteMacEnb::macPduMake(MacCid cid)
                 uinfo->setSourceId(getMacNodeId());
                 uinfo->setDestId(destId);
                 uinfo->setDirection(DL);
-                uinfo->setLcid(MacCidToLcid(cid));
+                uinfo->setLcid(MacCidToLcid(cid)); // @author Alessandro Noferi
 
 
                 const UserTxParams& txInfo = amc_->computeTxParams(destId, DL);
@@ -1077,4 +1080,5 @@ double LteMacEnb::getUtilization(Direction dir)
         throw cRuntimeError("LteMacEnb::getSchedDiscipline(): unrecognized direction %d", (int) dir);
     }
 }
+
 

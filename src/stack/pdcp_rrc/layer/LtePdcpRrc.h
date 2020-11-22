@@ -20,6 +20,7 @@
 #include "stack/pdcp_rrc/packet/LtePdcpPdu_m.h"
 #include "stack/pdcp_rrc/layer/entity/LtePdcpEntity.h"
 
+
 /**
  * @class LtePdcp
  * @brief PDCP Layer
@@ -48,7 +49,7 @@
  */
 
 
-class PacketFlowManager;
+class PacketFlowManagerBase;
 
 class LtePdcpRrcBase : public cSimpleModule
 {
@@ -65,16 +66,11 @@ class LtePdcpRrcBase : public cSimpleModule
 
 
     /**
-       * getDiscardRateStats() is used by the collector
-       * to get statistics about the discarded PDCP pcks
-       * - enbCollector for ENODEB
-       * - ueCollector  for UE
-       * Reset the counters, too
-       *
-       * RELAY does nothing
+       * getDiscardRateStats() is used by packetFlowManager
+       * to get the number of PDCP pkts
        */
-      virtual double getDiscardRateStats();
-      virtual void resetPckCounter();
+      virtual unsigned int getPktCount();
+      virtual void resetPktCounter();
 
 
   protected:
@@ -115,7 +111,7 @@ class LtePdcpRrcBase : public cSimpleModule
     /**
      * headerDecompress(): Performs header decompression.
      * At the moment, if header compression is enabled,
-     * simply restores original packet size
+     * simply restores original packet sizename
      *
      * @param cPacket packet to decompress
      */
@@ -221,7 +217,7 @@ class LtePdcpRrcBase : public cSimpleModule
      */
 
     // @author Alessandro Noferi
-    PacketFlowManager *packetFlowManager_;
+    PacketFlowManagerBase *packetFlowManager_;
     int pdcpPktCounter_;
 
 
@@ -339,23 +335,18 @@ private:
     LtePdcpRrcEnb();
 
     /**
-     * getDiscardRateStatsPerUe is used by the collector to
-     * get statistics about a specific UE
-     * - enbCollector for ENODEB
-     * - ueCollector  for UE
-     * Reset the counters, too
-     *
-     * RELAY does nothing
+     * getPktCountPerUe is used by the packetFlowManager
+     * to get the number of pdcp pkts of a UE
      *
      * @param id of the UE
      */
-    virtual double getDiscardRateStatsPerUe(MacNodeId id);
-    virtual void resetPckCounterPerUe(MacNodeId id);
+    virtual unsigned int getPktCountPerUe(MacNodeId id);
+    virtual void resetPktCounterPerUe(MacNodeId id);
 
     /**
       * getPdcpBytesUlPerUe() and getPdcpBytesDlPerUe()
       * are used by the collector to get
-      * statistics about the bytes of pdcp pck
+      * statistics about the bytes of pdcp pkts
       *
       */
     unsigned int getPdcpBytesUlPerUe(MacNodeId id);

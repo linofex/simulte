@@ -9,7 +9,10 @@
 
 #include "stack/pdcp_rrc/layer/LtePdcpRrc.h"
 
-#include "stack/packetFlowManager/PacketFlowManager.h"
+#include "stack/packetFlowManager/PacketFlowManagerBase.h"
+#include "stack/packetFlowManager/PacketFlowManagerEnb.h"
+#include "stack/packetFlowManager/PacketFlowManagerUe.h"
+
 
 
 Define_Module(LtePdcpRrcUe);
@@ -139,6 +142,11 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
         // create lcid in packet flow manager
         //check if it is the UE the node id i src
         packetFlowManager_->initLcid(mylcid, lteInfo->getDestId());
+        // if(getDirection() == DL)
+        //     packetFlowManager_->initLcid(mylcid, lteInfo->getDestId());
+        // else if (getDirection() == UL)
+        //     packetFlowManager_->initLcid(mylcid, lteInfo->getSourceId());
+
     }
 
     EV << "LteRrc : Assigned Lcid: " << mylcid << "\n";
@@ -253,7 +261,7 @@ void LtePdcpRrcBase::initialize(int stage)
         amSap_[OUT] = gate("AM_Sap$o");
 
         binder_ = getBinder();
-        packetFlowManager_ = check_and_cast<PacketFlowManager *> (getParentModule()->getSubmodule("packetFlowManager"));
+        
         headerCompressedSize_ = par("headerCompressedSize"); // Compressed size
         nodeId_ = getAncestorPar("macNodeId");
 
@@ -325,15 +333,15 @@ void LtePdcpRrcBase::finish()
     // TODO make-finish
 }
 
-void LtePdcpRrcBase::resetPckCounter()
+void LtePdcpRrcBase::resetPktCounter()
 {
     pdcpPktCounter_ = 0;
 }
 
 
-double LtePdcpRrcBase::getDiscardRateStats()
+unsigned int LtePdcpRrcBase::getPktCount()
 {
-    return (double)(packetFlowManager_->getTotalDiscardedPck() * 1000000) / pdcpPktCounter_;
+    return pdcpPktCounter_;
 }
 
 
@@ -346,6 +354,7 @@ void LtePdcpRrcEnb::initialize(int stage)
     LtePdcpRrcBase::initialize(stage);
     if (stage == inet::INITSTAGE_LOCAL)
         nodeId_ = getAncestorPar("macNodeId");
+        packetFlowManager_ = check_and_cast<PacketFlowManagerEnb *> (getParentModule()->getSubmodule("packetFlowManager"));
 }
 
 
@@ -383,12 +392,12 @@ void LtePdcpRrcEnb::toDataPort(cPacket* pkt)
 }
 
 
-double LtePdcpRrcEnb::getDiscardRateStatsPerUe(MacNodeId id)
+unsigned int LtePdcpRrcEnb::getPktCountPerUe(MacNodeId id)
 {
     NodeIdToCounterMap::iterator it = pdcpPktCounterPerUe_.find(id);
     if(it != pdcpPktCounterPerUe_.end())
     {
-        return (double)(packetFlowManager_->getTotalDiscardedPckPerUe(id) * 1000000 ) / it->second;
+        return  it->second;
     }
     else
     {
@@ -396,7 +405,7 @@ double LtePdcpRrcEnb::getDiscardRateStatsPerUe(MacNodeId id)
     }
 }
 
-void LtePdcpRrcEnb::resetPckCounterPerUe(MacNodeId id)
+void LtePdcpRrcEnb::resetPktCounterPerUe(MacNodeId id)
 {
     NodeIdToCounterMap::iterator it = pdcpPktCounterPerUe_.find(id);
     if(it != pdcpPktCounterPerUe_.end())
@@ -450,6 +459,7 @@ void LtePdcpRrcUe::initialize(int stage)
     if (stage == inet::INITSTAGE_NETWORK_LAYER_3)
     {
         nodeId_ = getAncestorPar("macNodeId");
+        packetFlowManager_ = check_and_cast<PacketFlowManagerUe *> (getParentModule()->getSubmodule("packetFlowManager"));
     }
 }
 

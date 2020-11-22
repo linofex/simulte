@@ -22,6 +22,9 @@
 #include "stack/phy/layer/LtePhyBase.h"
 #include "stack/mac/packet/LteMacSduRequest.h"
 #include "corenetwork/statsCollector/UeStatsCollector.h"
+#include "stack/packetFlowManager/PacketFlowManagerUe.h"
+
+#include "stack/rlc/packet/LteRlcDataPdu.h"
 
 Define_Module(LteMacUe);
 
@@ -99,6 +102,8 @@ void LteMacUe::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER)
     {
         cellId_ = getAncestorPar("masterId");
+        flowManager_ = check_and_cast<PacketFlowManagerUe *>(getParentModule()->getSubmodule("packetFlowManager"));
+
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3)
     {
@@ -113,7 +118,6 @@ void LteMacUe::initialize(int stage)
 
         // Get the Physical Channel reference of the node
         info->phy = check_and_cast<LtePhyBase*>(info->ue->getSubmodule("lteNic")->getSubmodule("phy"));
-
         binder_->addUeInfo(info);
 
         // only for UEs that have been added dynamically to the simulation
@@ -311,6 +315,8 @@ void LteMacUe::macPduMake(MacCid cid)
     int64 size = 0;
 
     macPduList_.clear();
+    // @author Alessandro Noferi
+    SequenceNumberSet rlcPduSet;
 
     //  Build a MAC pdu for each scheduled user on each codeword
     LteMacScheduleList::const_iterator it;
@@ -342,6 +348,8 @@ void LteMacUe::macPduMake(MacCid cid)
             uinfo->setSourceId(getMacNodeId());
             uinfo->setDestId(destId);
             uinfo->setDirection(UL);
+            uinfo->setLcid(MacCidToLcid(destCid)); // @author Alessandro Noferi
+
             uinfo->setUserTxParams(schedulingGrant_->getUserTxParams()->dup());
             macPkt = new LteMacPdu("LteMacPdu");
             macPkt->setHeaderLength(MAC_HEADER);
@@ -366,6 +374,8 @@ void LteMacUe::macPduMake(MacCid cid)
                 throw cRuntimeError("Empty buffer for cid %d, while expected SDUs were %d", destCid, sduPerCid);
 
             pkt = mbuf_[destCid]->popFront();
+            rlcPduSet.insert(check_and_cast<LteRlcUmDataPdu *>(pkt)->getPduSequenceNumber());
+
             drop(pkt);
             macPkt->pushSdu(pkt);
             sduPerCid--;
@@ -499,6 +509,9 @@ void LteMacUe::macPduMake(MacCid cid)
         else
         {
             txBuf->insertPdu(txList.first,cw, macPkt);
+            LogicalCid lcid = (check_and_cast<UserControlInfo *> (macPkt->getControlInfo()))->getLcid();
+            flowManager_->insertMacPdu(lcid , macPkt->getId(), rlcPduSet);
+
         }
     }
 }

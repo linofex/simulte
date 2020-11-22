@@ -8,7 +8,11 @@
 //
 
 #include "stack/rlc/um/entity/UmTxEntity.h"
-#include "stack/packetFlowManager/PacketFlowManager.h"
+#include "stack/packetFlowManager/PacketFlowManagerBase.h"
+#include "stack/packetFlowManager/PacketFlowManagerUe.h"
+#include "stack/packetFlowManager/PacketFlowManagerEnb.h"
+
+
 #include <set>
 
 Define_Module(UmTxEntity);
@@ -32,9 +36,12 @@ void UmTxEntity::initialize()
     lteRlc_ = check_and_cast<LteRlcUm*>(getParentModule()->getSubmodule("um"));
     //                                                          RLC                 LTE Nic
 
-
-    packetFlowManager_ = check_and_cast<PacketFlowManager *>(getParentModule()->getParentModule()->getSubmodule("packetFlowManager"));
-
+    // @author Alessandro Noferi
+    if(mac->getNodeType() == ENODEB)
+        packetFlowManager_ = check_and_cast<PacketFlowManagerEnb *>(getParentModule()->getParentModule()->getSubmodule("packetFlowManager"));
+    else if(mac->getNodeType() == UE)
+        packetFlowManager_ = check_and_cast<PacketFlowManagerUe *>(getParentModule()->getParentModule()->getSubmodule("packetFlowManager"));
+    burstStatus_ = INACTIVE;
 }
 
 void UmTxEntity::enque(cPacket* pkt)
@@ -160,7 +167,57 @@ void UmTxEntity::rlcPduMake(int pduLength)
     {
         FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(rlcPdu->getControlInfo());
         LogicalCid lcid = lteInfo->getLcid();
-        packetFlowManager_->insertRlcPdu(lcid, sno_ - 1, pdcpSnoSet, firstIsFragment_);
+
+        /* burst management
+         *
+         * if the buffer is empty, the burst, if ACTIVE,
+         * now is finished. Tell the flowmanager to STOP
+         * keep trace of burst RLCsm (not the timer). Set burst as INACTIVE
+         *
+         * if the buffer is NOT empty,
+         *      if burst is already ACTIVE, do not start the timer T2
+         *      if burst is INACTIVE, START the timer T2 and set it as ACTIVE
+         * Tell the flowmanager to keep trace of burst RLCs
+         */
+
+        if(sduQueue_.isEmpty())
+        {
+            if(burstStatus_ == ACTIVE)
+            {
+                EV << NOW << " UmTxEntity::burstStatus - ACTIVE -> INACTIVE" << endl;
+
+                packetFlowManager_->insertRlcPdu(lcid, rlcPdu, STOP);
+                burstStatus_ = INACTIVE;
+
+            }
+            else
+            {
+                EV << NOW << " UmTxEntity::burstStatus - "<< burstStatus_ << endl;
+
+                packetFlowManager_->insertRlcPdu(lcid, rlcPdu, burstStatus_);
+
+            }
+        }
+
+        else
+        {
+            if(burstStatus_ == INACTIVE)
+            {
+                burstStatus_ = ACTIVE;
+                EV << NOW << " UmTxEntity::burstStatus - INACTIVE -> ACTIVE" << endl;
+                //start a new burst
+                packetFlowManager_->insertRlcPdu(lcid, rlcPdu, START);
+
+            }
+            else
+            {
+                EV << NOW << " UmTxEntity::burstStatus - burstStatus: "<< burstStatus_ << endl;
+
+                // burst in still active
+                packetFlowManager_->insertRlcPdu(lcid, rlcPdu, burstStatus_);
+
+            }
+        }
     }
 
     lteRlc_->sendToLowerLayer(rlcPdu);

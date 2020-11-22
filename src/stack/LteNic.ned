@@ -24,7 +24,9 @@ import lte.stack.handoverManager.LteHandoverManager;
 
 import lte.stack.phy.ChannelModel.LteChannelModelInterface;
 
-import lte.stack.packetFlowManager.PacketFlowManager;
+import lte.stack.packetFlowManager.PacketFlowManagerUe;
+import lte.stack.packetFlowManager.PacketFlowManagerEnb;
+
 
 // 
 // Interface for the LTE Stack.
@@ -146,7 +148,7 @@ module LteNicUe extends LteNicBase
         dlFbGen: LteDlFeedbackGenerator {
             @display("p=50,50;is=s");
         }
-        packetFlowManager: PacketFlowManager {
+        packetFlowManager: PacketFlowManagerUe {
 			@display("p=104.8, 389.75998");
 		}
 }
@@ -198,7 +200,7 @@ module LteNicEnb extends LteNicBase
  		//#
         //# Modules used to take trace of PDCP pkt flow
         //#
-		packetFlowManager: PacketFlowManager {
+		packetFlowManager: PacketFlowManagerEnb {
 			@display("p=104.8, 389.75998");
 		}
     connections:

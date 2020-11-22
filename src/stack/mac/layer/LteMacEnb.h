@@ -21,7 +21,6 @@ class LteSchedulerEnbUl;
 class ConflictGraph;
 class LteBinder;
 
-class PacketFlowManager;
 
 class LteMacEnb : public LteMacBase
 {
