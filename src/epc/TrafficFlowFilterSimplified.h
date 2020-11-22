@@ -55,8 +55,8 @@ class TrafficFlowFilterSimplified : public cSimpleModule
     //@author Alessandro Noferi
     //
     //for emulation
-    inet::L3Address meHostExtAddress;
-    int meHostExtAddressMask;
+    inet::L3Address meHostExtAddress_;
+    int meHostExtAddressMask_;
     //only if owner type is GTPENDPOINT
     inet::L3Address eNodeBAddress;
     int eNodeBMacId;

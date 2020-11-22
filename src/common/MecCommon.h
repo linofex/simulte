@@ -4,6 +4,20 @@
 #include <string>
 #include "common/LteCommon.h"
 
+
+enum RlcBurstStatus
+{
+    START, STOP, ACTIVE, INACTIVE
+};
+
+
+
+typedef struct {
+    unsigned int discarded;
+    unsigned int total;
+}DiscardedPkts;
+
+
 namespace mec {
 
     struct AssociateId 

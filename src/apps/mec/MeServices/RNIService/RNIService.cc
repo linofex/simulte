@@ -71,12 +71,11 @@ void RNIService::handleMessage(cMessage *msg)
 }
 
 void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket){
-
+    std::vector<std::string> splittedUri = utils::splitString(uri, "?");
     // check it is a GET for a query or a subscription
-    if(uri.rfind(baseUriQueries_, 0) == 0) //queries
+    if(splittedUri[0] == baseUriQueries_) //queries
     {
         //look for qurery parameters
-        std::vector<std::string> splittedUri = utils::splitString(uri, "?");
         if(splittedUri.size() == 2) // uri has parameters eg. uriPath?param=value&param1=value,value
         {
             std::vector<std::string> queryParameters = utils::splitString(splittedUri[1], "&");
@@ -166,16 +165,16 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
             Http::send404Response(socket);
         }
     }
-    else if (uri.rfind(baseUriSubscriptions_, 0) == 0) //subs
+    else if (splittedUri[0] == baseUriSubscriptions_) //subs
     {
-//        // TODO implement subscription?
-//        Http::send404Response(socket);
-//    }
-//    else // not found
-//    {
-//        Http::send404Response(socket);
-//    }
+        // TODO implement subscription?
+        Http::send404Response(socket);
     }
+    else // not found
+    {
+        Http::send404Response(socket);
+    }
+
 }
 
 

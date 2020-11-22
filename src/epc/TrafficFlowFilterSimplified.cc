@@ -31,12 +31,16 @@ void TrafficFlowFilterSimplified::initialize(int stage)
     // reading and setting owner type
     ownerType_ = selectOwnerType(par("ownerType"));
 
+
+    //TO DO fix flow
+    meHostExtAddress_ = inet::L3AddressResolver().resolve("0.0.0.0");
+    meHostExtAddressMask_ = 32;
+
     //mec
     //@author Angelo Buono
     //
     // ENB SIDE
     if(getParentModule()->hasPar("meHost")){
-
         meHost = getParentModule()->par("meHost").stringValue();
         if(ownerType_ == ENB &&  strcmp(meHost.c_str(), "")){
             //@author Alessandro Noferi
@@ -47,8 +51,8 @@ void TrafficFlowFilterSimplified::initialize(int stage)
                 throw cRuntimeError("TrafficFlowFilterSimplified::initialize - Bad meHostExtConn parameter. It must be like addres/mask");
 
             }
-            meHostExtAddress = inet::L3AddressResolver().resolve(extAdd[0].c_str());
-            meHostExtAddressMask = atoi(extAdd[1].c_str());
+            meHostExtAddress_ = inet::L3AddressResolver().resolve(extAdd[0].c_str());
+            meHostExtAddressMask_ = atoi(extAdd[1].c_str());
             //end
 
             std::stringstream meHostName;
@@ -57,6 +61,7 @@ void TrafficFlowFilterSimplified::initialize(int stage)
             meHostAddress = inet::L3AddressResolver().resolve(meHost.c_str());
 
             EV << "TrafficFlowFilterSimplified::initialize - meHost: " << meHost << " meHostAddress: " << meHostAddress.str() << endl;
+            EV << "TrafficFlowFilterSimplified::initialize - meHostadd: " << meHostExtAddress_.str()<< " meHostAddress: " << meHostExtAddressMask_ << endl;
         }
     }
     //end mec
@@ -128,10 +133,10 @@ TrafficFlowTemplateId TrafficFlowFilterSimplified::findTrafficFlow(L3Address src
         EV << "TrafficFlowFilterSimplified::findTrafficFlow - returning flowId (-3) for tunneling to " << meHost << endl;
         return -3;
     }
-    else if (ownerType_ == ENB && destAddress.matches(meHostExtAddress, meHostExtAddressMask))
+    else if (ownerType_ == ENB && destAddress.matches(meHostExtAddress_, meHostExtAddressMask_))
     {
         // the destination is the ME Host
-        EV << "TrafficFlowFilterSimplified::findTrafficFlow - returning flowId (REST) for tunneling to " << meHost << endl;
+        EV << "TrafficFlowFilterSimplified::findTrafficFlow - [emulation] returning flowId (-3) for tunneling to " << meHost << endl;
         return -3;
     }
 

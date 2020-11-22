@@ -3,8 +3,39 @@
 #include "apps/mec/MeServices/packets/HttpResponsePacket.h"
 #include "inet/common/RawPacket.h"
 #include "inet/common/INETDefs.h"
+#include "apps/mec/MeServices/RNIService/resources/json.hpp"
 
 namespace Http {
+    /* ProblemDetail structure from RFC 7807
+     * {
+     * "type": "https://example.com/probs/out-of-credit",
+     * "title": "You do not have enough credit.",
+     * "detail": "Your current balance is 30, but that costs 50.",
+     * "instance": "/account/12345/msgs/abc",
+     * "balance": 30,
+     * "accounts": ["/account/12345","/account/67890"],
+     * "status": 403
+     * }
+     *
+     *
+     * {
+     *  "type": "https://example.net/validation-error",
+     *  "title": "Your request parameters didn't validate.",
+     *  "invalid-params": [ {
+     *      "name": "age",
+     *      "reason": "must be a positive integer"
+     *   },
+     *   {
+     *   "name": "color",
+     *   "reason": "must be 'green', 'red' or 'blue'"}
+     *   ]
+     *}
+     *
+     *  Content-Type: application/problem+json
+     *
+     */
+
+
 
     void sendPacket(HTTPResponsePacket& pck, inet::TCPSocket *socket){
         inet::RawPacket *res = new inet::RawPacket("response");
@@ -45,16 +76,22 @@ namespace Http {
 
     void send400Response(inet::TCPSocket *socket){
         HTTPResponsePacket resp = HTTPResponsePacket(BAD_REQ);
+        resp.setBody("{TODO implement ProblemDetails}");
         sendPacket(resp, socket);
     }
 
     void send404Response(inet::TCPSocket *socket){
         HTTPResponsePacket resp = HTTPResponsePacket(NOT_FOUND);
+        nlohmann::ordered_json problemDetail;
+        problemDetail[""];
+        resp.setBody("{TODO implement ProblemDetails}");
         sendPacket(resp, socket);
     }
 
     void send505Response(inet::TCPSocket *socket){
         HTTPResponsePacket resp = HTTPResponsePacket(HTTP_NOT_SUPPORTED);
+        resp.setBody("{TODO implement ProblemDetails}");
+
         sendPacket(resp, socket);
     }
 }
