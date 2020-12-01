@@ -12,13 +12,15 @@
 
 #include <omnetpp.h>
 #include "common/LteCommon.h"
+#include "common/MecCommon.h"
+
 #include "common/LteControlInfo.h"
 #include "stack/rlc/packet/LteRlcSdu_m.h"
 #include "stack/rlc/um/entity/UmTxEntity.h"
 #include "stack/rlc/um/entity/UmRxEntity.h"
 #include "stack/rlc/packet/LteRlcDataPdu.h"
 #include "stack/mac/layer/LteMacBase.h"
-
+#include <set>
 class UmTxEntity;
 class UmRxEntity;
 
@@ -46,9 +48,7 @@ class UmRxEntity;
 class LteRlcUm : public cSimpleModule
 {
   public:
-    LteRlcUm()
-    {
-    }
+    LteRlcUm();
     virtual ~LteRlcUm()
     {
     }
@@ -83,6 +83,17 @@ class LteRlcUm : public cSimpleModule
 
     virtual bool isEmptyingTxBuffer(MacNodeId peerId) { return false; }
 
+    /**
+     * @author Alessandro Noferi
+     * Methods used by RlcEntity and EnodeBCollector respectively
+     * in order to manage UL throughput stats.
+     */
+
+    void activeUeLcid(MacCid cid);
+    void deactiveUeLcid(MacCid cid);
+    void addUeThroughput(MacNodeId nodeId, Throughput throughput);
+    double getUeThroughput(MacNodeId nodeId);
+    void resetThroughputStats(MacNodeId nodeId);
 
     /**
      * Initialize watches
@@ -180,6 +191,25 @@ class LteRlcUm : public cSimpleModule
     typedef std::map<MacCid, UmRxEntity*> UmRxEntities;
     UmTxEntities txEntities_;
     UmRxEntities rxEntities_;
+
+    /**
+     * Holds the throughput stats for each UE
+     * identified by the srcId of the
+     * FlowControlInfo in each entity
+     *
+     */
+    typedef std::map<MacNodeId, Throughput > ULThroughputPerUE;
+    ULThroughputPerUE ulThroughput_;
+
+    typedef std::map<MacNodeId, std::set<LogicalCid> > ActiveUeUL;
+    ActiveUeUL activeUsersUl_;
+    //debug
+    std::map<MacNodeId, cOutVector> tt;
+
+  public:
+    ActiveUeUL& getActiveUeUL() { return activeUsersUl_;}
+
 };
+
 
 #endif

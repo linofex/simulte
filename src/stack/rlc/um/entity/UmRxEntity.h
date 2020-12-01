@@ -54,8 +54,8 @@ class UmRxEntity : public cSimpleModule
     * This method is used to manage a burst and calculate the UL tput of a UE
     * It is called at the and of enque() and at the and of a t_reorering
     * period. Only the EnodeB needs to manage the buffer, since onyl it has to
-    * calculate UL tput.    * 
-    * /
+    * calculate UL tput.
+    */
     void handleBurst();
   protected:
 

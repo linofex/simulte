@@ -9,7 +9,7 @@
 
 #include "stack/rlc/um/LteRlcUm.h"
 #include "stack/mac/packet/LteMacSduRequest.h"
-
+#include <sstream>
 Define_Module(LteRlcUm);
 
 UmTxEntity* LteRlcUm::getTxBuffer(FlowControlInfo* lteInfo)
@@ -154,7 +154,7 @@ void LteRlcUm::handleUpperMessage(cPacket *pkt)
         // Bufferize RLC SDU
         EV << "LteRlcUm::handleUpperMessage - Enque packet " << rlcPkt->getName() << " into the Tx Buffer\n";
         txbuf->enque(rlcPkt);
-
+        
     }
 
     emit(receivedPacketFromUpperLayer, pkt);
@@ -239,6 +239,11 @@ void LteRlcUm::deleteQueues(MacNodeId nodeId)
  * Main functions
  */
 
+LteRlcUm::LteRlcUm()
+{
+    ulThroughput_.clear();
+}
+
 void LteRlcUm::initialize()
 {
     up_[IN] = gate("UM_Sap_up$i");
@@ -272,3 +277,64 @@ void LteRlcUm::handleMessage(cMessage* msg)
     }
     return;
 }
+
+void LteRlcUm::addUeThroughput(MacNodeId nodeId, Throughput throughtput)
+{
+    ULThroughputPerUE::iterator it = ulThroughput_.find(nodeId);
+    if(it == ulThroughput_.end())
+    {
+        ulThroughput_[nodeId] = throughtput;
+        //debug
+        std::stringstream strs;
+        strs << "rlc:" << nodeId -1025;
+        std::string temp_str = strs.str();
+        char* char_type = (char*) temp_str.c_str();
+        tt[nodeId].setName(char_type);
+        tt[nodeId].record(getUeThroughput(nodeId));
+
+    }
+    else
+    {
+        it->second.pktSizeCount = throughtput.pktSizeCount;
+        it->second.time = throughtput.time;
+        tt[nodeId].record(getUeThroughput(nodeId));
+    }
+}
+
+double LteRlcUm::getUeThroughput(MacNodeId nodeId)
+{
+    ULThroughputPerUE::iterator it = ulThroughput_.find(nodeId);
+    if(it == ulThroughput_.end())
+    {
+        return 0;
+    }
+    else
+    {
+        return (it->second.pktSizeCount / (it->second.time).dbl());
+    }
+}
+
+void LteRlcUm::resetThroughputStats(MacNodeId nodeId)
+{
+    ULThroughputPerUE::iterator it = ulThroughput_.find(nodeId);
+    if(it == ulThroughput_.end())
+    {
+        return;
+    }
+    else
+    {
+        it->second.pktSizeCount = 0;
+        it->second.time = 0;
+    }
+}
+
+void LteRlcUm::activeUeLcid(MacCid cid)
+{
+    activeUsersUl_[MacCidToNodeId(cid)].insert(MacCidToLcid(cid));
+}
+void LteRlcUm::deactiveUeLcid(MacCid cid)
+{
+    activeUsersUl_[MacCidToNodeId(cid)].erase(MacCidToLcid(cid));
+}
+
+
