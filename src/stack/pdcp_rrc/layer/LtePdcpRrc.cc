@@ -113,11 +113,12 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
     // Control Informations
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pkt->removeControlInfo());
 
+    unsigned int sduHeaderSize = lteInfo->getHeaderSize();
+
     setTrafficInformation(pkt, lteInfo);
     lteInfo->setDestId(getDestId(lteInfo));
     headerCompress(pkt, lteInfo->getHeaderSize()); // header compression
 
-    int64_t sdusize = pkt->getByteLength();
 
 
     // Cid Request
@@ -184,7 +185,7 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
     EV << "LtePdcp : Sending packet " << pdcpPkt->getName() << " on port "
        << (lteInfo->getRlcType() == UM ? "UM_Sap$o\n" : "AM_Sap$o\n");
 
-    packetFlowManager_->insertPdcpSdu(mylcid, sno, arrivalTime);
+    packetFlowManager_->insertPdcpSdu(mylcid, sno, sduHeaderSize,  arrivalTime);
 
     // Send message
     send(pdcpPkt, (lteInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
@@ -363,8 +364,9 @@ void LtePdcpRrcEnb::fromDataPort(cPacket* pkt)
     // Control Information
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pkt->getControlInfo());
     // dest id
-    MacNodeId destId = binder_->getMacNodeId(IPv4Address(lteInfo->getDstAddr()));
-//  MacNodeId destUe = getDestId(lteInfo); // could be the relay
+//    MacNodeId destId = binder_->getMacNodeId(IPv4Address(lteInfo->getDstAddr()));
+    MacNodeId destId = lteInfo->getDestId();
+//    MacNodeId destUe = getDestId(lteInfo); // could be the relay
     if(pdcpPktCounterPerUe_.find(destId) == pdcpPktCounterPerUe_.end())
         pdcpPktCounterPerUe_[destId] = 0; // ue
     pdcpPktCounterPerUe_[destId] += 1; // ue
@@ -372,23 +374,42 @@ void LtePdcpRrcEnb::fromDataPort(cPacket* pkt)
     if(pdcpSduBytesDl_.find(destId) == pdcpSduBytesDl_.end())
         pdcpSduBytesDl_[destId] = 0;
     pdcpSduBytesDl_[destId] += pkt->getByteLength();
+    EV << "Total PDCP SDU bytes sent to nodeId " << destId << " in this period : " <<  pdcpSduBytesDl_[destId] <<"B" << endl;
 
     LtePdcpRrcBase::fromDataPort(pkt);
 }
 
 void LtePdcpRrcEnb::toDataPort(cPacket* pkt)
 {
-    cPacket *pktCopy = pkt->dup();
-    LtePdcpPdu* pdcpPkt = check_and_cast<LtePdcpPdu*>(pktCopy); //ask professor if I can use pkt
-    cPacket* upPkt = pdcpPkt->decapsulate(); // Decapsulate packet
-    FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pkt->getControlInfo());
-    // src id
-    MacNodeId srcId = binder_->getMacNodeId(IPv4Address(lteInfo->getSrcAddr()));
-    if(pdcpSduBytesUl_.find(srcId) == pdcpSduBytesUl_.end())
-        pdcpSduBytesUl_[srcId] = 0;
-    pdcpSduBytesUl_[srcId] += upPkt->getByteLength();
-    delete pktCopy;
-    LtePdcpRrcBase::toDataPort(pkt);
+    emit(receivedPacketFromLowerLayer, pkt);
+       LtePdcpPdu* pdcpPkt = check_and_cast<LtePdcpPdu*>(pkt);
+       FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(
+           pdcpPkt->removeControlInfo());
+
+       EV << "LtePdcp : Received packet with CID " << lteInfo->getLcid() << "\n";
+       EV << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
+
+       cPacket* upPkt = pdcpPkt->decapsulate(); // Decapsulate packet
+       delete pdcpPkt;
+
+       headerDecompress(upPkt, lteInfo->getHeaderSize()); // Decompress packet header
+       MacNodeId srcId = lteInfo->getSourceId();
+       handleControlInfo(upPkt, lteInfo);
+
+       EV << "LtePdcp : Sending packet " << upPkt->getName()
+          << " on port DataPort$o\n";
+
+       // save sta
+       if(pdcpSduBytesUl_.find(srcId) == pdcpSduBytesUl_.end())
+        {
+         pdcpSduBytesUl_[srcId] = 0;
+        }
+         pdcpSduBytesUl_[srcId] += upPkt->getByteLength();
+        EV << "Total PDCP SDU bytes received from nodeId " << srcId << " in this period : " <<  pdcpSduBytesUl_[srcId] <<"B" << endl;
+
+       // Send message
+       send(upPkt, dataPort_[OUT]);
+       emit(sentPacketToUpperLayer, upPkt);
 }
 
 

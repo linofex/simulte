@@ -169,6 +169,12 @@ public:
     {
         return new LteRlcUmDataPdu(*this);
     }
+    
+    
+    virtual RlcSduList* getRlcSudList()
+    {
+        return &sduList_;
+    }
 };
 
 /**

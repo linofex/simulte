@@ -31,7 +31,7 @@ simple EnodeBStatsCollector
 		// period duration for each l2 meas
 		double prbUsagePeriod  @unit(s)   = default(0.001s); // TTI period
         double activeUserPeriod @unit(s)  = default(0.1s);
-        double dataVolumePeriod @unit(s)   = default(1s);
+        double dataVolumePeriod @unit(s)   = default(0.5s);
         double delayPacketPeriod @unit(s)  = default(0.5s);
         double discardRatePeriod @unit(s) = default(60s);
 

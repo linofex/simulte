@@ -11,11 +11,22 @@ enum RlcBurstStatus
 };
 
 
+typedef struct
+{
+    unsigned int pktCount;
+    simtime_t time;
+} Delay;
+
+typedef struct
+{
+    unsigned int pktSizeCount;
+    simtime_t time;
+} Throughput;
 
 typedef struct {
     unsigned int discarded;
     unsigned int total;
-}DiscardedPkts;
+} DiscardedPkts;
 
 
 namespace mec {

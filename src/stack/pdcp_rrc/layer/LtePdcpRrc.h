@@ -200,7 +200,7 @@ class LtePdcpRrcBase : public cSimpleModule
      *
      * @param pkt incoming packet
      */
-    void toDataPort(cPacket *pkt);
+     virtual void toDataPort(cPacket *pkt);
 
     /**
      * handler for tm sap

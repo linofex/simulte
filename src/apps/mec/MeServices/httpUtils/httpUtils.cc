@@ -33,6 +33,19 @@ namespace Http {
      *
      *  Content-Type: application/problem+json
      *
+     *  RNI API
+     *
+     *  {
+     *      "ProblemDetails": {
+     *          "type": "string",
+     *          "title": "string",
+     *          "status": 0,
+     *          "detail": "string",
+     *          "instance": "string"
+     *      }
+     *  }
+     *
+     *
      */
 
 

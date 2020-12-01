@@ -55,7 +55,7 @@ class HTTPResponsePacket : public HTTPResponsePacket_Base
     public:
         HTTPResponsePacket(const char *name=nullptr, short kind=0);
         HTTPResponsePacket(const responseCode res, const char *name=nullptr, short kind=0);
-        HTTPResponsePacket& operator=(const HTTPResponsePacket& other) {if (this==&other) return *this; HTTPResponsePacket_Base::operator=(other); copy(other); return *this;}
+        HTTPResponsePacket& operator=(const HTTPResponsePacket& other){}// {if (this==&other) return *this; HTTPResponsePacket_Base::operator=(other); copy(other); return *this;}
 
         virtual HTTPResponsePacket *dup() const override {return new HTTPResponsePacket(*this);}
 
