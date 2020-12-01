@@ -11,6 +11,7 @@
 #include "stack/rlc/um/entity/UmRxEntity.h"
 #include "stack/mac/layer/LteMacBase.h"
 #include "stack/mac/layer/LteMacEnb.h"
+#include "common/MecCommon.h"
 
 Define_Module(UmRxEntity);
 
@@ -26,6 +27,16 @@ UmRxEntity::UmRxEntity() :
     lastPduReassembled_ = 0;
     nodeB_ = NULL;
     init_ = false;
+
+    // @author Alessandro Noferi
+    isBurst_ = false;
+    t2Set_ = false;
+    totalBits_ = 0;
+    ttiBits_ = 0;
+    t2_ = 0;
+    t1_ = 0;
+    ttiT2_ = 0;
+    ttiT1_ = 0;
 }
 
 UmRxEntity::~UmRxEntity()
@@ -133,6 +144,12 @@ void UmRxEntity::enque(cPacket* pkt)
     pduBuffer_.addAt(index, pdu);
     received_.at(index) = true;
 
+    if (lteInfo->getDirection() == UL)
+    {
+        MacCid cid = idToMacCid(flowControlInfo_->getSourceId(), flowControlInfo_->getLcid());
+        rlc_->activeUeLcid(cid);
+    }
+
     // emit statistics
     MacNodeId ueId;
     if (lteInfo->getDirection() == DL || lteInfo->getDirection() == D2D || lteInfo->getDirection() == D2D_MULTI)   // This module is at a UE
@@ -202,6 +219,80 @@ void UmRxEntity::enque(cPacket* pkt)
             rxWindowDesc_.reorderingSno_ = rxWindowDesc_.highestReceivedSno_;
         }
     }
+
+
+    if(flowControlInfo_->getDirection() == UL) //only eNodeB checks the burst
+    {
+        handleBurst();
+    }
+
+}
+
+/* burst management
+ * check buffer size:
+ *   - if 0:
+ *      if(burst = true) //it is ended
+ *           consider only totalbytes, last_t1 and t2
+ *           clear variables
+ *           reset isBurst
+ *      if burst = false nothing happen
+ *          clear temp var
+ *  - if 1:
+ *      if burst = true //burst is still running
+ *          update total var with temp vale
+ *      if burst = false // new busr activatf
+ *          burst = 1
+ *          update total var with temp var
+ */
+void UmRxEntity::handleBurst()
+{
+    EV_FATAL << "size: " << pduBuffer_.size() + ((buffered_== NULL)?0 : 1) << endl;
+    if((pduBuffer_.size() + (buffered_== NULL)? 0 : 1) == 0)
+    {
+        if(isBurst_) // burst ends
+        {
+            //send stats
+            LteRlcUm* lteRlc = check_and_cast<LteRlcUm*>(getParentModule()->getSubmodule("um"));
+            Throughput throughput = {totalBits_, (t1_- t2_)};
+            lteRlc->addUeThroughput(flowControlInfo_->getSourceId(), throughput);
+            EV_FATAL << "BURST ENDED - size : " << totalBits_ << endl;
+            EV_FATAL << "tput: size " << totalBits_ << " time " << (t1_- t2_) <<  endl;
+
+            totalBits_ = 0;
+            t2_ = 0;
+            t1_ = 0;
+
+            isBurst_ = false;
+        }
+        else
+        {
+            EV_FATAL << "NO BURST - size : " << totalBits_ << endl;
+        }
+    }
+    else
+    {
+        if(isBurst_)
+        {
+
+            totalBits_ += ttiBits_;
+            t1_ = ttiT1_;
+            EV_FATAL << "BURST CONTINUE - size : " << totalBits_ << endl;
+        }
+        else
+        {
+            isBurst_ = true;
+            totalBits_ = ttiBits_;
+            t2_ = ttiT2_;
+            t1_ = ttiT1_;
+            EV_FATAL << "BURST STARTED - size : " << totalBits_ << endl;
+        }
+    }
+
+    // reset temporary (per tti) variables
+    ttiT2_ = 0;
+    ttiT1_ = 0;
+    ttiBits_ = 0;
+    t2Set_ = false;
 }
 
 void UmRxEntity::moveRxWindow(const int pos)
@@ -304,6 +395,14 @@ void UmRxEntity::toPdcp(LteRlcSdu* rlcSdu)
 
     EV << NOW << " UmRxEntity::toPdcp Created PDCP PDU with length " <<  pdcpPdu->getByteLength() << " bytes" << endl;
     EV << NOW << " UmRxEntity::toPdcp Send packet to upper layer" << endl;
+
+    if(t2Set_ == false) // first packet sent in this TTI
+    {
+        ttiT2_ = simTime();
+        t2Set_ = true;
+    }
+    ttiT1_ = simTime(); // last packet sent in this TTI
+    ttiBits_ += pdcpPdu->getBitLength();
 
     lteRlc->sendDefragmented(pdcpPdu);
 }
@@ -622,6 +721,14 @@ void UmRxEntity::reassemble(unsigned int index)
     // remove PDU from buffer
     pduBuffer_.remove(index);
     received_.at(index) = false;
+    if (lteInfo->getDirection() == UL)
+    {
+        if(buffered_ == NULL && pduBuffer_.size() == 0)
+        {
+            MacCid cid = idToMacCid(flowControlInfo_->getSourceId(), flowControlInfo_->getLcid());
+            rlc_->deactiveUeLcid(cid);
+        }
+    }
     EV << NOW << " UmRxEntity::reassemble Removed PDU from position " << index << endl;
 
     // emit statistics
@@ -681,6 +788,7 @@ void UmRxEntity::initialize()
     totalPduRcvdBytes_ = 0;
 
     cModule* parent = check_and_cast<LteRlcUm*>(getParentModule()->getSubmodule("um"));
+    rlc_ = check_and_cast<LteRlcUm*>(parent);
     //statistics
     LteMacBase* mac = check_and_cast<LteMacBase*>(getParentModule()->getParentModule()->getSubmodule("mac"));
 
@@ -761,6 +869,12 @@ void UmRxEntity::handleMessage(cMessage* msg)
         {
             rxWindowDesc_.reorderingSno_ = rxWindowDesc_.highestReceivedSno_;
             t_reordering_.start(timeout_);
+        }
+
+        //manage burst only eNodeB checks the burst
+        if(flowControlInfo_->getDirection() == UL && ttiBits_ > 0) // ttiBits >0 means that a packet has been sent
+        {                                                          // during the previous reassembling
+            handleBurst();
         }
 
         delete msg;
