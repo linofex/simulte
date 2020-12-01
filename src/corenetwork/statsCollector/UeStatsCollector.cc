@@ -88,7 +88,6 @@ void UeStatsCollector::add_dl_nongbr_data_volume_ue(unsigned int value)
     dl_nongbr_data_volume_ue.addValue(value);
 }
 
-
 int UeStatsCollector::get_ul_nongbr_delay_ue()
 {
     return ul_nongbr_delay_ue.getMean();
@@ -109,10 +108,11 @@ int UeStatsCollector::get_dl_nongbr_pdr_ue()
 
 int UeStatsCollector::get_ul_nongbr_throughput_ue()
 {
-    return -1;}
+    return ul_nongbr_throughput_ue.getMean();
+}
 int UeStatsCollector::get_dl_nongbr_throughput_ue()
 {
-    return -1;
+    return dl_nongbr_throughput_ue.getMean();
 }
 
 int UeStatsCollector::get_ul_nongbr_data_volume_ue()

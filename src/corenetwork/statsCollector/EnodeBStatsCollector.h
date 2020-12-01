@@ -31,6 +31,7 @@ class LteMacEnb;
 class LtePdcpRrcEnb;
 class PacketFlowManagerEnb;
 class LteCellInfo;
+class LteRlcUm;
 
 typedef std::map<MacNodeId, UeStatsCollector*> UeStatsCollectorMap;
 
@@ -44,6 +45,7 @@ class EnodeBStatsCollector: public cSimpleModule
         // LTE Nic layers
         LtePdcpRrcEnb *pdcp_;
         LteMacEnb     *mac_;
+        LteRlcUm      *rlc_;
         PacketFlowManagerEnb *flowManager_;
 
         LteCellInfo *cellInfo_;
@@ -153,9 +155,7 @@ class EnodeBStatsCollector: public cSimpleModule
         void add_ul_nongbr_data_volume_ue_perUser();
         void add_dl_nongbr_data_volume_ue_perUser();
         void add_dl_nongbr_throughput_ue_perUser();
-
-
-
+        void add_ul_nongbr_throughput_ue_perUser();
 
 
         int get_dl_gbr_prb_usage_cell(){return -1;}
