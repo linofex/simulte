@@ -22,6 +22,7 @@
 #include "stack/mac/packet/LteRac_m.h"
 #include "stack/mac/packet/LteMacSduRequest.h"
 #include "common/LteCommon.h"
+#include "stack/rlc/um/LteRlcUm.h"
 
 #include "stack/packetFlowManager/PacketFlowManagerEnb.h"
 
@@ -610,7 +611,7 @@ void LteMacEnb::macPduMake(MacCid cid)
                     destCid, mbuf_[destCid]->getQueueLength(), sduPerCid);
             }
             pkt = mbuf_[destCid]->popFront();
-            rlcPduSet.insert(check_and_cast<LteRlcUmDataPdu *>(pkt)->getPduSequenceNumber());
+            rlcPduSet.insert(check_and_cast<LteRlcDataPdu *>(pkt)->getPduSequenceNumber());
             ASSERT(pkt != NULL);
 
             drop(pkt);
@@ -1016,17 +1017,23 @@ ConflictGraph* LteMacEnb::getConflictGraph()
 }
 
 
-int LteMacEnb::getActiveUeSetSize(Direction dir)
+int LteMacEnb::getActiveUeSet(Direction dir)
 {
     std::set<MacNodeId> activeUeSet;
 
+    /*
+     * According to ETSI 136 314:
+     * Active UEs in DL are users whre there is
+     * buffered data in MAC RLC PDCP, plus data in HARQ
+     * transmissions not yet terminated.
+     */
     if(dir == DL){
         ActiveSet::const_iterator it = enbSchedulerDl_->getActiveConnectionSetBeginIt();
         ActiveSet::const_iterator end = enbSchedulerDl_->getActiveConnectionSetEndIt();
 
         // from macCid to NodeId
         for (; it != end ; ++it){
-            activeUeSet.insert(MacCidToNodeId(*it));
+            activeUeSet.insert(MacCidToNodeId(*it)); // active users in MAC
         }
 
         HarqTxBuffers *harqBuffer = getHarqTxBuffers();
@@ -1034,8 +1041,18 @@ int LteMacEnb::getActiveUeSetSize(Direction dir)
         HarqTxBuffers::const_iterator endHarq = harqBuffer->end();
         for(; itHarq != endHarq ; ++itHarq){
             if(itHarq->second->isHarqBufferActive()){
-                activeUeSet.insert(itHarq->first);
+                activeUeSet.insert(itHarq->first); // active users in HARQ
             }
+        }
+
+        // every time a RLC SDU enters the layer, a newPktData is sent to
+        // mac to inform the presence of data in RLC.
+        LteMacBufferMap::const_iterator vit = macBuffers_.begin();
+        LteMacBufferMap::const_iterator eit = macBuffers_.end();
+        for(; vit != eit ; ++vit)
+        {
+            if(!vit->second->isEmpty())
+                activeUeSet.insert(MacCidToNodeId(vit->first)); // active users in RLC
         }
     }
     else if (dir == UL)
@@ -1045,7 +1062,7 @@ int LteMacEnb::getActiveUeSetSize(Direction dir)
 
         // from macCid to NodeId
         for (; it != end ; ++it){
-            activeUeSet.insert(MacCidToNodeId(*it));
+            activeUeSet.insert(MacCidToNodeId(*it)); // Active users MAC
         }
 
         HarqRxBuffers *harqBuffer = getHarqRxBuffers();
@@ -1053,10 +1070,25 @@ int LteMacEnb::getActiveUeSetSize(Direction dir)
         HarqRxBuffers::const_iterator endHarq = harqBuffer->end();
         for(; itHarq != endHarq ; ++itHarq){
             if(itHarq->second->isHarqBufferActive()){
-                activeUeSet.insert(itHarq->first);
+                activeUeSet.insert(itHarq->first); // active users in HARQ
             }
-                }
+        }
 
+        // check the presence of um
+
+        LteRlcUm *rlcUm;
+        cModule *rlc = getParentModule()->getSubmodule("rlc");
+        if(rlc->findSubmodule("um") != -1)
+        {
+            rlcUm = check_and_cast<LteRlcUm *>(getParentModule()->getSubmodule("rlc")->getSubmodule("um"));
+            std::map<MacNodeId, std::set<LogicalCid>>::iterator rit =  rlcUm->getActiveUeUL().begin();
+            std::map<MacNodeId, std::set<LogicalCid>>::iterator endrit =  rlcUm->getActiveUeUL().end();
+            for(; rit != endrit ; ++rit){
+                if(rit->second.empty()){
+                    activeUeSet.insert(rit->first); // active users in RLC
+                }
+            }
+        }
     }
 
     else {

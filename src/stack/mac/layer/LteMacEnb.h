@@ -334,13 +334,13 @@ class LteMacEnb : public LteMacBase
 
     // @author Alessandro Noferi
     /* Get the number of active users based on the direction.
-     * A user is active (according with TS 136 314 if:
+     * A user is active (according with TS 136 314) if:
      * - it has buffered data in MAC RLC or PDCP layers -> ActiveSet
      * - it has data for which HARQ trasmission has not yet terminated -> !EMPTY HarqBuffer
      *
      * @par direction
      */
-    int getActiveUeSetSize(Direction dir);
+    int getActiveUeSet(Direction dir);
 
     /* get percentage of block utilized during the last TTI
      * @param dir UL or DL
