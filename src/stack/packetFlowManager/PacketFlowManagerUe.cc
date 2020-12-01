@@ -43,7 +43,6 @@ void PacketFlowManagerUe::initialize(int stage)
     {
         PacketFlowManagerBase::initialize(stage);
         pdcp_ = check_and_cast<LtePdcpRrcUe *>(getParentModule()->getSubmodule("pdcpRrc"));
-        headerCompressedSize_ = pdcp_->par("headerCompressedSize");
     }
 }
 
@@ -68,14 +67,8 @@ void PacketFlowManagerUe::initLcid(LogicalCid lcid, MacNodeId nodeId)
     newDesc.macSdusPerPdu_.clear();
     newDesc.macPduPerProcess_.resize(harqProcesses_, 0);
 
-
-    std::stringstream strs;
-      strs << nodeId -1025;
-      std::string temp_str = strs.str();
-      char* char_type = (char*) temp_str.c_str();
-
-      connectionMap_[lcid] = newDesc;
-      EV_FATAL << NOW << "node id "<< nodeId << " PacketFlowManagerUe::initLcid - initialized lcid " << lcid << endl;
+    connectionMap_[lcid] = newDesc;
+    EV_FATAL << NOW << "node id "<< nodeId << " PacketFlowManagerUe::initLcid - initialized lcid " << lcid << endl;
 }
 
 void PacketFlowManagerUe::clearLcid(LogicalCid lcid)
@@ -106,7 +99,8 @@ void PacketFlowManagerUe::clearAllLcid()
     EV_FATAL << NOW << " PacketFlowManagerUe::clearAllLcid - cleared data structures for all lcids "<< endl;
 }
 
-void PacketFlowManagerUe::initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, simtime_t& arrivalTime)
+void PacketFlowManagerUe::initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, unsigned int pdcpSize, simtime_t& arrivalTime)
+
 {
     // if pdcpStatus_ already present, error
     std::map<unsigned int, PdcpStatus>::iterator it = desc->pdcpStatus_.find(pdcp);
@@ -120,13 +114,13 @@ void PacketFlowManagerUe::initPdcpStatus(StatusDescriptor* desc, unsigned int pd
     newpdcpStatus.discardedAtRlc = false;
     newpdcpStatus.hasArrivedAll  = false;
     newpdcpStatus.sentOverTheAir =  false;
-    newpdcpStatus.pdcpSduSize = 0;
+    newpdcpStatus.pdcpSduSize = pdcpSize;
 
 
     desc->pdcpStatus_[pdcp] = newpdcpStatus;
 }
 
-void PacketFlowManagerUe::insertPdcpSdu(LogicalCid lcid, unsigned int pdcpSno, simtime_t arrivalTime)
+void PacketFlowManagerUe::insertPdcpSdu(LogicalCid lcid, unsigned int pdcpSno,unsigned int pdcpSize, simtime_t arrivalTime)
 {
     ConnectionMap::iterator cit = connectionMap_.find(lcid);
     if (cit == connectionMap_.end())
@@ -140,7 +134,7 @@ void PacketFlowManagerUe::insertPdcpSdu(LogicalCid lcid, unsigned int pdcpSno, s
     // get the descriptor for this connection
     StatusDescriptor* desc = &cit->second;
 
-    initPdcpStatus(desc, pdcpSno, arrivalTime);
+    initPdcpStatus(desc, pdcpSno, pdcpSize, arrivalTime);
 
     EV_FATAL << NOW << "node id "<< desc->nodeId_-1025 <<" PacketFlowManagerUe::insertPdcpSdu - PDCP status for PDCP PDU SN " << pdcpSno<<" added. Logicl cid " << lcid << endl;
 

@@ -56,7 +56,6 @@ class PacketFlowManagerBase : public cSimpleModule
             simtime_t entryTime;
         } PdcpStatus;
 
-
         int pktDiscardCounterTotal_; // total discarded packets counter of the node
 
         LteNodeType nodeType_; // UE or ENODED (used for set MACROS)
@@ -69,7 +68,8 @@ class PacketFlowManagerBase : public cSimpleModule
 
         int headerCompressedSize_;
 
-        virtual void initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, simtime_t& arrivalTime);
+        virtual void initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, unsigned int headerSize, simtime_t& arrivalTime);
+        virtual void removePdcpBurst(StatusDescriptor* desc, PdcpStatus& pdcpStatus,  unsigned int pdcpSno, bool ack);
 
         virtual int numInitStages() const { return 2; }
         virtual void initialize(int stage);
@@ -105,7 +105,7 @@ class PacketFlowManagerBase : public cSimpleModule
         * @param pdcpSno sequence number of the pdcp pdu
         * @param entryTime the time the packet enters PDCP layer
         */
-        virtual void insertPdcpSdu(LogicalCid lcid, unsigned int pdcpSno, simtime_t entryTime) = 0;
+        virtual void insertPdcpSdu(LogicalCid lcid, unsigned int pdcpSno, unsigned int sduSize, simtime_t entryTime) = 0;
         
         /* 
         * This method insert a new rlc seqnum and the corresponding pdcp pdus inside it

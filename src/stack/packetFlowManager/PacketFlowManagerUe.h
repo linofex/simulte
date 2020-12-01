@@ -74,7 +74,8 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
 
     virtual int numInitStages() const { return 2; }
     virtual void initialize(int stage);
-    virtual void initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, simtime_t& arrivalTime);
+    virtual void initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, unsigned int pdcpSize, simtime_t& arrivalTime);
+
 
 //    bool hasFragments(LogicalCid lcid, unsigned int pdcp);
 
@@ -96,7 +97,7 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
     * @param pdcpSno sequence number of the pdcp pdu
     * @param entryTime the time the packet enters PDCP layer
     */
-    virtual void insertPdcpSdu(LogicalCid lcid, unsigned int pdcpSno, simtime_t entryTime);
+    virtual void insertPdcpSdu(LogicalCid lcid, unsigned int pdcpSno,unsigned int sduSize, simtime_t entryTime);
     
     /* 
     * This method insert a new rlc seqnum and the corresponding pdcp pdus inside it
