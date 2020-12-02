@@ -5,7 +5,7 @@
 #include <ctime>
 #include <string>
 
-#include "../../RNIService/resources/json.hpp"
+#include "apps/mec/MeServices/httpUtils/json.hpp"
 #include "common/LteCommon.h"
 
 

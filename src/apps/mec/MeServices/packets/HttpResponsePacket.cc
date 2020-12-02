@@ -26,6 +26,9 @@ void HTTPResponsePacket::setStatus(const responseCode res){
         case(OK):
             response = "200 OK";
             break;
+        case(CREATED):
+            response = "201 Created";
+            break;
         case(BAD_REQ):
             response = "400 BadRequest";
             break;

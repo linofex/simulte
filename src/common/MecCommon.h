@@ -10,6 +10,13 @@ enum RlcBurstStatus
     START, STOP, ACTIVE, INACTIVE
 };
 
+enum Trigger
+{
+    PERIODICAL, UTI_80, DL_TPU_1
+};
+
+
+Trigger getTrigger(std::string& trigger);
 
 typedef struct
 {

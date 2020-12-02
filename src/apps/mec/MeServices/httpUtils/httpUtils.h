@@ -17,6 +17,8 @@ void sendPacket(HTTPResponsePacket& pck, inet::TCPSocket *socket);
 bool ceckHttpVersion(std::string& httpVersion);
 
 void send200Response(inet::TCPSocket *socket, const char* body);
+void send201Response(inet::TCPSocket *socket, const char* body);
+
 
 void send405Response(inet::TCPSocket *socket, const char *methods =  "" );
 void send400Response(inet::TCPSocket *socket);

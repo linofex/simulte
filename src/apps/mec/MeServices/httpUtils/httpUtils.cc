@@ -3,8 +3,7 @@
 #include "apps/mec/MeServices/packets/HttpResponsePacket.h"
 #include "inet/common/RawPacket.h"
 #include "inet/common/INETDefs.h"
-#include "apps/mec/MeServices/RNIService/resources/json.hpp"
-
+#include "apps/mec/MeServices/httpUtils/json.hpp"
 namespace Http {
     /* ProblemDetail structure from RFC 7807
      * {
@@ -73,6 +72,14 @@ namespace Http {
         sendPacket(resp, socket);
     }
 
+    void send201Response(inet::TCPSocket *socket, const char* body){
+            HTTPResponsePacket resp = HTTPResponsePacket(CREATED);
+            resp.setBody(body);
+            sendPacket(resp, socket);
+    }
+
+
+
     void send405Response(inet::TCPSocket *socket, const char* methods){
         HTTPResponsePacket resp = HTTPResponsePacket(BAD_METHOD);
         if(strcmp (methods,"") == 0)
@@ -89,7 +96,7 @@ namespace Http {
 
     void send400Response(inet::TCPSocket *socket){
         HTTPResponsePacket resp = HTTPResponsePacket(BAD_REQ);
-        resp.setBody("{TODO implement ProblemDetails}");
+        resp.setBody("{ \"send400Response\" : \"TODO implement ProblemDetails\"}");
         sendPacket(resp, socket);
     }
 
@@ -97,7 +104,7 @@ namespace Http {
         HTTPResponsePacket resp = HTTPResponsePacket(NOT_FOUND);
         nlohmann::ordered_json problemDetail;
         problemDetail[""];
-        resp.setBody("{TODO implement ProblemDetails}");
+        resp.setBody("{ \"send404Response\" : \"TODO implement ProblemDetails\"}");
         sendPacket(resp, socket);
     }
 

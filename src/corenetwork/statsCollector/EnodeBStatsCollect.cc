@@ -37,7 +37,7 @@ void EnodeBStatsCollector::initialize(int stage){
         mac_ = check_and_cast<LteMacEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("mac"));
         pdcp_ = check_and_cast<LtePdcpRrcEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("pdcpRrc"));
 
-        cModule *rlc = getParentModule()->getSubmodule("rlc");
+        cModule *rlc = getParentModule()->getSubmodule("lteNic")->getSubmodule("rlc");
         if(rlc->findSubmodule("um") != -1)
         {
             rlc_ = check_and_cast<LteRlcUm *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("rlc")->getSubmodule("um"));

@@ -27,6 +27,7 @@
 #include "apps/mec/MeServices/packets/HttpResponsePacket_m.h"
 
 enum responseCode { OK,         // 200
+                    CREATED,    // 201
                     BAD_REQ,    // 400
                     UNAUTH,     // 401
                     FORBIDDEN,  // 403
