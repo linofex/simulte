@@ -46,7 +46,7 @@ class GenericService: public cSimpleModule, public inet::ILifecycle
     protected:
         inet::TCPSocket serverSocket; // Used to listen incoming connections
         inet::TCPSocketMap socketMap; // Stores the connections
-
+        std::string host_;
         LteBinder* binder_;
         cModule* meHost_;
         std::vector<cModule*> eNodeB_;     //eNodeBs connected to the ME Host
@@ -63,9 +63,9 @@ class GenericService: public cSimpleModule, public inet::ILifecycle
         virtual void handlePUTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket) = 0;
         virtual void handleDELETERequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket)= 0;
 
-        virtual void handleRequest(char* packet, inet::TCPSocket *socket);
+        virtual void handleRequest(std::string& packet, inet::TCPSocket *socket);
 
-        virtual void parseRequest(char *packet_, inet::TCPSocket *socket, reqMap* request);
+        virtual bool parseRequest(std::string&, inet::TCPSocket *socket, reqMap* request);
         virtual ~GenericService();
 
         virtual bool handleOperationStage(inet::LifecycleOperation *operation, int stage, inet::IDoneCallback *doneCallback) override

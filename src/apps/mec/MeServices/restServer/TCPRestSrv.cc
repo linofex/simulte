@@ -109,7 +109,7 @@ void TCPRestSrv::handleMessage(cMessage *msg)
             }
             if (msg->getKind() == inet::TCP_I_DATA || msg->getKind() == inet::TCP_I_URGENT_DATA) {
                 EV << "## New packet arrived\n";
-                char* packet = utils::getPacketPayload(msg);
+                std::string packet = utils::getPacketPayload(msg);
 //                inet::RawPacket *request = check_and_cast<inet::RawPacket *>(msg);
 //                std::string packet(request->getByteArray().getDataPtr());
                 //EV << packet;
@@ -131,7 +131,7 @@ void TCPRestSrv::handleMessage(cMessage *msg)
 
 }
 
- void TCPRestSrv::handleRequest(char* packet, inet::TCPSocket *socket){
+ void TCPRestSrv::handleRequest(std::string& packet, inet::TCPSocket *socket){
      std::map<std::string, std::string> request = parseRequest(packet); // e.g. [0] GET [1] URI
      if(request.at("method").compare("GET") == 0)
          handleGetRequest(request.at("uri"), socket); // pass URI
@@ -147,7 +147,7 @@ void TCPRestSrv::handleMessage(cMessage *msg)
 
 }
 
-std::map<std::string, std::string> TCPRestSrv::parseRequest(char* packet_){
+std::map<std::string, std::string> TCPRestSrv::parseRequest(std::string&  packet_){
 
     std::string packet(packet_);
     std::map<std::string, std::string> headerFields;

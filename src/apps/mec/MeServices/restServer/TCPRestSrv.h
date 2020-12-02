@@ -60,13 +60,13 @@ class TCPRestSrv: public cSimpleModule, public inet::ILifecycle
   protected:
 
 
-    std::map<std::string, std::string> parseRequest(char *packet_);
+    std::map<std::string, std::string> parseRequest(std::string& packet_);
     virtual void initialize(int stage) override;
     virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
-    virtual void handleRequest(char *packet, inet::TCPSocket *socket);
+    virtual void handleRequest(std::string& packet, inet::TCPSocket *socket);
     virtual void handleGetRequest(std::string& uri, inet::TCPSocket* socket);
     virtual void handlePostRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
 

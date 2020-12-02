@@ -29,7 +29,7 @@ namespace utils {
 
 
 std::vector<std::string> splitString(const std::string& str, std::string delim);
-char* getPacketPayload(::omnetpp::cMessage *msg);
+std::string getPacketPayload(::omnetpp::cMessage *msg);
 inet::RawPacket* createUDPPacket(const std::string& payload);
 } // namespace httptools
 

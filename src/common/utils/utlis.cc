@@ -22,10 +22,12 @@ namespace utils {
         return splitted;
     }
 
-    char* getPacketPayload(::omnetpp::cMessage *msg){
+    std::string getPacketPayload(::omnetpp::cMessage *msg){
         inet::RawPacket *request = check_and_cast<inet::RawPacket *>(msg);
         if (request == 0) throw cRuntimeError("UEWarningAlertApp_rest::handleMessage - \tFATAL! Error when casting to MEAppPacket");
-        return request->getByteArray().getDataPtr();
+        int pktSize = request->getByteLength();
+        std::string packet(request->getByteArray().getDataPtr(), pktSize);
+        return packet;
     }
 
     inet::RawPacket* createUDPPacket(const std::string& payload){

@@ -32,9 +32,8 @@
 #include <string>
 #include <vector>
 #include "common/utils/utils.h"
-
-
-
+#include <sstream>
+#include "apps/mec/MeServices/httpUtils/json.hpp"
 //Define_Module(GenericService);
 
 
@@ -61,6 +60,11 @@ void GenericService::initialize(int stage)
         binder_ = getBinder();
         meHost_ = getParentModule() // virtualizationInfrastructure
                 ->getParentModule(); // MeHost
+
+
+        std::stringstream hostStream;
+        hostStream << localAddress<< ":" << localPort;
+        host_ = hostStream.str();
 
         this->getConnectedEnodeB();
 
@@ -92,7 +96,7 @@ void GenericService::handleMessage(cMessage *msg)
             }
             if (msg->getKind() == inet::TCP_I_DATA || msg->getKind() == inet::TCP_I_URGENT_DATA) {
                 EV << "## New packet arrived\n";
-                char* packet = utils::getPacketPayload(msg);
+                std::string packet = utils::getPacketPayload(msg);
                 handleRequest(packet, socket);
             }
             else if (msg->getKind() == inet::TCP_I_PEER_CLOSED) {
@@ -110,11 +114,12 @@ void GenericService::handleMessage(cMessage *msg)
 
 }
 
- void GenericService::handleRequest(char* packet, inet::TCPSocket *socket){
+ void GenericService::handleRequest(std::string& packet, inet::TCPSocket *socket){
      reqMap *request = new reqMap;
-     parseRequest(packet, socket, request); // e.g. [0] GET [1] URI
+     bool res = parseRequest(packet, socket, request); // e.g. [0] GET [1] URI
 
-     if(!request->empty()){ // request-line is well formatted
+
+     if(res){ // request-line is well formatted
 
          if(request->at("method").compare("GET") == 0)
              handleGETRequest(request->at("uri"), socket); // pass URI
@@ -147,10 +152,9 @@ void GenericService::handleMessage(cMessage *msg)
      }
  }
 
-void GenericService::parseRequest(char* packet_, inet::TCPSocket *socket, reqMap* request){
-    std::string packet(packet_);
-
-    std::vector<std::string> splitting = utils::splitString(packet, "\r\n\r\n"); // bound between header and body
+bool GenericService::parseRequest(std::string& packet_, inet::TCPSocket *socket, reqMap* request){
+//    std::string packet(packet_);
+    std::vector<std::string> splitting = utils::splitString(packet_, "\r\n\r\n"); // bound between header and body
     std::string header;
     std::string body;
     
@@ -167,7 +171,7 @@ void GenericService::parseRequest(char* packet_, inet::TCPSocket *socket, reqMap
     else //incorrect request
     {
        Http::send400Response(socket); // bad request
-       return;
+       return false;
     }
     
 
@@ -177,11 +181,11 @@ void GenericService::parseRequest(char* packet_, inet::TCPSocket *socket, reqMap
     line = utils::splitString(*it, " ");  // Request-Line GET / HTTP/1.1
     if(line.size() != 3 ){
         Http::send400Response(socket);
-        return;
+        return false;
     }
     if(!Http::ceckHttpVersion(line[2])){
         Http::send505Response(socket);
-        return;
+        return false;
     }
 
     request->insert( std::pair<std::string, std::string>("method", line[0]) );
@@ -194,7 +198,7 @@ void GenericService::parseRequest(char* packet_, inet::TCPSocket *socket, reqMap
             request->insert( std::pair<std::string, std::string>(line[0], line[1]) );
     }
 
-    return;
+    return true;
 }
 
 void GenericService::refreshDisplay() const
