@@ -73,7 +73,7 @@ class UEWarningAlertApp_rest : public cSimpleModule
         virtual void handleMessage(cMessage *msg);
         virtual void finish();
 
-        void handleUDPPacket(char *packet);
+        void handleUDPPacket(std::string& packet);
         void sendStartUEWarningAlertApp();
         void sendStopUEWarningAlertApp();
 

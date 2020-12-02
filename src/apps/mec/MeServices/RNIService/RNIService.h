@@ -19,6 +19,8 @@
 #define __INET_RNISERVICE_H
 
 #include "inet/common/INETDefs.h"
+#include "common/MecCommon.h"
+
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/common/lifecycle/LifecycleOperation.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
@@ -37,6 +39,21 @@
  *
  */
 
+typedef struct{
+    inet::TCPSocket *socket;
+    std::vector<MacNodeId> cellIds;
+    std::vector<MacNodeId> ues;
+    std::vector<Trigger> trigger;
+    std::string consumerUri;
+    std::string appInstanceId;
+    std::string subscriptionType;
+    std::string subscriptionId;
+
+    double expiretaionTime;
+} SubscriptionInfo;
+
+
+
 class L2Meas;
 
 class RNIService: public GenericService
@@ -44,6 +61,10 @@ class RNIService: public GenericService
   private:
 
     L2Meas L2MeasResource_;
+    std::map<std::string, SubscriptionInfo >subscriptions_;
+    std::map<std::string, std::set<std::string> >subTypeToSubId_;
+
+    unsigned int subscriptionId_;
     std::string baseUriQueries_;
     std::string baseUriSubscriptions_;
     std::set<std::string>supportedQueryParams_;

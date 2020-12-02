@@ -100,16 +100,17 @@ void UEWarningAlertApp_rest::handleMessage(cMessage *msg)
     else{
         EV << "###RICEVUTO: " << msg;
         if(msg->getKind() == UDP_I_DATA){
-            handleUDPPacket(utils::getPacketPayload(msg));
+            std::string udpPayload = utils::getPacketPayload(msg);
+           handleUDPPacket(udpPayload);
         }
         delete msg;
     }
 }
 
 
-void UEWarningAlertApp_rest::handleUDPPacket(char* payload){
+void UEWarningAlertApp_rest::handleUDPPacket(std::string& payload){
     // ACK from app
-    if(strstr(payload, "OK START APP") != nullptr){
+    if(payload.compare("OK START APP") == 0){
         // stop sending START APP
         if(selfStart_->isScheduled()){
             cancelEvent(selfStart_);
@@ -120,11 +121,11 @@ void UEWarningAlertApp_rest::handleUDPPacket(char* payload){
         //        if(selfStop_->isScheduled()) cancelEvent(selfStop_);
         scheduleAt(simTime() + stopTime, selfStop_);
     }
-    else if(strstr(payload, "OK STOP APP") != nullptr){
+    else if(payload.compare("OK STOP APP") == 0){
         //do nothing
     }
     // alert message
-    else if(strstr(payload, "ALERT MESSAGE") != nullptr){
+    else if(payload.compare("OK START APP") == 0){
         EV << payload << endl;
     }
 
