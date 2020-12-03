@@ -1,20 +1,4 @@
-//
-// Copyright (C) 2004 Andras Varga
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-
+// TODO intro
 
 #include "../GenericService/GenericService.h"
 
@@ -28,7 +12,7 @@
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
 
 #include "apps/mec/MeServices/httpUtils/httpUtils.h"
-
+#include <iostream>
 #include <string>
 #include <vector>
 #include "common/utils/utils.h"
@@ -102,12 +86,13 @@ void GenericService::handleMessage(cMessage *msg)
             else if (msg->getKind() == inet::TCP_I_PEER_CLOSED) {
                 socket->close();
                 socketMap.removeSocket(socket);
-                delete socket;
-                EV_INFO <<"Closed connection from: " << socket->getRemoteAddress();
+                std::cout<<"Closed connection from: " << socket->getRemoteAddress()<< std::endl;
+                //delete socket; // do not delte RNI use it to manage subscription!
 
             }
             else if (msg->getKind() == inet::TCP_I_CLOSED) {
-                EV_INFO <<"Removed connection from: " << socket->getRemoteAddress();
+                std::cout <<"Removed connection from: " << socket->getRemoteAddress();
+                socket->processMessage(msg);
             }
             delete msg;
         }
@@ -131,8 +116,7 @@ void GenericService::handleMessage(cMessage *msg)
              handlePUTRequest(request->at("uri"), request->at("body"),  socket); // pass URI
 
          else if(request->at("method").compare("DELETE") == 0)
-             handleDELETERequest(request->at("uri"), request->at("body"),  socket); // pass URI
-
+             handleDELETERequest(request->at("uri"),  socket); // pass URI
          else if(request->at("method").compare("HEAD") == 0)
              Http::send405Response(socket);
 
@@ -206,8 +190,6 @@ void GenericService::refreshDisplay() const
 // TODO
     return;
 }
-
-
 
 void GenericService::getConnectedEnodeB(){
     int eNodeBsize = meHost_->gateSize("pppENB");

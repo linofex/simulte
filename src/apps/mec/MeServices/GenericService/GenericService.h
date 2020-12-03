@@ -1,18 +1,4 @@
-//
-// Copyright (C) 2004 Andras Varga
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
+// TODO intro
 //
 
 #ifndef __INET_GENERICSERVICE_H
@@ -59,9 +45,9 @@ class GenericService: public cSimpleModule, public inet::ILifecycle
         virtual void getConnectedEnodeB();
 
         virtual void handleGETRequest(const std::string& uri, inet::TCPSocket* socket) = 0;
-        virtual void handlePOSTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket) = 0;
-        virtual void handlePUTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket) = 0;
-        virtual void handleDELETERequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket)= 0;
+        virtual void handlePOSTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket)   = 0;
+        virtual void handlePUTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket)    = 0;
+        virtual void handleDELETERequest(const std::string& uri, inet::TCPSocket* socket) = 0;
 
         virtual void handleRequest(std::string& packet, inet::TCPSocket *socket);
 
