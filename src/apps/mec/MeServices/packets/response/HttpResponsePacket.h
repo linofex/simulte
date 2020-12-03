@@ -1,9 +1,9 @@
 /**
  * @author Alessandro Noferi
  *
- * This class create and manages HTTP responses, i.e.:
+ * This class create and manages HTTP responses packets, i.e.:
  *
- * HTTP/1.1 CODE \r\n
+ * HTTP/1.1 STATUS \r\n
  * headers[] \r\n
  * \r\n
  * body
@@ -24,10 +24,11 @@
 
 #include <omnetpp.h>
 #include <string>
-#include "apps/mec/MeServices/packets/HttpResponsePacket_m.h"
+#include "apps/mec/MeServices/packets/response/HttpResponsePacket_m.h"
 
 enum responseCode { OK,         // 200
                     CREATED,    // 201
+                    NO_CONTENT, // 204
                     BAD_REQ,    // 400
                     UNAUTH,     // 401
                     FORBIDDEN,  // 403
@@ -56,23 +57,23 @@ class HTTPResponsePacket : public HTTPResponsePacket_Base
     public:
         HTTPResponsePacket(const char *name=nullptr, short kind=0);
         HTTPResponsePacket(const responseCode res, const char *name=nullptr, short kind=0);
-        HTTPResponsePacket& operator=(const HTTPResponsePacket& other){}// {if (this==&other) return *this; HTTPResponsePacket_Base::operator=(other); copy(other); return *this;}
+        HTTPResponsePacket& operator=(const HTTPResponsePacket& other){if (this==&other) return *this; HTTPResponsePacket_Base::operator=(other); copy(other); return *this;}
 
         virtual HTTPResponsePacket *dup() const override {return new HTTPResponsePacket(*this);}
 
 //        virtual void setStatus(const char * status);
         virtual void setStatus(const responseCode res);
-        virtual void setConnection(const char * connection_) override;
-        virtual void setContentType(const char * contentType_) override;
+        virtual void setConnection(const char * connection_);
+        virtual void setContentType(const char * contentType_);
         virtual void setBody(const char * body_) override;
         virtual void setBody(const std::string& body_);
-        virtual void setHeaderField(const char * hfield_);
+        virtual void setHeaderField(const std::string& key, const std::string& value);
 
         virtual const char * getPayload();
     private:
-          //void copy(const HTTPResponsePacket& other){};
-          std::vector<const char *> headerFields;
-          ::omnetpp::opp_string httpVersion = "HTTP/1.1 ";
+          void copy(const HTTPResponsePacket& other);
+          std::map<std::string, std::string> headerFields_;
+          ::omnetpp::opp_string httpVersion_ = "HTTP/1.1 ";
 
 };
 

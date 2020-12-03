@@ -61,8 +61,11 @@ class RNIService: public GenericService
   private:
 
     L2Meas L2MeasResource_;
-    std::map<std::string, SubscriptionInfo >subscriptions_;
-    std::map<std::string, std::set<std::string> >subTypeToSubId_;
+    typedef std::map<std::string, std::map<std::string, SubscriptionInfo >> SubscriptionsStructure;
+    SubscriptionsStructure subscriptions_;
+
+    double L2measSubscriptionPeriod_;
+    cMessage *L2measSubscriptionEvent_;
 
     unsigned int subscriptionId_;
     std::string baseUriQueries_;
@@ -70,6 +73,7 @@ class RNIService: public GenericService
     std::set<std::string>supportedQueryParams_;
     std::set<std::string>supportedSubscriptionParams_;
     
+    void manageL2MeasSubscriptions();
   public:
     RNIService();
   protected:
@@ -85,7 +89,7 @@ class RNIService: public GenericService
     virtual void handleGETRequest(const std::string& uri, inet::TCPSocket* socket);
     virtual void handlePOSTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
     virtual void handlePUTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
-    virtual void handleDELETERequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
+    virtual void handleDELETERequest(const std::string& uri, inet::TCPSocket* socket);
 
     virtual ~RNIService();
 

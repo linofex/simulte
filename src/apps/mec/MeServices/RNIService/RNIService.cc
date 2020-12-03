@@ -1,38 +1,19 @@
-//
-// Copyright (C) 2004 Andras Varga
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-
-
-
+//TODO intro
 
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "inet/transportlayer/contract/tcp/TCPCommand_m.h"
-#include "apps/mec/MeServices/packets/HttpResponsePacket.h"
 #include "apps/mec/warningAlert_rest/UEWarningAlertApp_rest.h"
 #include "inet/common/RawPacket.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
-
+#include <iostream>
 #include "apps/mec/MeServices/RNIService/RNIService.h"
 
 #include <string>
 #include <vector>
-#include "apps/mec/MeServices/packets/HttpResponsePacket.h"
+//#include "apps/mec/MeServices/packets/HttpResponsePacket.h"
 #include "apps/mec/MeServices/httpUtils/httpUtils.h"
 #include "common/utils/utils.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
@@ -44,6 +25,8 @@ Define_Module(RNIService);
 RNIService::RNIService():L2MeasResource_(){
     baseUriQueries_ = "/example/rni/v2/queries";
     baseUriSubscriptions_ = "/example/rni/v2/subscriptions";
+    subscriptionId_ = 0;
+    subscriptions_.clear();
     supportedQueryParams_.insert("cell_id");
     supportedQueryParams_.insert("ue_ipv4_address");
     // supportedQueryParams_s_.insert("ue_ipv6_address");
@@ -59,15 +42,28 @@ void RNIService::initialize(int stage)
     else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
         GenericService::initialize(stage);
         L2MeasResource_.addEnodeB(eNodeB_);
-        subscriptionId_ = 0;
-        subscriptions_.clear();
+        L2measSubscriptionEvent_ = new cMessage("L2measSubscriptionEvent");
+        L2measSubscriptionPeriod_ = par("L2measSubscriptionPeriod");
+
     }
 }
 
 
 void RNIService::handleMessage(cMessage *msg)
 {
-    GenericService::handleMessage(msg);
+    if(msg->isSelfMessage())
+    {
+        if(strcmp(msg->getName(), "L2measSubscriptionEvent") == 0)
+        {
+            manageL2MeasSubscriptions();
+            scheduleAt(simTime() + L2measSubscriptionPeriod_ , msg);
+        }
+
+    }
+    else
+    {
+        GenericService::handleMessage(msg);
+    }
 }
 
 void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket)
@@ -194,7 +190,6 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
 
 }
 
-
 void RNIService::handlePOSTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket)
 {
     // uri must be in form example/v1/rni/subscriptions/sub_type
@@ -220,7 +215,7 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
         }
         catch(nlohmann::detail::parse_error e)
         {
-
+            throw cRuntimeError("%s", body.c_str());
             // body is not correctly formatted in JSON, manage it
             Http::send400Response(socket); // bad body JSON
             return;
@@ -279,16 +274,16 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
                 }
 
                 //check ues filter
-                if(filterCriteria.contains("associatedId"))
+                if(filterCriteria.contains("associateId"))
                 {
-                    if(filterCriteria["associatedId"].is_array())
+                    if(filterCriteria["associateId"].is_array())
                     {
-                        nlohmann::json ueVector = filterCriteria["associatedId"];
+                        nlohmann::json ueVector = filterCriteria["associateId"];
                         for(int i = 0; i < ueVector.size(); ++i)
                         {
-                            if(ueVector.at(i)["type"] == "UE_IPv4_ADDRESS")
+                            if(ueVector.at(i)["associateId"]["type"] == "UE_IPv4_ADDRESS")
                             {
-                                std::string address = ueVector.at(i)["value"];
+                                std::string address = ueVector.at(i)["associateId"]["value"];
                                 ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
                             }
                             else
@@ -300,8 +295,11 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
                     }
                     else
                     {
-                        std::string address = filterCriteria["associatedId"]["value"];
-                        ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
+                        if(filterCriteria["associateId"]["type"] == "UE_IPv4_ADDRESS")
+                        {
+                            std::string address = filterCriteria["associateId"]["value"];
+                            ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
+                        }
                     }
                 }
 
@@ -361,32 +359,133 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
                 idStream << "sub"<< subscriptionId_;
                 newSubscription.subscriptionId = idStream.str();
                 newSubscription.subscriptionType = "L2_meas";
-                subscriptions_[newSubscription.subscriptionId] = newSubscription;
-                subTypeToSubId_["L2_meas"].insert(newSubscription.subscriptionId);
+
+                subscriptions_["L2_meas"][newSubscription.subscriptionId] = newSubscription;
 
                 subscriptionId_++;
-                std::string links =  host_ + "/"+ baseUriSubscriptions_ + "/" + newSubscription.subscriptionId;
+                std::string links =  host_ + baseUriSubscriptions_ + "/" + newSubscription.subscriptionId;
                 nlohmann::json response;
-                response["MeasRepUeSubscription"]["_links"]["self"] =links;
-                response["MeasRepUeSubscription"] = jsonBody;
+                response["L2MeasSubscription"]["_links"]["self"] =links;
+                response["L2MeasSubscription"] = jsonBody;
 
+                std::pair<std::string, std::string> location("Location: ", links);
                 //send 201 response
-                Http::send201Response(socket, response.dump(2).c_str());
+                Http::send201Response(socket, response.dump(2).c_str(), location);
+                if(!L2measSubscriptionEvent_->isScheduled()) //subscriptions are not scheduled
+                    scheduleAt(simTime() + L2measSubscriptionPeriod_, L2measSubscriptionEvent_);
                 return;
             }
             else
             {
-                throw cRuntimeError("do the else statement");
+                Http::send400Response(socket); // filterCriteria is mandatory and takes exactly 1 att
+                return;
             }
         }
+    }
+    else
+    {
+        Http::send404Response(socket); //resource not found
     }
 }
 
 void RNIService::handlePUTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){}
 
-void RNIService::handleDELETERequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){}
+void RNIService::handleDELETERequest(const std::string& uri, inet::TCPSocket* socket)
+{
+    //get the subId from the uri
+    // check the sender is the UE that created the resource
+    std::size_t lastPart = uri.find_last_of("/");
+    if(lastPart == std::string::npos)
+    {
+        throw cRuntimeError("1 - %s", uri.c_str());
+
+        Http::send404Response(socket); //it is not a correct uri
+        return;
+    }
+
+    // find_last_of does not take in to account if the uri has a last /
+    // in this case subscriptionType would be empty and the baseUri == uri
+    // by the way the next if statement solve this problem
+    std::string subscriptionId =  uri.substr(lastPart+1);
+    std::string uriAndSubType = uri.substr(0,lastPart);
+    lastPart = uriAndSubType.find_last_of("/");
+    if(lastPart == std::string::npos)
+    {
+        throw cRuntimeError("2 - %s", uriAndSubType.c_str());
+        Http::send404Response(socket); //it is not a correct uri
+        return;
+    }
+    std::string baseUri = uriAndSubType.substr(0,lastPart);
+    std::string subscriptionType = uriAndSubType.substr(lastPart + 1);
+
+    if(baseUri.compare(baseUriSubscriptions_) == 0)
+    {
+        SubscriptionsStructure::iterator it = subscriptions_.find(subscriptionType);
+        if(it == subscriptions_.end()){
+            Http::send404Response(socket);
+            return;
+        }
+        std::map<std::string, SubscriptionInfo >::iterator rit = it->second.find(subscriptionId);
+        if(rit != it->second.end()){
+            it->second.erase(rit);
+            if(it->second.empty() && L2measSubscriptionEvent_->isScheduled()) // no more l2meas sub, stop timer
+                cancelEvent(L2measSubscriptionEvent_);
+
+        }
+        else
+        {
+            // manage?
+        }
+        Http::send204Response(socket);
 
 
+    }
+    else
+    {
+
+        Http::send404Response(socket); //it is not a correct uri
+        return;
+    }
+}
+
+
+void RNIService::manageL2MeasSubscriptions(){
+    SubscriptionsStructure::iterator it = subscriptions_.find("L2_meas");
+    if(it != subscriptions_.end())
+    {
+        std::map<std::string, SubscriptionInfo>::iterator sit = it->second.begin();
+        std::map<std::string, SubscriptionInfo>::iterator end = it->second.end();
+        for(;sit != end; ++sit)
+        {
+            std::string body;
+            //send response
+            if(!sit->second.ues.empty() && !sit->second.cellIds.empty())
+            {
+                body = L2MeasResource_.toJson(sit->second.cellIds, sit->second.ues).dump(2);
+                std::cout << "ue e cell"<<std::endl;
+            }
+            else if(sit->second.ues.empty() && !sit->second.cellIds.empty())
+            {
+                body = L2MeasResource_.toJsonCell(sit->second.cellIds).dump(2);
+                std::cout << "cell"<<std::endl;
+            }
+            else if(!sit->second.ues.empty() && sit->second.cellIds.empty())
+            {
+                body = L2MeasResource_.toJsonUe(sit->second.ues).dump(2);
+                std::cout << "ue"<<std::endl;
+            }
+            else if(sit->second.ues.empty() && sit->second.cellIds.empty())
+            {
+                body = L2MeasResource_.toJson().dump(2);
+                std::cout << "tutti"<<std::endl;
+            }
+            // TODO manage socket closed!(if is non connected, I remove the ue sub!
+            if(sit->second.socket->getState() == TCPSocket::CONNECTED) //fix this (smart pointers nor usable (!?)
+                Http::sendPostRequest(sit->second.socket, body.c_str(),"127.0.0.1:8888", "/io/te");
+        }
+
+    }
+}
 void RNIService::finish()
 {
 // TODO
@@ -402,6 +501,7 @@ void RNIService::refreshDisplay() const
 
 
 RNIService::~RNIService(){
+    cancelEvent(L2measSubscriptionEvent_);
 return;
 }
 

@@ -1,4 +1,4 @@
-#include "apps/mec/MeServices/packets/HttpResponsePacket.h"
+#include "apps/mec/MeServices/packets/response/HttpResponsePacket.h"
 #include "inet/common/INETDefs.h"
 
 
@@ -7,7 +7,7 @@ HTTPResponsePacket::HTTPResponsePacket(const char *name, short kind): HTTPRespon
 {
      setContentType("application/json");
      setConnection("keep-alive");
-     setBody("\r\n");
+     setBody("");
      setPayload("");
 }
 HTTPResponsePacket::HTTPResponsePacket(const responseCode res, const char *name, short kind): HTTPResponsePacket_Base(name, kind)
@@ -15,82 +15,92 @@ HTTPResponsePacket::HTTPResponsePacket(const responseCode res, const char *name,
     setStatus(res);
     setContentType("application/json");
     setConnection("keep-alive");
-    setBody("\r\n");
+    setBody("");
     setPayload("");
-
 }
 
 void HTTPResponsePacket::setStatus(const responseCode res){
-    ::omnetpp::opp_string response;
     switch(res) {
         case(OK):
-            response = "200 OK";
+        this->status = "200 OK";
             break;
         case(CREATED):
-            response = "201 Created";
+        this->status = "201 Created";
             break;
+        case(NO_CONTENT):
+        this->status = "204 No Content";
+            break;
+
         case(BAD_REQ):
-            response = "400 BadRequest";
+        this->status = "400 BadRequest";
             break;
         case(UNAUTH):
-            response = "401 Unauthorized";
+        this->status = "401 Unauthorized";
             break;
         case(FORBIDDEN):
-            response = "403 Forbidden";
+        this->status = "403 Forbidden";
             break;
         case(NOT_FOUND):
-            response = "404 Not Found";
+        this->status = "404 Not Found";
             break;
         case(NOT_ACC):
-            response = "406 Not Acceptable";
+        this->status = "406 Not Acceptable";
             break;
         case(TOO_REQS):
-            response = "429 Too Many Requests";
+        this->status = "429 Too Many Requests";
             break;
         case(BAD_METHOD):
-                response = "405 Method Not Allowed";
+        this->status = "405 Method Not Allowed";
                 break;
         case(HTTP_NOT_SUPPORTED):
-                response = "505 HTTP Version Not Supported";
+        this->status = "505 HTTP Version Not Supported";
                 break;
         default:
             throw cRuntimeError("Response code not allowed");
     }
-    this->status = httpVersion + response + "\r\n";
 }
 
 void HTTPResponsePacket::setContentType(const char* contentType_){
-    contentType = ::omnetpp::opp_string("Content-Type: ") + ::omnetpp::opp_string(contentType_) + "\r\n";
+    headerFields_["Content-Type: "] = std::string(contentType_);
 }
 
 void HTTPResponsePacket::setConnection(const char* connection_){
-    connection = ::omnetpp::opp_string("Connection: ") + ::omnetpp::opp_string(connection_) + "\r\n";
+    headerFields_["Connection: "] = std::string(connection_);
 }
 
 void HTTPResponsePacket::setBody(const char * body_){
     body = ::omnetpp::opp_string("\r\n") + ::omnetpp::opp_string(body_) + "\r\n";
+    headerFields_["Content-Length: "] = std::to_string(strlen(body_));
+
 }
 
 void HTTPResponsePacket::setBody(const std::string& body_){
     body = ::omnetpp::opp_string("\r\n") + ::omnetpp::opp_string(body_) + "\r\n";
+    headerFields_["Content-Length: "] = std::to_string(body_.size());
 }
 
-void HTTPResponsePacket::setHeaderField(const char* hfield){
-    headerFields.push_back(hfield);
+void HTTPResponsePacket::setHeaderField(const std::string& key, const std::string& value){
+    headerFields_[key] = value;
 }
 
 const char* HTTPResponsePacket::getPayload(){
-    this->payload = status + contentType + connection;
-    if(!headerFields.empty()){
-        std::vector<const char *>::const_iterator it = headerFields.begin();
-        std::vector<const char *>::const_iterator end = headerFields.end();
+    this->payload = httpVersion_ + status + "\r\n";
+    if(!headerFields_.empty()){
+        std::map<std::string, std::string>::const_iterator it = headerFields_.begin();
+        std::map<std::string, std::string>::const_iterator end = headerFields_.end();
         for(; it != end; ++it){
-            payload += ::omnetpp::opp_string(*it) + "\r\n";
+            payload += it->first + it->second + "\r\n";
         }
     }
-        this->payload += body;
-
+    this->payload += body;
     return this->payload.c_str();
+}
+
+
+void HTTPResponsePacket::copy(const HTTPResponsePacket& other)
+{
+    this->httpVersion_ = other.httpVersion_;
+    this->headerFields_ = other.headerFields_;
 }
 
 
