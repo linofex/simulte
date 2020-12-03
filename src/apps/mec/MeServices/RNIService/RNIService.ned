@@ -39,6 +39,7 @@ simple RNIService like ITCPApp
         string localAddress = default(""); // local address; may be left empty ("")
         int localPort = default(1000);     // localPort number to listen on
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytestream"); // bytestreamfor emulation
+        double L2measSubscriptionPeriod @unit(s)= default(1s);
         @display("i=block/app");
 //        @signal[sentPk](type=inet::GenericAppMsg);
 //        @signal[rcvdPk](type=inet::GenericAppMsg);
