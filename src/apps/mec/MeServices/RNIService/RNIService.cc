@@ -56,19 +56,18 @@ void RNIService::handleMessage(cMessage *msg)
         if(strcmp(msg->getName(), "L2measSubscriptionEvent") == 0)
         {
             manageL2MeasSubscriptions();
-            scheduleAt(simTime() + L2measSubscriptionPeriod_ , msg);
+            return;
         }
 
     }
-    else
-    {
-        GenericService::handleMessage(msg);
-    }
+
+    GenericService::handleMessage(msg);
+
 }
 
 void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket)
 {
-    std::vector<std::string> splittedUri = utils::splitString(uri, "?");
+    std::vector<std::string> splittedUri = lte::utils::splitString(uri, "?");
     // uri must be in form example/v1/rni/queries/resource
     std::size_t lastPart = splittedUri[0].find_last_of("/");
     if(lastPart == std::string::npos)
@@ -90,7 +89,7 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
         //look for qurery parameters
             if(splittedUri.size() == 2) // uri has parameters eg. uriPath?param=value&param1=value,value
             {
-                std::vector<std::string> queryParameters = utils::splitString(splittedUri[1], "&");
+                std::vector<std::string> queryParameters = lte::utils::splitString(splittedUri[1], "&");
                 /*
                 * supported paramater:
                 * - cell_id
@@ -111,13 +110,13 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
                 for(; it != end; ++it){
                     if(it->rfind("cell_id", 0) == 0) // cell_id=par1,par2
                     {
-                        params = utils::splitString(*it, "=");
+                        params = lte::utils::splitString(*it, "=");
                         if(params.size()!= 2) //must be param=values
                         {
                             Http::send400Response(socket);
                             return;
                         }
-                        splittedParams = utils::splitString(params[1], ",");
+                        splittedParams = lte::utils::splitString(params[1], ",");
                         std::vector<std::string>::iterator pit  = splittedParams.begin();
                         std::vector<std::string>::iterator pend = splittedParams.end();
                         for(; pit != pend; ++pit){
@@ -126,13 +125,13 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
                     }
                     else if(it->rfind("ue_ipv4_address", 0) == 0)
                     {
-                        params = utils::splitString(*it, "=");
+                        params = lte::utils::splitString(*it, "=");
                         if(params.size()!= 2) //must be param=values
                         {
                             Http::send400Response(socket);
                             return;
                         }
-                        splittedParams = utils::splitString(params[1], ",");
+                        splittedParams = lte::utils::splitString(params[1], ",");
                         std::vector<std::string>::iterator pit  = splittedParams.begin();
                         std::vector<std::string>::iterator pend = splittedParams.end();
                         for(; pit != pend; ++pit){
@@ -176,6 +175,10 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
             {
                 Http::send404Response(socket);
             }
+        }
+        else
+        {
+            Http::send404Response(socket);
         }
     }
     else if (splittedUri[0].compare(baseUriSubscriptions_) == 0) //subs
@@ -236,6 +239,12 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
                 if(!jsonBody.contains("callbackReference") || jsonBody["callbackReference"].is_array())
                 {
                     Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
+                    return;
+                }
+
+                if(std::string(jsonBody["callbackReference"]).find('/') == -1) //bad uri
+                {
+                    Http::send400Response(socket); // must be ipv4
                     return;
                 }
 
@@ -352,7 +361,9 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
                 newSubscription.ues = ues;
                 newSubscription.trigger = triggers;
                 newSubscription.appInstanceId = filterCriteria["appInstanceId"];
+
                 newSubscription.consumerUri = jsonBody["callbackReference"];
+                newSubscription.consumerUri += "notifications/L2_meas/"+ std::to_string(subscriptionId_);
                 newSubscription.socket = socket;
 
                 std::stringstream idStream;
@@ -449,13 +460,14 @@ void RNIService::handleDELETERequest(const std::string& uri, inet::TCPSocket* so
 }
 
 
+
+
 void RNIService::manageL2MeasSubscriptions(){
     SubscriptionsStructure::iterator it = subscriptions_.find("L2_meas");
     if(it != subscriptions_.end())
     {
         std::map<std::string, SubscriptionInfo>::iterator sit = it->second.begin();
-        std::map<std::string, SubscriptionInfo>::iterator end = it->second.end();
-        for(;sit != end; ++sit)
+        while(sit != it->second.end())
         {
             std::string body;
             //send response
@@ -479,10 +491,22 @@ void RNIService::manageL2MeasSubscriptions(){
                 body = L2MeasResource_.toJson().dump(2);
                 std::cout << "tutti"<<std::endl;
             }
-            // TODO manage socket closed!(if is non connected, I remove the ue sub!
-            if(sit->second.socket->getState() == TCPSocket::CONNECTED) //fix this (smart pointers nor usable (!?)
-                Http::sendPostRequest(sit->second.socket, body.c_str(),"127.0.0.1:8888", "/io/te");
+            if(sit->second.socket->getState() == TCPSocket::CONNECTED)
+            {
+                int slash = sit->second.consumerUri.find('/');
+                std::string host = sit->second.consumerUri.substr(0, slash);
+                std::string uri = sit->second.consumerUri.substr(slash);
+                Http::sendPostRequest(sit->second.socket, body.c_str(), host.c_str(), uri.c_str());
+                sit++;
+            }
+            else
+            { //remove the subscription since the socket is not connected
+                it->second.erase(sit++);
+            }
+
         }
+        if(!it->second.empty())
+            scheduleAt(simTime() + L2measSubscriptionPeriod_ , L2measSubscriptionEvent_);
 
     }
 }
@@ -501,7 +525,7 @@ void RNIService::refreshDisplay() const
 
 
 RNIService::~RNIService(){
-    cancelEvent(L2measSubscriptionEvent_);
+    cancelAndDelete(L2measSubscriptionEvent_);
 return;
 }
 

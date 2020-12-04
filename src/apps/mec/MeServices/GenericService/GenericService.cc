@@ -10,12 +10,13 @@
 #include "apps/mec/warningAlert_rest/UEWarningAlertApp_rest.h"
 #include "inet/common/RawPacket.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
-
+#include "apps/mec/MeServices/GenericService/SocketManager.h"
+#include "inet/common/INETUtils.h"
+#include "common/utils/utils.h"
 #include "apps/mec/MeServices/httpUtils/httpUtils.h"
 #include <iostream>
 #include <string>
 #include <vector>
-#include "common/utils/utils.h"
 #include <sstream>
 #include "apps/mec/MeServices/httpUtils/json.hpp"
 //Define_Module(GenericService);
@@ -34,6 +35,8 @@ void GenericService::initialize(int stage)
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
 
+        requestServiceTime_ = par("requestServiceTime");
+        requestService_ = new cMessage("serveRequest");
 
         serverSocket.setOutputGate(gate("tcpOut"));
         serverSocket.readDataTransferModePar(*this);
@@ -60,42 +63,63 @@ void GenericService::initialize(int stage)
     }
 }
 
-void GenericService::handleMessage(cMessage *msg)
+void GenericService::manageRequest()
 {
-    if (msg->isSelfMessage()) {
+    cMessage *msg = check_and_cast<cMessage *>(requests_.pop());
+    inet::TCPSocket *socket = socketMap.findSocketFor(msg);
+
+    if (!socket && msg->getKind() == TCP_I_ESTABLISHED) {
+        // new connection -- create new socket object and server process
+        socket = new inet::TCPSocket(msg);
+        socket->setOutputGate(gate("tcpOut"));
+        socketMap.addSocket(socket);
+
+        std::cout <<"New connection from: " << socket->getRemoteAddress() << "tcp type " <<msg->getKind() <<std::endl ;
+
+        const char *serverThreadClass = par("serverThreadClass");
+        SocketManager *proc =
+            check_and_cast<SocketManager *>(inet::utils::createOne(serverThreadClass));
+
+        socket->setCallbackObject(proc);
+        proc->init(this, socket);
+    }
+    if(socket)
+        socket->processMessage(msg);
+    else
+    {
         delete msg;
     }
-    else {
-            inet::TCPSocket *socket = socketMap.findSocketFor(msg);
 
-            if (!socket) {
-                // new connection -- create new socket object and server process
-                socket = new inet::TCPSocket(msg);
-                socket->setOutputGate(gate("tcpOut"));
-                socketMap.addSocket(socket);
+    if(requests_.getLength() != 0)
+        scheduleAt(simTime() + requestServiceTime_ , requestService_);
+}
 
-                EV_INFO <<"New connection from: " << socket->getRemoteAddress();
-                delete msg;
-                return;
-            }
-            if (msg->getKind() == inet::TCP_I_DATA || msg->getKind() == inet::TCP_I_URGENT_DATA) {
-                EV << "## New packet arrived\n";
-                std::string packet = utils::getPacketPayload(msg);
-                handleRequest(packet, socket);
-            }
-            else if (msg->getKind() == inet::TCP_I_PEER_CLOSED) {
-                socket->close();
-                socketMap.removeSocket(socket);
-                std::cout<<"Closed connection from: " << socket->getRemoteAddress()<< std::endl;
-                //delete socket; // do not delte RNI use it to manage subscription!
+void GenericService::newRequest(cMessage *msg)
+{
+    int oldSize = requests_.getLength();
+    requests_.insert(msg);
+    // save timestamp if needed with setArrivalTime
+    if(oldSize == 0) // start serving requests
+        manageRequest();
+}
 
-            }
-            else if (msg->getKind() == inet::TCP_I_CLOSED) {
-                std::cout <<"Removed connection from: " << socket->getRemoteAddress();
-                socket->processMessage(msg);
-            }
+
+
+void GenericService::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage()) { // request managed
+        if(strcmp(msg->getName(), "serveRequest") == 0)
+        {
+            manageRequest();
+        }
+        else
+        {
             delete msg;
         }
+    }
+    else { // new request arruived
+        newRequest(msg);
+    }
 
 }
 
@@ -111,7 +135,6 @@ void GenericService::handleMessage(cMessage *msg)
 
          else if(request->at("method").compare("POST") == 0) //subscription
              handlePOSTRequest(request->at("uri"), request->at("body"),  socket); // pass URI
-
          else if(request->at("method").compare("PUT") == 0)
              handlePUTRequest(request->at("uri"), request->at("body"),  socket); // pass URI
 
@@ -138,7 +161,7 @@ void GenericService::handleMessage(cMessage *msg)
 
 bool GenericService::parseRequest(std::string& packet_, inet::TCPSocket *socket, reqMap* request){
 //    std::string packet(packet_);
-    std::vector<std::string> splitting = utils::splitString(packet_, "\r\n\r\n"); // bound between header and body
+    std::vector<std::string> splitting = lte::utils::splitString(packet_, "\r\n\r\n"); // bound between header and body
     std::string header;
     std::string body;
     
@@ -160,9 +183,9 @@ bool GenericService::parseRequest(std::string& packet_, inet::TCPSocket *socket,
     
 
     std::vector<std::string> line;
-    std::vector<std::string> lines = utils::splitString(header, "\r\n");
+    std::vector<std::string> lines = lte::utils::splitString(header, "\r\n");
     std::vector<std::string>::iterator it = lines.begin();
-    line = utils::splitString(*it, " ");  // Request-Line GET / HTTP/1.1
+    line = lte::utils::splitString(*it, " ");  // Request-Line GET / HTTP/1.1
     if(line.size() != 3 ){
         Http::send400Response(socket);
         return false;
@@ -177,7 +200,7 @@ bool GenericService::parseRequest(std::string& packet_, inet::TCPSocket *socket,
     request->insert( std::pair<std::string, std::string>("http", line[2]) );
 
     for(++it; it != lines.end(); ++it) {
-        line = utils::splitString(*it, ": ");
+        line = lte::utils::splitString(*it, ": ");
         if(!line.empty())
             request->insert( std::pair<std::string, std::string>(line[0], line[1]) );
     }
@@ -210,8 +233,6 @@ void GenericService::finish()
 
 GenericService::~GenericService(){
     socketMap.deleteSockets(); //it calls delete, too
+    cancelAndDelete(requestService_);
 }
-
-
-
 

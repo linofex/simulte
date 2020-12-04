@@ -84,17 +84,16 @@ class RNIService: public GenericService
     virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
-//    virtual void handleRequest(char *packet, inet::TCPSocket *socket);
 
     virtual void handleGETRequest(const std::string& uri, inet::TCPSocket* socket);
     virtual void handlePOSTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
     virtual void handlePUTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
     virtual void handleDELETERequest(const std::string& uri, inet::TCPSocket* socket);
 
+
     virtual ~RNIService();
 
-    virtual bool handleOperationStage(inet::LifecycleOperation *operation, int stage, inet::IDoneCallback *doneCallback) override
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
 };
 
 
