@@ -46,7 +46,7 @@ void TrafficFlowFilterSimplified::initialize(int stage)
             //@author Alessandro Noferi
             //begin
             std::string address = getParentModule()->par("meHostExtConn").stringValue();
-            std::vector<std::string> extAdd = utils::splitString(address, "/");
+            std::vector<std::string> extAdd = lte::utils::splitString(address, "/");
             if(extAdd.size() != 2){
                 throw cRuntimeError("TrafficFlowFilterSimplified::initialize - Bad meHostExtConn parameter. It must be like addres/mask");
 

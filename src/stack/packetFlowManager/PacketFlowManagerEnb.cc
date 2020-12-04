@@ -76,16 +76,16 @@ void PacketFlowManagerEnb::initLcid(LogicalCid lcid, MacNodeId nodeId)
     newDesc.burstStatus_.clear();
 
     //debug
-    std::stringstream timeStream;
-    timeStream << nodeId -1025<< "time";
-    std::string timeString = timeStream.str();
-    char* timeChar = (char*) timeString.c_str();
-    times_[nodeId].setName(timeChar);
-    std::stringstream tPutStream;
-    tPutStream << nodeId -1025<< "tput";
-    std::string tPutString = tPutStream.str();
-    char* tPutChar = (char*) tPutString.c_str();
-    tput_[nodeId].setName(tPutChar);
+//    std::stringstream timeStream;
+//    timeStream << nodeId -1025<< "time";
+//    std::string timeString = timeStream.str();
+//    char* timeChar = (char*) timeString.c_str();
+//    times_[nodeId].setName(timeChar);
+//    std::stringstream tPutStream;
+//    tPutStream << nodeId -1025<< "tput";
+//    std::string tPutString = tPutStream.str();
+//    char* tPutChar = (char*) tPutString.c_str();
+//    tput_[nodeId].setName(tPutChar);
 //
 
     connectionMap_[lcid] = newDesc;
@@ -195,8 +195,7 @@ void PacketFlowManagerEnb::insertRlcPdu(LogicalCid lcid, unsigned int rlcSno, Se
     for (; sit != pdcpSnoSet.end(); ++sit)
     {
         unsigned int pdcpSno = *sit;
-        if(desc->nodeId_== 7)
-                ww.record(pdcpSno);
+
         // store the RLC SDUs (PDCP PDUs) included in the RLC PDU
         desc->rlcSdusPerPdu_[rlcSno].insert(pdcpSno);
 
@@ -297,8 +296,6 @@ void PacketFlowManagerEnb::insertRlcPdu(LogicalCid lcid, LteRlcUmDataPdu* rlcPdu
             lteInfo = check_and_cast<FlowControlInfo*>(rlcSdu->getControlInfo());
             unsigned int pdcpSno = rlcSdu->getSnoMainPacket();
 
-            if(desc->nodeId_== 7)
-                    ww.record(pdcpSno);
 
             // store the RLC SDUs (PDCP PDUs) included in the RLC PDU
             desc->rlcSdusPerPdu_[rlcSno].insert(pdcpSno);
@@ -569,17 +566,14 @@ void PacketFlowManagerEnb::macPduArrived(LogicalCid lcid, unsigned int macPduId)
                         throw cRuntimeError("PacketFlowManagerEnb::macPduArrived - Node id %d is not in pdcp delay map structure, this should not happen. Aborting", desc->nodeId_);
 
                     double time = (simTime() - pit->second.entryTime).dbl() ;
-                    times_[desc->nodeId_].record(time);
+               //     times_[desc->nodeId_].record(time);
 
                     EV_FATAL << NOW << "node id "<< desc->nodeId_<< " PacketFlowManagerEnb::macPduArrived - PDCP PDU "<< pdcpPduSno << " of lcid " << lcid << " acknowledged. Delay time: " << time << "ms"<< endl;
 
-//                    times_[desc->nodeId_].record(time);
                     dit->second.time += (simTime() - pit->second.entryTime);
                     dit->second.pktCount += 1;
 
                     myset.erase(pdcpPduSno);
-                    if((desc->nodeId_ - 1025) == 7)
-//                        ii.record(pdcpPduSno);
 
                         // update next sno
                     nextPdcpSno_ = pdcpPduSno+1;
@@ -717,7 +711,7 @@ void PacketFlowManagerEnb::removePdcpBurstRLC(StatusDescriptor* desc, unsigned i
                 tit->second.pktSizeCount += bsit->second.burstSize;
                 tit->second.time += (simTime() - bsit->second.startBurstTransmission);
                 double tp = bsit->second.burstSize/(simTime() - bsit->second.startBurstTransmission).dbl();
-                tput_[desc->nodeId_].record(tp);
+               // tput_[desc->nodeId_].record(tp);
 
                 EV_FATAL << NOW << "node id "<< desc->nodeId_ - 1025 << " PacketFlowManagerEnb::removePdcpBurst Burst "<< bsit->first << " length " << simTime() - bsit->second.startBurstTransmission<< " tput: "<< tp << endl;
                 desc->burstStatus_.erase(bsit); // remove emptied burst

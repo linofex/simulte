@@ -1,6 +1,8 @@
 
 
 #include "common/utils/utils.h"
+
+namespace lte{
 namespace utils {
 
     std::vector<std::string> splitString(const std::string& str, std::string delim){
@@ -38,5 +40,6 @@ namespace utils {
     }
 
 
+}
 }
 

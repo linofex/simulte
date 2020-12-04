@@ -73,13 +73,13 @@ void HTTPRequestPacket::setUri(const std::string& uri_){
 }
 
 void HTTPRequestPacket::setBody(const char * body_){
-    body = ::omnetpp::opp_string("\r\n") + ::omnetpp::opp_string(body_) + "\r\n";
-    setLength(strlen(body_));
+    body = ::omnetpp::opp_string(body_);
+    setLength(body.size());
 }
 
 void HTTPRequestPacket::setBody(const std::string& body_){
-    body = ::omnetpp::opp_string("\r\n") + ::omnetpp::opp_string(body_) + "\r\n";
-    setLength(body_.size());
+    body = ::omnetpp::opp_string(body_);
+    setLength(body.size());
 }
 
 void HTTPRequestPacket::setHeaderField(const std::string& key , const std::string& value){
@@ -95,7 +95,7 @@ const char* HTTPRequestPacket::getPayload(){
             payload += it->first + it->second + "\r\n";
         }
     }
-    this->payload += body;
+    this->payload += ::omnetpp::opp_string("\r\n") + body;
     return this->payload.c_str();
 }
 

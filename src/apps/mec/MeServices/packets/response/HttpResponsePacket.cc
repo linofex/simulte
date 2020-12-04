@@ -5,16 +5,16 @@
 
 HTTPResponsePacket::HTTPResponsePacket(const char *name, short kind): HTTPResponsePacket_Base(name,kind)
 {
-     setContentType("application/json");
-     setConnection("keep-alive");
-     setBody("");
-     setPayload("");
+    setContentType("application/json");
+    setConnection("close");
+    setBody("");
+    setPayload("");
 }
 HTTPResponsePacket::HTTPResponsePacket(const responseCode res, const char *name, short kind): HTTPResponsePacket_Base(name, kind)
 {
     setStatus(res);
     setContentType("application/json");
-    setConnection("keep-alive");
+    setConnection("close");
     setBody("");
     setPayload("");
 }
@@ -69,13 +69,13 @@ void HTTPResponsePacket::setConnection(const char* connection_){
 }
 
 void HTTPResponsePacket::setBody(const char * body_){
-    body = ::omnetpp::opp_string("\r\n") + ::omnetpp::opp_string(body_) + "\r\n";
+    body = ::omnetpp::opp_string(body_);
     headerFields_["Content-Length: "] = std::to_string(strlen(body_));
 
 }
 
 void HTTPResponsePacket::setBody(const std::string& body_){
-    body = ::omnetpp::opp_string("\r\n") + ::omnetpp::opp_string(body_) + "\r\n";
+    body = ::omnetpp::opp_string(body_);
     headerFields_["Content-Length: "] = std::to_string(body_.size());
 }
 
@@ -92,7 +92,7 @@ const char* HTTPResponsePacket::getPayload(){
             payload += it->first + it->second + "\r\n";
         }
     }
-    this->payload += body;
+    this->payload += ::omnetpp::opp_string("\r\n") + body;
     return this->payload.c_str();
 }
 

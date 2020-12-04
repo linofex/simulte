@@ -100,7 +100,7 @@ void UEWarningAlertApp_rest::handleMessage(cMessage *msg)
     else{
         EV << "###RICEVUTO: " << msg;
         if(msg->getKind() == UDP_I_DATA){
-            std::string udpPayload = utils::getPacketPayload(msg);
+            std::string udpPayload = lte::utils::getPacketPayload(msg);
            handleUDPPacket(udpPayload);
         }
         delete msg;
@@ -153,7 +153,7 @@ void UEWarningAlertApp_rest::sendStartUEWarningAlertApp()
     std::ostringstream payload;
     payload << "START APP";
 
-    RawPacket *pck  = utils::createUDPPacket(payload.str());
+    RawPacket *pck  = lte::utils::createUDPPacket(payload.str());
     socket.sendTo(pck, destAddress_, destPort_);
 
     //rescheduling
@@ -166,7 +166,7 @@ void UEWarningAlertApp_rest::sendStopUEWarningAlertApp(){
     std::ostringstream payload;
     payload << "STOP APP";
 
-    RawPacket *pck  = utils::createUDPPacket(payload.str());
+    RawPacket *pck  = lte::utils::createUDPPacket(payload.str());
     socket.sendTo(pck, destAddress_, destPort_);
 
 }
