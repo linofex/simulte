@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef _RNISERVICE_H
-#define _RNISERVICE_H
+#ifndef _LOCATIONSERVICE_H
+#define _LOCATIONSERVICE_H
 
 #include "inet/common/INETDefs.h"
 #include "common/MecCommon.h"
@@ -30,7 +30,7 @@
 
 #include "apps/mec/MeServices/GenericService/GenericService.h"
 #include "corenetwork/binder/LteBinder.h"
-#include "resources/L2Meas.h"
+#include "apps/mec/MeServices/LocationService/resources/LocationResource.h"
 
 
 /**
@@ -54,18 +54,18 @@ typedef struct{
 
 
 
-class L2Meas;
+class Location;
 
-class RNIService: public GenericService
+class LocationService: public GenericService
 {
   private:
 
-    L2Meas L2MeasResource_;
+    LocationResource LocationResource_;
     typedef std::map<std::string, std::map<std::string, SubscriptionInfo >> SubscriptionsStructure;
     SubscriptionsStructure subscriptions_;
 
-    double L2measSubscriptionPeriod_;
-    cMessage *L2measSubscriptionEvent_;
+    double LocationSubscriptionPeriod_;
+    cMessage *LocationSubscriptionEvent_;
 
     unsigned int subscriptionId_;
     std::string baseUriQueries_;
@@ -75,13 +75,13 @@ class RNIService: public GenericService
     
     bool scheduledSubscription;
 
-    void manageL2MeasSubscriptions(Trigger trigger);
+    void manageLocationSubscriptions(Trigger trigger);
 
   public:
-    RNIService();
+    LocationService();
+
   protected:
 
-//    std::map<std::string, std::string> parseRequest(char *packet_);
     virtual void initialize(int stage) override;
     virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) override;
@@ -95,11 +95,11 @@ class RNIService: public GenericService
     virtual void handleSubscriptionType(cMessage *msg);
 
 
-    virtual ~RNIService();
+    virtual ~LocationService();
 
 
 };
 
 
-#endif // ifndef _RNISERVICE_H
+#endif // ifndef _LOCATIONSERVICE_H
 

@@ -4,7 +4,7 @@
 #define _ASSOCIATEID_H_
 
 
-#include "AttributeBase.h"
+#include "apps/mec/MeServices/Resources/AttributeBase.h"
 
 #include <string>
 #include "common/MecCommon.h"

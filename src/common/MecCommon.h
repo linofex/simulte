@@ -12,7 +12,7 @@ enum RlcBurstStatus
 
 enum Trigger
 {
-    PERIODICAL, UTI_80, DL_TPU_1
+    L2_MEAS_PERIODICAL, L2_MEAS_UTI_80, L2_MEAS_DL_TPU_1
 };
 
 

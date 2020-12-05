@@ -38,6 +38,10 @@ void GenericService::initialize(int stage)
         requestServiceTime_ = par("requestServiceTime");
         requestService_ = new cMessage("serveRequest");
 
+        subscriptionServiceTime_ = par("subscriptionServiceTime");
+        subscriptionService_ = new cMessage("serveSubscription");
+
+
         serverSocket.setOutputGate(gate("tcpOut"));
         serverSocket.readDataTransferModePar(*this);
         serverSocket.bind(localAddress[0] ? inet::L3AddressResolver().resolve(localAddress) : inet::L3Address(), localPort);
@@ -61,6 +65,22 @@ void GenericService::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
+}
+
+void GenericService::manageSubscription()
+{
+    cMessage *msg = check_and_cast<cMessage *>(subscriptions_.pop());
+    handleSubscriptionType(msg);
+    scheduleNextEvent();
+}
+
+void GenericService::scheduleNextEvent()
+{
+    // schedule next event
+    if(subscriptions_.getLength() != 0)
+        scheduleAt(simTime() + subscriptionServiceTime_ , subscriptionService_);
+    else if (requests_.getLength() != 0)
+        scheduleAt(simTime() + requestServiceTime_ , requestService_);
 }
 
 void GenericService::manageRequest()
@@ -90,25 +110,46 @@ void GenericService::manageRequest()
         delete msg;
     }
 
-    if(requests_.getLength() != 0)
-        scheduleAt(simTime() + requestServiceTime_ , requestService_);
+    scheduleNextEvent();
 }
+
 
 void GenericService::newRequest(cMessage *msg)
 {
     int oldSize = requests_.getLength();
     requests_.insert(msg);
     // save timestamp if needed with setArrivalTime
-    if(oldSize == 0) // start serving requests
+    if(oldSize == 0 && subscriptions_.getLength() == 0) // start serving requests after subscriptions
         manageRequest();
 }
 
+void GenericService::newSubscriptionEvent(cMessage *msg)
+{
+    int oldSize = subscriptions_.getLength();
+    subscriptions_.insert(msg);
+    // save timestamp if needed with setArrivalTime
+    if(oldSize == 0) // start serving subscriptions
+        manageSubscription();
+}
 
+void GenericService::triggeredEvent(short int event)
+{
+    cMessage *msg = new cMessage("subscriptionEvent", event);
+    scheduleAt(NOW, msg);
+}
 
 void GenericService::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage()) { // request managed
-        if(strcmp(msg->getName(), "serveRequest") == 0)
+    if (msg->isSelfMessage()) {
+        if(strcmp(msg->getName(), "subscriptionEvent") == 0)
+        {
+            newSubscriptionEvent(msg);
+        }
+        else if(strcmp(msg->getName(), "serveSubscription") == 0)
+        {
+            manageSubscription();
+        }
+        else if(strcmp(msg->getName(), "serveRequest") == 0)
         {
             manageRequest();
         }
@@ -117,7 +158,7 @@ void GenericService::handleMessage(cMessage *msg)
             delete msg;
         }
     }
-    else { // new request arruived
+    else { // new request arrived
         newRequest(msg);
     }
 
@@ -205,6 +246,9 @@ bool GenericService::parseRequest(std::string& packet_, inet::TCPSocket *socket,
             request->insert( std::pair<std::string, std::string>(line[0], line[1]) );
     }
 
+    if(request->at("Host").compare(host_) != 0)
+        return false;
+
     return true;
 }
 
@@ -234,5 +278,6 @@ void GenericService::finish()
 GenericService::~GenericService(){
     socketMap.deleteSockets(); //it calls delete, too
     cancelAndDelete(requestService_);
+    cancelAndDelete(subscriptionService_);
 }
 

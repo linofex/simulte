@@ -1,4 +1,4 @@
-#include "../../RNIService/resources/L2Meas.h"
+#include "apps/mec/MeServices/RNIService/resources/L2Meas.h"
 #include "corenetwork/statsCollector/UeStatsCollector.h"
 #include "corenetwork/statsCollector/EnodeBStatsCollector.h"
 

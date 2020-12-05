@@ -12,9 +12,9 @@
 #include <vector>
 #include <map>
 #include "inet/applications/tcpapp/TCPSrvHostApp.h"
-
+#include <queue>
 #include "corenetwork/binder/LteBinder.h"
-
+#include "common/MecCommon.h"
 
 /**
  *
@@ -42,9 +42,17 @@ class GenericService: public inet::TCPSrvHostApp
         double requestServiceTime_;
         cQueue requests_;
 
-        virtual void manageRequest();
-        virtual void newRequest(cMessage *msg);
+        cMessage *subscriptionService_;
+        double subscriptionServiceTime_;
+        cQueue subscriptions_;
 
+
+        virtual void manageRequest();
+        virtual void manageSubscription(); // the trigger depends on the resource
+        virtual void newRequest(cMessage *msg);
+        virtual void newSubscriptionEvent(cMessage *msg);
+
+        virtual void scheduleNextEvent();
 
         virtual void initialize(int stage) override;
         virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
@@ -53,20 +61,25 @@ class GenericService: public inet::TCPSrvHostApp
         virtual void refreshDisplay() const override;
         virtual void getConnectedEnodeB();
 
+        virtual bool parseRequest(std::string&, inet::TCPSocket *socket, reqMap* request);
+
+
         virtual void handleGETRequest(const std::string& uri, inet::TCPSocket* socket) = 0;
         virtual void handlePOSTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket)   = 0;
         virtual void handlePUTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket)    = 0;
         virtual void handleDELETERequest(const std::string& uri, inet::TCPSocket* socket) = 0;
+        virtual void handleSubscriptionType(cMessage *msg) = 0;
 
 //        virtual void removeSubscription(inet::TCPSocket* socket) = 0;
-        virtual bool parseRequest(std::string&, inet::TCPSocket *socket, reqMap* request);
         virtual ~GenericService();
 
         virtual bool handleOperationStage(inet::LifecycleOperation *operation, int stage, inet::IDoneCallback *doneCallback) override
         { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     public:
+        virtual void triggeredEvent(short int event);
         virtual void handleRequest(std::string& packet, inet::TCPSocket *socket);
+
 };
 
 

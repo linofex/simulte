@@ -47,7 +47,8 @@ class LteBinder : public cSimpleModule
     typedef std::map<MacNodeId, std::map<MacNodeId, bool> > DeployedUesMap;
 
     unsigned int numBands_;  // number of logical bands
-    std::map<IPv4Address, MacNodeId> macNodeIdToIPAddress_;
+    std::map<IPv4Address, MacNodeId> IPAddressToMacNodeId_;
+    std::map<MacNodeId, IPv4Address> macNodeIdToIPAddress_; // @autrho Alessandro Noferi
     std::map<MacNodeId, char*> macNodeIdToModuleName_;
     std::map<MacNodeId, LteMacBase*> macNodeIdToModule_;
     std::vector<MacNodeId> nextHop_; // MacNodeIdMaster --> MacNodeIdSlave
@@ -226,10 +227,26 @@ class LteBinder : public cSimpleModule
      */
     MacNodeId getMacNodeId(IPv4Address address)
     {
-        if (macNodeIdToIPAddress_.find(address) == macNodeIdToIPAddress_.end())
+        if (IPAddressToMacNodeId_.find(address) == IPAddressToMacNodeId_.end())
             return 0;
-        return macNodeIdToIPAddress_[address];
+        return IPAddressToMacNodeId_[address];
     }
+
+    /**
+     * @author Alessandro Noferi
+     *
+     * Returns the Ipv4 Address for the given MacNodeId
+     *
+     * @param MacNodeId
+     */
+    IPv4Address getIPv4Address(MacNodeId nodeId)
+    {
+        std::map<MacNodeId, IPv4Address>::const_iterator it = macNodeIdToIPAddress_.find(nodeId);
+        if(it  == macNodeIdToIPAddress_.end())
+            return IPv4Address();
+        return it->second;
+    }
+
 
     /**
      * Returns the X2NodeId for the given IP address
@@ -249,7 +266,8 @@ class LteBinder : public cSimpleModule
      */
     void setMacNodeId(IPv4Address address, MacNodeId nodeId)
     {
-        macNodeIdToIPAddress_[address] = nodeId;
+        IPAddressToMacNodeId_[address] = nodeId;
+        macNodeIdToIPAddress_[nodeId] = address;
     }
     /**
      * Associates the given IP address with the given X2NodeId.

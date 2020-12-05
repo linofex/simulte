@@ -4,7 +4,7 @@
 #include <vector>
 #include <omnetpp.h>
 #include <map>
-#include "../../RNIService/resources/AttributeBase.h"
+#include "apps/mec/MeServices/Resources/AttributeBase.h"
 #include "../../RNIService/resources/Ecgi.h"
 #include "corenetwork/statsCollector/UeStatsCollector.h"
 #include "corenetwork/statsCollector/EnodeBStatsCollector.h"

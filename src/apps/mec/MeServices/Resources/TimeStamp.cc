@@ -3,7 +3,7 @@
 */
 
 
-#include "../../RNIService/resources/TimeStamp.h"
+#include "apps/mec/MeServices/Resources/TimeStamp.h"
 
 #include "time.h"
 

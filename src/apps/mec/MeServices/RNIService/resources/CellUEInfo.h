@@ -5,7 +5,7 @@
 #include <vector>
 #include <omnetpp.h>
 #include <map>
-#include "../../RNIService/resources/AttributeBase.h"
+#include "apps/mec/MeServices/Resources/AttributeBase.h"
 #include "common/MecCommon.h"
 #include "../../RNIService/resources/Ecgi.h"
 #include "AssociateId.h"

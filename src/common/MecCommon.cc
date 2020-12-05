@@ -2,12 +2,12 @@
 
 Trigger getTrigger(std::string& trigger)
 {
-    if(trigger.compare("PERIODICAL") == 0)
-        return PERIODICAL;
-    if(trigger.compare("UTI_80") == 0)
-        return UTI_80;
-    if(trigger.compare("DL_TPU_1") == 0)
-        return DL_TPU_1;
+    if(trigger.compare("L2_MEAS_PERIODICAL") == 0)
+        return L2_MEAS_PERIODICAL;
+    if(trigger.compare("L2_MEAS_UTI_80") == 0)
+        return L2_MEAS_UTI_80;
+    if(trigger.compare("L2_MEAS_DL_TPU_1") == 0)
+        return L2_MEAS_DL_TPU_1;
 
     throw cRuntimeError("getTrigger - trigger %s not exist", trigger.c_str());
 }

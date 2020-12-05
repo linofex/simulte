@@ -1,6 +1,6 @@
 // @author Alessandro Noferi
 
-package lte.apps.mec.MeServices.RNIService;
+package lte.apps.mec.MeServices.LocationService;
 
 
 import lte.apps.mec.MeServices.GenericService.GenericService;
@@ -17,13 +17,13 @@ import inet.applications.contract.ITCPApp;
 // 
 // @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
 //
-simple RNIService like GenericService, ITCPApp
+simple LocationService like GenericService, ITCPApp
 {
     parameters:
         string localAddress = default(""); // local address; may be left empty ("")
         int localPort = default(1000);     // localPort number to listen on
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytestream"); // bytestreamfor emulation
-        double L2measSubscriptionPeriod @unit(s)= default(1s);
+        double LocationSubscriptionPeriod @unit(s)= default(1s);
         double requestServiceTime @unit(s) = default(0.5us);
         double subscriptionServiceTime @unit(s) = default(0.5us);
         string serverThreadClass = default("SocketManager")

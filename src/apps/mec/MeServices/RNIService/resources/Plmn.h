@@ -2,7 +2,7 @@
 #define _PLMN_H_
 
 #include "../../../../../common/MecCommon.h"
-#include "../../RNIService/resources/AttributeBase.h"
+#include "apps/mec/MeServices/Resources/AttributeBase.h"
 
 // https://en.wikipedia.org/wiki/Mobile_country_code
 

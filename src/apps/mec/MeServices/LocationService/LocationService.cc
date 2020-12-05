@@ -9,31 +9,34 @@
 #include "inet/common/RawPacket.h"
 #include "inet/applications/tcpapp/GenericAppMsg_m.h"
 #include <iostream>
-#include "apps/mec/MeServices/RNIService/RNIService.h"
+#include "apps/mec/MeServices/LocationService/LocationService.h"
 
 #include <string>
 #include <vector>
 //#include "apps/mec/MeServices/packets/HttpResponsePacket.h"
 #include "apps/mec/MeServices/httpUtils/httpUtils.h"
 #include "common/utils/utils.h"
-#include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
 
-Define_Module(RNIService);
+
+Define_Module(LocationService);
 
 
-RNIService::RNIService():L2MeasResource_(){
-    baseUriQueries_ = "/example/rni/v2/queries";
-    baseUriSubscriptions_ = "/example/rni/v2/subscriptions";
+LocationService::LocationService(){
+    baseUriQueries_ = "/example/location/v2/queries";
+    baseUriSubscriptions_ = "/example/location/v2/subscriptions";
     subscriptionId_ = 0;
     subscriptions_.clear();
-    supportedQueryParams_.insert("cell_id");
-    supportedQueryParams_.insert("ue_ipv4_address");
+    supportedQueryParams_.insert("address");
+    supportedQueryParams_.insert("latitude");
+    supportedQueryParams_.insert("longitude");
+    supportedQueryParams_.insert("zone");
+
     scheduledSubscription = false;
     // supportedQueryParams_s_.insert("ue_ipv6_address");
 }
 
-void RNIService::initialize(int stage)
+void LocationService::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -42,30 +45,21 @@ void RNIService::initialize(int stage)
     }
     else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
         GenericService::initialize(stage);
-        L2MeasResource_.addEnodeB(eNodeB_);
-        L2measSubscriptionEvent_ = new cMessage("L2measSubscriptionEvent");
-        L2measSubscriptionPeriod_ = par("L2measSubscriptionPeriod");
+        LocationResource_.addEnodeB(eNodeB_);
+        LocationResource_.addBinder(binder_);
+        LocationResource_.setBaseUri(host_+baseUriQueries_);
+        LocationSubscriptionEvent_ = new cMessage("LocationSubscriptionEvent");
+        LocationSubscriptionPeriod_ = par("LocationSubscriptionPeriod");
     }
 }
 
 
-void RNIService::handleMessage(cMessage *msg)
+void LocationService::handleMessage(cMessage *msg)
 {
-//    if(msg->isSelfMessage())
-//    {
-//        if(strcmp(msg->getKind(), PERIODIC) == 0)
-//        {
-//            manageL2MeasSubscriptions();
-//            return;
-//        }
-//
-//    }
-
     GenericService::handleMessage(msg);
-
 }
 
-void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket)
+void LocationService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket)
 {
     std::vector<std::string> splittedUri = lte::utils::splitString(uri, "?");
     // uri must be in form example/v1/rni/queries/resource
@@ -84,7 +78,7 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
     // check it is a GET for a query or a subscription
     if(baseUri.compare(baseUriQueries_) == 0 ) //queries
     {
-        if(resourceType.compare("layer2_meas") == 0 )
+        if(resourceType.compare("users") == 0 )
         {
         //look for qurery parameters
             if(splittedUri.size() == 2) // uri has parameters eg. uriPath?param=value&param1=value,value
@@ -98,7 +92,7 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
                 */
 
                 std::vector<MacNodeId> cellIds;
-                std::vector<MacNodeId> ues;
+                std::vector<IPv4Address> ues;
 
                 typedef std::map<std::string, std::vector<std::string>> queryMap;
                 queryMap queryParamsMap; // e.g cell_id -> [0, 1]
@@ -108,7 +102,7 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
                 std::vector<std::string> params;
                 std::vector<std::string> splittedParams;
                 for(; it != end; ++it){
-                    if(it->rfind("cell_id", 0) == 0) // cell_id=par1,par2
+                    if(it->rfind("accessPointId", 0) == 0) // cell_id=par1,par2
                     {
                         params = lte::utils::splitString(*it, "=");
                         if(params.size()!= 2) //must be param=values
@@ -123,10 +117,10 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
                             cellIds.push_back((MacNodeId)std::stoi(*pit));
                         }
                     }
-                    else if(it->rfind("ue_ipv4_address", 0) == 0)
+                    else if(it->rfind("address", 0) == 0)
                     {
-                        params = lte::utils::splitString(*it, "=");
-                        if(params.size()!= 2) //must be param=values
+                        params = lte::utils::splitString(*it, "=acr:");
+                        if(params.size()!= 2) //must be param=acr:values
                         {
                             Http::send400Response(socket);
                             return;
@@ -136,8 +130,8 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
                         std::vector<std::string>::iterator pend = splittedParams.end();
                         for(; pit != pend; ++pit){
                            //manage ipv4 address without any macnode id
-                            //or do the conversion inside L2Meas..
-                           ues.push_back(binder_->getMacNodeId(IPv4Address((*pit).c_str())));
+                            //or do the conversion inside Location..
+                           ues.push_back(IPv4Address((*pit).c_str()));
                         }
                     }
                     else // bad parameters
@@ -151,15 +145,15 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
                 //send response
                 if(!ues.empty() && !cellIds.empty())
                 {
-                    Http::send200Response(socket, L2MeasResource_.toJson(cellIds, ues).dump(2).c_str());
+                    Http::send200Response(socket, LocationResource_.toJson(cellIds, ues).dump(2).c_str());
                 }
                 else if(ues.empty() && !cellIds.empty())
                 {
-                    Http::send200Response(socket, L2MeasResource_.toJsonCell(cellIds).dump(2).c_str());
+                    Http::send200Response(socket, LocationResource_.toJsonCell(cellIds).dump(2).c_str());
                 }
                 else if(!ues.empty() && cellIds.empty())
                {
-                   Http::send200Response(socket, L2MeasResource_.toJsonUe(ues).dump(2).c_str());
+                   Http::send200Response(socket, LocationResource_.toJsonUe(ues).dump(2).c_str());
                }
                else
                {
@@ -168,7 +162,7 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
 
             }
             else if (splittedUri.size() == 1 ){ //no query params
-                Http::send200Response(socket,L2MeasResource_.toJson().dump(2).c_str());
+                Http::send200Response(socket,LocationResource_.toJson().dump(2).c_str());
                 return;
             }
             else //bad uri
@@ -193,7 +187,7 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
 
 }
 
-void RNIService::handlePOSTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket)
+void LocationService::handlePOSTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket)
 {
     // uri must be in form example/v1/rni/subscriptions/sub_type
     std::size_t lastPart = uri.find_last_of("/");
@@ -225,7 +219,7 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
         }
         // check if the notification type
         // allowed:
-        //  - L2MeasurementNotification
+        //  - LocationurementNotification
 
         SubscriptionInfo newSubscription;
 
@@ -233,9 +227,9 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
         {
             // should check if the mecApp already make the subscription?
             // how? TODO
-            if(jsonBody.contains("L2MeasurementSubscription")) // mandatory attribute
+            if(jsonBody.contains("LocationurementSubscription")) // mandatory attribute
             {
-                jsonBody = jsonBody["L2MeasurementSubscription"];// entering the structure for convenience
+                jsonBody = jsonBody["LocationurementSubscription"];// entering the structure for convenience
                 if(!jsonBody.contains("callbackReference") || jsonBody["callbackReference"].is_array())
                 {
                     Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
@@ -376,8 +370,8 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
                 subscriptionId_++;
                 std::string links =  host_ + baseUriSubscriptions_ + "/" + newSubscription.subscriptionId;
                 nlohmann::json response;
-                response["L2MeasSubscription"]["_links"]["self"] =links;
-                response["L2MeasSubscription"] = jsonBody;
+                response["LocationSubscription"]["_links"]["self"] =links;
+                response["LocationSubscription"] = jsonBody;
 
                 std::pair<std::string, std::string> location("Location: ", links);
                 //send 201 response
@@ -386,7 +380,7 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
                 if(scheduledSubscription == false)
                 {
                     cMessage *msg = new cMessage("subscriptionEvent", L2_MEAS_PERIODICAL);
-                    scheduleAt(simTime() + L2measSubscriptionPeriod_ , msg);
+                    scheduleAt(simTime() + LocationSubscriptionPeriod_ , msg);
                 }
 
                 return;
@@ -404,9 +398,9 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
     }
 }
 
-void RNIService::handlePUTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){}
+void LocationService::handlePUTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){}
 
-void RNIService::handleDELETERequest(const std::string& uri, inet::TCPSocket* socket)
+void LocationService::handleDELETERequest(const std::string& uri, inet::TCPSocket* socket)
 {
     //get the subId from the uri
     // check the sender is the UE that created the resource
@@ -444,8 +438,8 @@ void RNIService::handleDELETERequest(const std::string& uri, inet::TCPSocket* so
         std::map<std::string, SubscriptionInfo >::iterator rit = it->second.find(subscriptionId);
         if(rit != it->second.end()){
             it->second.erase(rit);
-            if(it->second.empty() && L2measSubscriptionEvent_->isScheduled()) // no more l2meas sub, stop timer
-                cancelEvent(L2measSubscriptionEvent_);
+            if(it->second.empty() && LocationSubscriptionEvent_->isScheduled()) // no more Location sub, stop timer
+                cancelEvent(LocationSubscriptionEvent_);
 
         }
         else
@@ -465,97 +459,96 @@ void RNIService::handleDELETERequest(const std::string& uri, inet::TCPSocket* so
 }
 
 
-void RNIService::handleSubscriptionType(cMessage *msg)
+void LocationService::handleSubscriptionType(cMessage *msg)
 {
     if(msg->getKind() == L2_MEAS_PERIODICAL)
     {
-        manageL2MeasSubscriptions(L2_MEAS_PERIODICAL);
+        manageLocationSubscriptions(L2_MEAS_PERIODICAL);
     }
     delete msg;
 }
 
-void RNIService::manageL2MeasSubscriptions(Trigger trigger){
-    SubscriptionsStructure::iterator it = subscriptions_.find("L2_meas");
-    if(it != subscriptions_.end())
-    {
-        std::map<std::string, SubscriptionInfo>::iterator sit = it->second.begin();
-        while(sit != it->second.end())
-        {
-            std::string body;
-            //send response
-            if(trigger == L2_MEAS_PERIODICAL)
-            {
-                if(!sit->second.ues.empty() && !sit->second.cellIds.empty())
-                {
-                    body = L2MeasResource_.toJson(sit->second.cellIds, sit->second.ues).dump(2);
-                    std::cout << "ue e cell"<<std::endl;
-                }
-                else if(sit->second.ues.empty() && !sit->second.cellIds.empty())
-                {
-                    body = L2MeasResource_.toJsonCell(sit->second.cellIds).dump(2);
-                    std::cout << "cell"<<std::endl;
-                }
-                else if(!sit->second.ues.empty() && sit->second.cellIds.empty())
-                {
-                    body = L2MeasResource_.toJsonUe(sit->second.ues).dump(2);
-                    std::cout << "ue"<<std::endl;
-                }
-                else if(sit->second.ues.empty() && sit->second.cellIds.empty())
-                {
-                    body = L2MeasResource_.toJson().dump(2);
-                    std::cout << "tutti"<<std::endl;
-                }
-            }
-            else if(trigger == L2_MEAS_UTI_80)
-            {
-//                body = L2MeasResource_.toJsonCell("utilization").dump(2);
-            }
-            if(sit->second.socket->getState() == TCPSocket::CONNECTED)
-            {
-                if(body.size() > 0)
-                {
-                    int slash = sit->second.consumerUri.find('/');
-                    std::string host = sit->second.consumerUri.substr(0, slash);
-                    std::string uri = sit->second.consumerUri.substr(slash);
-                    Http::sendPostRequest(sit->second.socket, body.c_str(), host.c_str(), uri.c_str());
-                }
-            sit++;
-            }
-            else
-            { //remove the subscription since the socket is not connected
-                it->second.erase(sit++);
-            }
-
-        }
-        if(!it->second.empty())
-        {
-            cMessage *msg = new cMessage("subscriptionEvent", L2_MEAS_PERIODICAL);
-            scheduleAt(simTime() + L2measSubscriptionPeriod_ , msg);
-            scheduledSubscription = true;
-        }
-        else
-        {
-            scheduledSubscription = false;
-        }
-    }
+void LocationService::manageLocationSubscriptions(Trigger trigger){
+//    SubscriptionsStructure::iterator it = subscriptions_.find("L2_meas");
+//    if(it != subscriptions_.end())
+//    {
+//        std::map<std::string, SubscriptionInfo>::iterator sit = it->second.begin();
+//        while(sit != it->second.end())
+//        {
+//            std::string body;
+//            //send response
+//            if(trigger == L2_MEAS_PERIODICAL)
+//            {
+//                if(!sit->second.ues.empty() && !sit->second.cellIds.empty())
+//                {
+//                    body = LocationResource_.toJson(sit->second.cellIds, sit->second.ues).dump(2);
+//                    std::cout << "ue e cell"<<std::endl;
+//                }
+//                else if(sit->second.ues.empty() && !sit->second.cellIds.empty())
+//                {
+//                    body = LocationResource_.toJsonCell(sit->second.cellIds).dump(2);
+//                    std::cout << "cell"<<std::endl;
+//                }
+//                else if(!sit->second.ues.empty() && sit->second.cellIds.empty())
+//                {
+//                    body = LocationResource_.toJsonUe(sit->second.ues).dump(2);
+//                    std::cout << "ue"<<std::endl;
+//                }
+//                else if(sit->second.ues.empty() && sit->second.cellIds.empty())
+//                {
+//                    body = LocationResource_.toJson().dump(2);
+//                    std::cout << "tutti"<<std::endl;
+//                }
+//            }
+//            else if(trigger == L2_MEAS_UTI_80)
+//            {
+//            }
+//            if(sit->second.socket->getState() == TCPSocket::CONNECTED)
+//            {
+//                if(body.size() > 0)
+//                {
+//                    int slash = sit->second.consumerUri.find('/');
+//                    std::string host = sit->second.consumerUri.substr(0, slash);
+//                    std::string uri = sit->second.consumerUri.substr(slash);
+//                    Http::sendPostRequest(sit->second.socket, body.c_str(), host.c_str(), uri.c_str());
+//                }
+//            sit++;
+//            }
+//            else
+//            { //remove the subscription since the socket is not connected
+//                it->second.erase(sit++);
+//            }
+//
+//        }
+//        if(!it->second.empty())
+//        {
+//            cMessage *msg = new cMessage("subscriptionEvent", L2_MEAS_PERIODICAL);
+//            scheduleAt(simTime() + LocationSubscriptionPeriod_ , msg);
+//            scheduledSubscription = true;
+//        }
+//        else
+//        {
+//            scheduledSubscription = false;
+//        }
+//    }
 }
 
-void RNIService::finish()
+void LocationService::finish()
 {
 // TODO
     return;
 }
 
 
-void RNIService::refreshDisplay() const
+void LocationService::refreshDisplay() const
 {
 // TODO
     return;
 }
 
 
-RNIService::~RNIService(){
-    cancelAndDelete(L2measSubscriptionEvent_);
+LocationService::~LocationService(){
+    cancelAndDelete(LocationSubscriptionEvent_);
 return;
 }
 

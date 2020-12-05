@@ -1,4 +1,4 @@
-#include "../../RNIService/resources/AttributeBase.h"
+#include "apps/mec/MeServices/Resources/AttributeBase.h"
 
 AttributeBase::AttributeBase()
 {

@@ -154,6 +154,13 @@ class LteCellInfo : public cSimpleModule
     {
         return cellId_;
     }
+    
+    const std::map<MacNodeId, inet::Coord>* getUePositionList()
+    {
+        return &uePosition;
+    }
+
+
     //end
 
     int getNumRbDl()

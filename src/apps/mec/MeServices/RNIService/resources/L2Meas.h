@@ -4,9 +4,9 @@
 #include "common/LteCommon.h"
 #include <vector>
 #include <map>
-#include "../../RNIService/resources/AttributeBase.h"
-#include "../../RNIService/resources/CellInfo.h"
-#include "../../RNIService/resources/TimeStamp.h"
+#include "apps/mec/MeServices/Resources/AttributeBase.h"
+#include "apps/mec/MeServices/RNIService/resources/CellInfo.h"
+#include "apps/mec/MeServices/Resources/TimeStamp.h"
 
 class EnodeBStatsCollector;
 
@@ -14,7 +14,7 @@ class L2Meas : public AttributeBase
 {
 	public:
 		/**
-		 * the constructor takes a vector of te eNodeBs connceted to the MeHost
+		 * the constructor takes a vector of the eNodeBs connected to the MeHost
 		 * and creates a CellInfo object
 		*/
         L2Meas();

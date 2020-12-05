@@ -2,7 +2,7 @@
 #define _TIMESTAMP_H_
 
 
-#include "../../RNIService/resources/AttributeBase.h"
+#include "apps/mec/MeServices/Resources/AttributeBase.h"
 
 
 /// <summary>

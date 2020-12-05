@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../../RNIService/resources/AttributeBase.h"
+#include "apps/mec/MeServices/Resources/AttributeBase.h"
 #include "../../RNIService/resources/Plmn.h"
 
 
