@@ -28,7 +28,7 @@
 #include <vector>
 #include <map>
 
-#include "apps/mec/MeServices/GenericService/GenericService.h"
+#include "../MeServiceBase/MeServiceBase.h"
 #include "corenetwork/binder/LteBinder.h"
 #include "resources/L2Meas.h"
 
@@ -56,7 +56,7 @@ typedef struct{
 
 class L2Meas;
 
-class RNIService: public GenericService
+class RNIService: public MeServiceBase
 {
   private:
 
@@ -75,16 +75,14 @@ class RNIService: public GenericService
     
     bool scheduledSubscription;
 
-    void manageL2MeasSubscriptions(Trigger trigger);
+    bool manageL2MeasSubscriptions(Trigger trigger);
 
   public:
     RNIService();
   protected:
 
-//    std::map<std::string, std::string> parseRequest(char *packet_);
     virtual void initialize(int stage) override;
     virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 
@@ -92,7 +90,7 @@ class RNIService: public GenericService
     virtual void handlePOSTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
     virtual void handlePUTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
     virtual void handleDELETERequest(const std::string& uri, inet::TCPSocket* socket);
-    virtual void handleSubscriptionType(cMessage *msg);
+    virtual bool handleSubscriptionType(cMessage *msg);
 
 
     virtual ~RNIService();

@@ -98,6 +98,7 @@ void MeAppBase::socketEstablished(int, void *)
 {
     // *redefine* to perform or schedule first sending
     EV_INFO << "connected\n";
+
 }
 
 void MeAppBase::socketDataArrived(int, void *, cPacket *msg, bool)

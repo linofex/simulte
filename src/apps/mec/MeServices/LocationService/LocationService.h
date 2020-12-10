@@ -28,7 +28,7 @@
 #include <vector>
 #include <map>
 
-#include "apps/mec/MeServices/GenericService/GenericService.h"
+#include "../MeServiceBase/MeServiceBase.h"
 #include "corenetwork/binder/LteBinder.h"
 #include "apps/mec/MeServices/LocationService/resources/LocationResource.h"
 
@@ -56,7 +56,7 @@ typedef struct{
 
 class Location;
 
-class LocationService: public GenericService
+class LocationService: public MeServiceBase
 {
   private:
 
@@ -75,7 +75,7 @@ class LocationService: public GenericService
     
     bool scheduledSubscription;
 
-    void manageLocationSubscriptions(Trigger trigger);
+    bool manageLocationSubscriptions(Trigger trigger);
 
   public:
     LocationService();
@@ -84,7 +84,6 @@ class LocationService: public GenericService
 
     virtual void initialize(int stage) override;
     virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg) override;
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 
@@ -92,7 +91,7 @@ class LocationService: public GenericService
     virtual void handlePOSTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
     virtual void handlePUTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
     virtual void handleDELETERequest(const std::string& uri, inet::TCPSocket* socket);
-    virtual void handleSubscriptionType(cMessage *msg);
+    virtual bool handleSubscriptionType(cMessage *msg);
 
 
     virtual ~LocationService();

@@ -30,8 +30,8 @@ simple MeAppGet like ITCPApp
         volatile int numRequestsPerSession = default(1);  // number of requests sent per session
         volatile int requestLength @unit(B) = default(200B); // length of a request
         volatile int replyLength @unit(B) = default(1MiB); // length of a reply
-        volatile double thinkTime @unit(s); // time gap between requests
-        volatile double idleInterval @unit(s); // time gap between sessions
+        volatile double thinkTime @unit(s) = default(0s); // time gap between requests
+        volatile double idleInterval @unit(s) = default(0s); // time gap between sessions
         volatile double reconnectInterval @unit(s) = default(30s);  // if connection breaks, waits this much before trying to reconnect
         @display("i=block/app");
         @signal[sentPk](type=cPacket);

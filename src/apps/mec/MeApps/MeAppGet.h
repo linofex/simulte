@@ -31,7 +31,7 @@ class MeAppGet : public MeAppBase
       virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
       virtual void initialize(int stage) override;
 //      virtual void handleTimer(cMessage *msg) override;
-//      virtual void socketEstablished(int connId, void *yourPtr) override;
+      virtual void socketEstablished(int connId, void *yourPtr) override;
 //      virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
 //      virtual void socketClosed(int connId, void *yourPtr) override;
 //      virtual void socketFailure(int connId, void *yourPtr, int code) override;

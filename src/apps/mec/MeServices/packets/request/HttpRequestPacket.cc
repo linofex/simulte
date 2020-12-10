@@ -6,14 +6,14 @@
 HTTPRequestPacket::HTTPRequestPacket(const char *name, short kind): HTTPRequestPacket_Base(name,kind)
 {
      setContentType("application/json");
-     setBody("\r\n");
+     setBody("");
      setPayload("");
 }
 HTTPRequestPacket::HTTPRequestPacket(const verb method, const char *name, short kind): HTTPRequestPacket_Base(name, kind)
 {
     setMethod(method);
     setContentType("application/json");
-    setBody("\r\n");
+    setBody("");
     setPayload("");
 
 }
@@ -61,11 +61,11 @@ void HTTPRequestPacket::setLength(unsigned int length_)
 
 void HTTPRequestPacket::setHost(const char *host_)
 {
-    headerFields_["Host"] = std::string(host_);
+    headerFields_["Host: "] = std::string(host_);
 }
 void HTTPRequestPacket::setHost(const std::string& host_)
 {
-    headerFields_["Host"] = host_;
+    headerFields_["Host: "] = host_;
 }
 
 void HTTPRequestPacket::setUri(const std::string& uri_){

@@ -41,29 +41,13 @@ void RNIService::initialize(int stage)
         return;
     }
     else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
-        GenericService::initialize(stage);
+        MeServiceBase::initialize(stage);
         L2MeasResource_.addEnodeB(eNodeB_);
         L2measSubscriptionEvent_ = new cMessage("L2measSubscriptionEvent");
         L2measSubscriptionPeriod_ = par("L2measSubscriptionPeriod");
     }
 }
 
-
-void RNIService::handleMessage(cMessage *msg)
-{
-//    if(msg->isSelfMessage())
-//    {
-//        if(strcmp(msg->getKind(), PERIODIC) == 0)
-//        {
-//            manageL2MeasSubscriptions();
-//            return;
-//        }
-//
-//    }
-
-    GenericService::handleMessage(msg);
-
-}
 
 void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket)
 {
@@ -465,17 +449,18 @@ void RNIService::handleDELETERequest(const std::string& uri, inet::TCPSocket* so
 }
 
 
-void RNIService::handleSubscriptionType(cMessage *msg)
+bool RNIService::handleSubscriptionType(cMessage *msg)
 {
     if(msg->getKind() == L2_MEAS_PERIODICAL)
     {
-        manageL2MeasSubscriptions(L2_MEAS_PERIODICAL);
+        return manageL2MeasSubscriptions(L2_MEAS_PERIODICAL);
     }
     delete msg;
 }
 
-void RNIService::manageL2MeasSubscriptions(Trigger trigger){
+bool RNIService::manageL2MeasSubscriptions(Trigger trigger){
     SubscriptionsStructure::iterator it = subscriptions_.find("L2_meas");
+    bool sent = false;
     if(it != subscriptions_.end())
     {
         std::map<std::string, SubscriptionInfo>::iterator sit = it->second.begin();
@@ -518,8 +503,10 @@ void RNIService::manageL2MeasSubscriptions(Trigger trigger){
                     std::string host = sit->second.consumerUri.substr(0, slash);
                     std::string uri = sit->second.consumerUri.substr(slash);
                     Http::sendPostRequest(sit->second.socket, body.c_str(), host.c_str(), uri.c_str());
+                    sent = true;
                 }
             sit++;
+
             }
             else
             { //remove the subscription since the socket is not connected
@@ -527,6 +514,8 @@ void RNIService::manageL2MeasSubscriptions(Trigger trigger){
             }
 
         }
+
+
         if(!it->second.empty())
         {
             cMessage *msg = new cMessage("subscriptionEvent", L2_MEAS_PERIODICAL);
@@ -537,7 +526,9 @@ void RNIService::manageL2MeasSubscriptions(Trigger trigger){
         {
             scheduledSubscription = false;
         }
+        return sent;
     }
+    return false;
 }
 
 void RNIService::finish()

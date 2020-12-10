@@ -56,6 +56,7 @@ namespace Http {
         res->setDataFromBuffer(payload , strlen(payload));
         res->setByteLength(strlen(payload));
         socket->send(res);
+        EV <<"sent" << endl;
     }
 
 
@@ -142,6 +143,15 @@ namespace Http {
         req.setBody(body);
         sendPacket(req.getPayload(), socket);
 
+    }
+    void sendGetRequest(inet::TCPSocket *socket, const char* body, const char* host, const char* uri)
+    {
+        HTTPRequestPacket req = HTTPRequestPacket(GET);
+        req.setHost(host);
+        req.setUri(uri);
+        req.setLength(strlen(body));
+        //req.setBody(body);
+        sendPacket(req.getPayload(), socket);
     }
 
 

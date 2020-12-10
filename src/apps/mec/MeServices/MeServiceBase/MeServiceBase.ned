@@ -18,7 +18,7 @@
 
 // @author Alessandro Noferi
 
-package lte.apps.mec.MeServices.GenericService;
+package lte.apps.mec.MeServices.MeServiceBase;
 
 
 import inet.applications.contract.ITCPApp;
@@ -27,7 +27,7 @@ import inet.applications.contract.ITCPApp;
 
 // @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
 //
-moduleinterface GenericService 
+moduleinterface MeServiceBase 
 {
     parameters:
         @display("i=block/app");

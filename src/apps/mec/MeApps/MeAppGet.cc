@@ -7,25 +7,48 @@
 
 
 #include "apps/mec/MeApps/MeAppGet.h"
-
+#include "apps/mec/MeServices/httpUtils/httpUtils.h"
+#include "common/utils/utils.h"
+#include <string>
 
 Define_Module(MeAppGet);
 
 MeAppGet::~MeAppGet(){}
 
 
-void MeAppGet::dataArrived(cPacket *msg){}
-void MeAppGet::handleSelfMsg(cMessage *msg){
-    connect();
+void MeAppGet::dataArrived(cPacket *msg){
+    std::string packet = lte::utils::getPacketPayload(msg);
+    EV_INFO << "payload: " << packet << endl;
     delete msg;
+    close();
+}
+
+void MeAppGet::socketEstablished(int connId, void *yourPtr)
+{
+
+    std::string body = "";
+    std::string uri = "/example/location/v2/queries/users";
+    std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
+    Http::sendGetRequest(&socket, body.c_str(), host.c_str(), uri.c_str());
+
+}
+
+
+void MeAppGet::handleSelfMsg(cMessage *msg){
+    if(strcmp(msg->getName(), "connect") == 0)
+    {
+        connect();
+        delete msg;
+        return;
+    }
 }
 
 void MeAppGet::initialize(int stage){
     MeAppBase::initialize(stage);
     if(stage == inet::INITSTAGE_APPLICATION_LAYER)
     {
-        cMessage *m = new cMessage("ciao");
-        scheduleAt(simTime()+1, m);
+        cMessage *m = new cMessage("connect");
+        scheduleAt(simTime()+0.5, m);
     }
 }
 

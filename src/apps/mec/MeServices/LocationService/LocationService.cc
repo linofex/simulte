@@ -44,7 +44,7 @@ void LocationService::initialize(int stage)
         return;
     }
     else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
-        GenericService::initialize(stage);
+        MeServiceBase::initialize(stage);
         LocationResource_.addEnodeB(eNodeB_);
         LocationResource_.addBinder(binder_);
         LocationResource_.setBaseUri(host_+baseUriQueries_);
@@ -53,14 +53,9 @@ void LocationService::initialize(int stage)
     }
 }
 
-
-void LocationService::handleMessage(cMessage *msg)
-{
-    GenericService::handleMessage(msg);
-}
-
 void LocationService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket)
 {
+    EV_INFO << "handleGETRequest" << endl;
     std::vector<std::string> splittedUri = lte::utils::splitString(uri, "?");
     // uri must be in form example/v1/rni/queries/resource
     std::size_t lastPart = splittedUri[0].find_last_of("/");
@@ -458,17 +453,17 @@ void LocationService::handleDELETERequest(const std::string& uri, inet::TCPSocke
     }
 }
 
-
-void LocationService::handleSubscriptionType(cMessage *msg)
+bool LocationService::handleSubscriptionType(cMessage *msg)
 {
     if(msg->getKind() == L2_MEAS_PERIODICAL)
     {
-        manageLocationSubscriptions(L2_MEAS_PERIODICAL);
+        return manageLocationSubscriptions(L2_MEAS_PERIODICAL);
     }
     delete msg;
+     return false;
 }
 
-void LocationService::manageLocationSubscriptions(Trigger trigger){
+bool LocationService::manageLocationSubscriptions(Trigger trigger){
 //    SubscriptionsStructure::iterator it = subscriptions_.find("L2_meas");
 //    if(it != subscriptions_.end())
 //    {

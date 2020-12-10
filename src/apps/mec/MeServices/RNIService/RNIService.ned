@@ -3,7 +3,7 @@
 package lte.apps.mec.MeServices.RNIService;
 
 
-import lte.apps.mec.MeServices.GenericService.GenericService;
+import lte.apps.mec.MeServices.MeServiceBase.MeServiceBase;
 
 import inet.applications.contract.ITCPApp;
 
@@ -17,7 +17,7 @@ import inet.applications.contract.ITCPApp;
 // 
 // @see ~GenericAppMsg, ~TCPBasicClientApp, ~TelnetApp
 //
-simple RNIService like GenericService, ITCPApp
+simple RNIService like MeServiceBase, ITCPApp
 {
     parameters:
         string localAddress = default(""); // local address; may be left empty ("")
