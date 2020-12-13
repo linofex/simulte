@@ -202,7 +202,7 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
         }
         catch(nlohmann::detail::parse_error e)
         {
-            throw cRuntimeError("%s", body.c_str());
+            std::cout <<  e.what() << std::endl;
             // body is not correctly formatted in JSON, manage it
             Http::send400Response(socket); // bad body JSON
             return;
@@ -213,174 +213,193 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
 
         SubscriptionInfo newSubscription;
 
+        std::string subscription;
         if(subscriptionType.compare("L2_meas") == 0)
         {
             // should check if the mecApp already make the subscription?
             // how? TODO
             if(jsonBody.contains("L2MeasurementSubscription")) // mandatory attribute
             {
-                jsonBody = jsonBody["L2MeasurementSubscription"];// entering the structure for convenience
-                if(!jsonBody.contains("callbackReference") || jsonBody["callbackReference"].is_array())
-                {
-                    Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-                    return;
-                }
 
-                if(std::string(jsonBody["callbackReference"]).find('/') == -1) //bad uri
-                {
-                    Http::send400Response(socket); // must be ipv4
-                    return;
-                }
-
-                if(!jsonBody.contains("filterCriteria")) // mandatory attribute
-                {
-                    Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-                    return;
-                }
-
-                if(jsonBody.contains("appInstanceId") && jsonBody["appInstanceId"].is_array())
-                {
-                    Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-                    return;
-                }
-
-                if(!jsonBody.contains("filterCriteria") || jsonBody["filterCriteria"].is_array())
-                {
-                   Http::send400Response(socket); // filterCriteria is mandatory and takes exactly 1 att
-                   return;
-                }
-
-
-                nlohmann::json filterCriteria = jsonBody["filterCriteria"];
-                std::vector<MacNodeId> ues;
-                std::vector<MacNodeId> cellids;
-                std::vector<Trigger> triggers;
-
-                //check for appInstanceId filter
-                if(filterCriteria.contains("appInstanceId")  )
-                {
-                    if(filterCriteria["appInstanceId"].is_array())
-                    {
-                        Http::send400Response(socket); // appInstanceId, if present, takes exactly 1 att
-                        return;
-                    }
-                }
-
-                //check ues filter
-                if(filterCriteria.contains("associateId"))
-                {
-                    if(filterCriteria["associateId"].is_array())
-                    {
-                        nlohmann::json ueVector = filterCriteria["associateId"];
-                        for(int i = 0; i < ueVector.size(); ++i)
-                        {
-                            if(ueVector.at(i)["associateId"]["type"] == "UE_IPv4_ADDRESS")
-                            {
-                                std::string address = ueVector.at(i)["associateId"]["value"];
-                                ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
-                            }
-                            else
-                            {
-                                Http::send400Response(socket); // must be ipv4
-                                return;
-                             }
-                         }
-                    }
-                    else
-                    {
-                        if(filterCriteria["associateId"]["type"] == "UE_IPv4_ADDRESS")
-                        {
-                            std::string address = filterCriteria["associateId"]["value"];
-                            ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
-                        }
-                    }
-                }
-
-                //check cellIds filter
-                if(filterCriteria.contains("ecgi"))
-                {
-                    if(filterCriteria["ecgi"].is_array())
-                    {
-                        nlohmann::json cellVector = filterCriteria["cellId"];
-                        for(int i = 0; i < cellVector.size(); ++i)
-                        {
-                            std::string cellId = cellVector.at(i)["cellId"];
-                            cellids.push_back((MacNodeId)std::stoi(cellId));
-                         }
-                    }
-                    else
-                    {
-                        std::string cellId = filterCriteria["ecgi"]["cellId"];
-                        cellids.push_back((MacNodeId)std::stoi(cellId));
-                    }
-                }
-
-
-                //check trigger filter
-                if(filterCriteria.contains("trigger"))
-                {
-                    if(filterCriteria["trigger"].is_array())
-                    {
-                        nlohmann::json triggerVector = filterCriteria["trigger"];
-                        for(int i = 0; i < triggerVector.size(); ++i)
-                        {
-                            std::string trigger = triggerVector.at(i);
-                            triggers.push_back(getTrigger(trigger));
-                         }
-                    }
-                    else
-                    {
-                        std::string trigger = filterCriteria["trigger"];
-                        triggers.push_back(getTrigger(trigger));
-                    }
-                }
-
-                //chek expiration time
-                if(jsonBody.contains("expiryDeadline") && !jsonBody["expiryDeadline"].is_array())
-                {
-                    newSubscription.expiretaionTime = jsonBody["expiryDeadline"]["seconds"]; //TO DO add nanoseconds
-                }
-
-                newSubscription.cellIds = cellids;
-                newSubscription.ues = ues;
-                newSubscription.trigger = triggers;
-                newSubscription.appInstanceId = filterCriteria["appInstanceId"];
-
-                newSubscription.consumerUri = jsonBody["callbackReference"];
-                newSubscription.consumerUri += "notifications/L2_meas/"+ std::to_string(subscriptionId_);
-                newSubscription.socket = socket;
-
-                std::stringstream idStream;
-                idStream << "sub"<< subscriptionId_;
-                newSubscription.subscriptionId = idStream.str();
-                newSubscription.subscriptionType = "L2_meas";
-
-                subscriptions_["L2_meas"][newSubscription.subscriptionId] = newSubscription;
-
-                subscriptionId_++;
-                std::string links =  host_ + baseUriSubscriptions_ + "/" + newSubscription.subscriptionId;
-                nlohmann::json response;
-                response["L2MeasSubscription"]["_links"]["self"] =links;
-                response["L2MeasSubscription"] = jsonBody;
-
-                std::pair<std::string, std::string> location("Location: ", links);
-                //send 201 response
-                Http::send201Response(socket, response.dump(2).c_str(), location);
-
-                if(scheduledSubscription == false)
-                {
-                    cMessage *msg = new cMessage("subscriptionEvent", L2_MEAS_PERIODICAL);
-                    scheduleAt(simTime() + L2measSubscriptionPeriod_ , msg);
-                }
-
-                return;
+                subscription = "L2MeasurementSubscription";
             }
             else
             {
-                Http::send400Response(socket); // filterCriteria is mandatory and takes exactly 1 att
+                Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
                 return;
             }
         }
+        else if(subscriptionType.compare("meas_rep_ue") == 0)
+        {
+            if(jsonBody.contains("MeasRepUeSubscription")) // mandatory attribute
+            {
+
+                subscription = "MeasRepUeSubscription";
+            }
+            else
+            {
+                Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
+                return;
+            }
+
+        }
+        else
+        {
+            Http::send400Response(socket);
+            return;
+        }
+
+        jsonBody = jsonBody[subscription];// entering the structure for convenience
+        if(!jsonBody.contains("callbackReference") || jsonBody["callbackReference"].is_array())
+        {
+
+            Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
+            return;
+        }
+
+        if(std::string(jsonBody["callbackReference"]).find('/') == -1) //bad uri
+        {
+            Http::send400Response(socket); // must be ipv4
+            return;
+        }
+
+        if(!jsonBody.contains("filterCriteria")) // mandatory attribute
+        {
+            Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
+            return;
+        }
+
+        if(jsonBody.contains("appInstanceId") && jsonBody["appInstanceId"].is_array())
+        {
+            Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
+            return;
+        }
+
+        if(!jsonBody.contains("filterCriteria") || jsonBody["filterCriteria"].is_array())
+        {
+           Http::send400Response(socket); // filterCriteria is mandatory and takes exactly 1 att
+           return;
+        }
+
+
+        nlohmann::json filterCriteria = jsonBody["filterCriteria"];
+        std::vector<MacNodeId> ues;
+        std::vector<MacNodeId> cellids;
+        Trigger trigger;
+
+        //check for appInstanceId filter
+        if(filterCriteria.contains("appInstanceId")  )
+        {
+            if(filterCriteria["appInstanceId"].is_array())
+            {
+                Http::send400Response(socket); // appInstanceId, if present, takes exactly 1 att
+                return;
+            }
+        }
+
+        //check ues filter
+        if(filterCriteria.contains("associateId"))
+        {
+            if(filterCriteria["associateId"].is_array())
+            {
+                nlohmann::json ueVector = filterCriteria["associateId"];
+                for(int i = 0; i < ueVector.size(); ++i)
+                {
+                    if(ueVector.at(i)["associateId"]["type"] == "UE_IPv4_ADDRESS")
+                    {
+                        std::string address = ueVector.at(i)["associateId"]["value"];
+                        ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
+                    }
+                    else
+                    {
+                        Http::send400Response(socket); // must be ipv4
+                        return;
+                     }
+                 }
+            }
+            else
+            {
+                if(filterCriteria["associateId"]["type"] == "UE_IPv4_ADDRESS")
+                {
+                    std::string address = filterCriteria["associateId"]["value"];
+                    ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
+                }
+            }
+        }
+        else
+        {
+            Http::send400Response(socket); // a user must be indicated
+            return;
+        }
+
+        //check cellIds filter
+        if(filterCriteria.contains("ecgi"))
+        {
+            if(filterCriteria["ecgi"].is_array())
+            {
+                nlohmann::json cellVector = filterCriteria["cellId"];
+                for(int i = 0; i < cellVector.size(); ++i)
+                {
+                    std::string cellId = cellVector.at(i)["cellId"];
+                    cellids.push_back((MacNodeId)std::stoi(cellId));
+                 }
+            }
+            else
+            {
+                std::string cellId = filterCriteria["ecgi"]["cellId"];
+                cellids.push_back((MacNodeId)std::stoi(cellId));
+            }
+        }
+
+        //check trigger filter
+        if(filterCriteria.contains("trigger"))
+        {
+            std::string trigger = filterCriteria["trigger"];
+            trigger = getTrigger(trigger);
+            //check if it is event trigger and notify, based on the state of the ues e cells
+
+        }
+
+        //chek expiration time
+        // TODO add end timer
+        if(jsonBody.contains("expiryDeadline") && !jsonBody["expiryDeadline"].is_array())
+        {
+            newSubscription.expirationTime = jsonBody["expiryDeadline"]["seconds"]; //TO DO add nanoseconds
+        }
+
+        newSubscription.cellIds = cellids;
+        newSubscription.ues = ues;
+//        newSubscription.trigger = triggers;
+        newSubscription.appInstanceId = filterCriteria["appInstanceId"];
+
+        newSubscription.consumerUri = jsonBody["callbackReference"];
+        newSubscription.consumerUri += "notifications/"+subscriptionType+"/"+ std::to_string(subscriptionId_);
+        newSubscription.socket = socket;
+
+        std::stringstream idStream;
+        idStream << subscriptionType << "sub"<< subscriptionId_;
+        newSubscription.subscriptionId = idStream.str();
+        newSubscription.subscriptionType = subscriptionType;
+
+        subscriptions_[subscriptionType][newSubscription.subscriptionId] = newSubscription;
+
+        subscriptionId_++;
+        std::string links =  host_ + baseUriSubscriptions_ + "/" + newSubscription.subscriptionId;
+        nlohmann::json response;
+        response[subscription]["_links"]["self"] = links;
+        response[subscription] = jsonBody;
+
+        std::pair<std::string, std::string> location("Location: ", links);
+        //send 201 response
+        Http::send201Response(socket, response.dump(2).c_str(), location);
+
+        if(trigger == L2_MEAS_PERIODICAL && scheduledSubscription == false)
+        {
+            cMessage *msg = new cMessage("subscriptionEvent", L2_MEAS_PERIODICAL);
+            scheduleAt(simTime() + L2measSubscriptionPeriod_ , msg);
+        }
+
+        return;
     }
     else
     {
@@ -453,9 +472,14 @@ bool RNIService::handleSubscriptionType(cMessage *msg)
 {
     if(msg->getKind() == L2_MEAS_PERIODICAL)
     {
+        delete msg;
         return manageL2MeasSubscriptions(L2_MEAS_PERIODICAL);
     }
-    delete msg;
+    else if(msg->getKind() == UE_CQI)
+    {
+        delete msg;
+    }
+
 }
 
 bool RNIService::manageL2MeasSubscriptions(Trigger trigger){
@@ -468,33 +492,37 @@ bool RNIService::manageL2MeasSubscriptions(Trigger trigger){
         {
             std::string body;
             //send response
-            if(trigger == L2_MEAS_PERIODICAL)
+            if(sit->second.trigger == trigger)
             {
-                if(!sit->second.ues.empty() && !sit->second.cellIds.empty())
+                if(trigger == L2_MEAS_PERIODICAL)
                 {
-                    body = L2MeasResource_.toJson(sit->second.cellIds, sit->second.ues).dump(2);
-                    std::cout << "ue e cell"<<std::endl;
+                    if(!sit->second.ues.empty() && !sit->second.cellIds.empty())
+                    {
+                        body = L2MeasResource_.toJson(sit->second.cellIds, sit->second.ues).dump(2);
+                        std::cout << "ue e cell"<<std::endl;
+                    }
+                    else if(sit->second.ues.empty() && !sit->second.cellIds.empty())
+                    {
+                        body = L2MeasResource_.toJsonCell(sit->second.cellIds).dump(2);
+                        std::cout << "cell"<<std::endl;
+                    }
+                    else if(!sit->second.ues.empty() && sit->second.cellIds.empty())
+                    {
+                        body = L2MeasResource_.toJsonUe(sit->second.ues).dump(2);
+                        std::cout << "ue"<<std::endl;
+                    }
+                    else if(sit->second.ues.empty() && sit->second.cellIds.empty())
+                    {
+                        body = L2MeasResource_.toJson().dump(2);
+                        std::cout << "tutti"<<std::endl;
+                    }
                 }
-                else if(sit->second.ues.empty() && !sit->second.cellIds.empty())
+                else if(trigger == L2_MEAS_UTI_80)
                 {
-                    body = L2MeasResource_.toJsonCell(sit->second.cellIds).dump(2);
-                    std::cout << "cell"<<std::endl;
+                    // tutte le toJson con id cella
                 }
-                else if(!sit->second.ues.empty() && sit->second.cellIds.empty())
-                {
-                    body = L2MeasResource_.toJsonUe(sit->second.ues).dump(2);
-                    std::cout << "ue"<<std::endl;
+    //                body = L2MeasResource_.toJsonCell("utilization").dump(2);
                 }
-                else if(sit->second.ues.empty() && sit->second.cellIds.empty())
-                {
-                    body = L2MeasResource_.toJson().dump(2);
-                    std::cout << "tutti"<<std::endl;
-                }
-            }
-            else if(trigger == L2_MEAS_UTI_80)
-            {
-//                body = L2MeasResource_.toJsonCell("utilization").dump(2);
-            }
             if(sit->second.socket->getState() == TCPSocket::CONNECTED)
             {
                 if(body.size() > 0)
@@ -514,7 +542,6 @@ bool RNIService::manageL2MeasSubscriptions(Trigger trigger){
             }
 
         }
-
 
         if(!it->second.empty())
         {

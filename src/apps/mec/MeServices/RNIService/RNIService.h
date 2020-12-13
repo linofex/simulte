@@ -41,15 +41,15 @@
 
 typedef struct{
     inet::TCPSocket *socket;
-    std::vector<MacNodeId> cellIds;
+    std::vector<MacCellId> cellIds;
     std::vector<MacNodeId> ues;
-    std::vector<Trigger> trigger;
+    Trigger trigger;
     std::string consumerUri;
     std::string appInstanceId;
     std::string subscriptionType;
     std::string subscriptionId;
 
-    double expiretaionTime;
+    double expirationTime;
 } SubscriptionInfo;
 
 
@@ -61,6 +61,8 @@ class RNIService: public MeServiceBase
   private:
 
     L2Meas L2MeasResource_;
+
+
     typedef std::map<std::string, std::map<std::string, SubscriptionInfo >> SubscriptionsStructure;
     SubscriptionsStructure subscriptions_;
 
