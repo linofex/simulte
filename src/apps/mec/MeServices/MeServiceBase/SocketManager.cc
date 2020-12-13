@@ -8,16 +8,30 @@
 #include "apps/mec/MeServices/MeServiceBase/SocketManager.h"
 #include "common/utils/utils.h"
 #include "../MeServiceBase/MeServiceBase.h"
-
+#include "apps/mec/MeServices/httpUtils/httpUtils.h"
+#include <iostream>
 
 Register_Class(SocketManager);
 
 
 void SocketManager::dataArrived(cMessage *msg, bool urgent){
-    service->newRequest(msg);
-//    std::string packet = lte::utils::getPacketPayload(msg);
-//    EV_INFO <<" dataArrived - handleRequest" << endl;
-//    service->handleRequest(packet, sock);
+        std::string packet = lte::utils::getPacketPayload(msg);
+        Http::DataType type = service->getDataType(packet);
+        if (type == Http::REQUEST)
+        {
+            //Request req = {msg, packet};
+            service->newRequest(msg);
+        }
+        else if(type == Http::RESPONSE)
+        {
+            // manage depending the method used
+            delete msg;
+        }
+        else
+        {
+            delete msg;
+        }
+
 }
 
 void SocketManager::established(){

@@ -12,6 +12,9 @@
 #include <string>
 
 namespace Http {
+
+enum DataType {REQUEST, RESPONSE, UNKNOWN};
+
 void sendPacket(const char* pck, inet::TCPSocket *socket);
 
 bool ceckHttpVersion(std::string& httpVersion);

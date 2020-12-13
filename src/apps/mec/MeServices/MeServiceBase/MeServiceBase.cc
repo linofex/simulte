@@ -11,7 +11,6 @@
 #include "apps/mec/MeServices/MeServiceBase/SocketManager.h"
 #include "inet/common/INETUtils.h"
 #include "common/utils/utils.h"
-#include "apps/mec/MeServices/httpUtils/httpUtils.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -74,7 +73,7 @@ void MeServiceBase::handleMessage(cMessage *msg)
         if(strcmp(msg->getName(), "subscriptionEvent") == 0)
         {
             newSubscriptionEvent(msg);
-            delete msg;
+           // delete msg;
         }
         else if(strcmp(msg->getName(), "serveSubscription") == 0)
         {
@@ -111,7 +110,8 @@ void MeServiceBase::handleMessage(cMessage *msg)
             proc->init(this, socket);
             socketMap.addSocket(socket);
         }
-          socket->processMessage(msg);//newRequest(msg)
+
+        socket->processMessage(msg);
     }
 
 }
@@ -153,7 +153,7 @@ void MeServiceBase::newRequest(cMessage *msg)
     int oldSize = requests_.getLength();
     requests_.insert(msg);
     // save timestamp if needed with setArrivalTime
-    if(oldSize == 0 && subscriptions_.getLength() == 0){ // start serving requests after subscriptions
+    if(oldSize == 0 && subscriptions_.getLength() == 0 && !subscriptionService_->isScheduled()){ // start serving requests after subscriptions
         EV << "Request execution started" << endl;
         scheduleNextEvent(requestServiceTime_);
     }
@@ -165,7 +165,7 @@ void MeServiceBase::newSubscriptionEvent(cMessage *msg)
     int oldSize = subscriptions_.getLength();
     subscriptions_.insert(msg);
     // save timestamp if needed with setArrivalTime
-    if(oldSize == 0) // start serving subscriptions
+    if(oldSize == 0 && !requestService_->isScheduled()) // start serving subscriptions
         scheduleNextEvent(subscriptionServiceTime_);
 }
 
@@ -178,6 +178,8 @@ bool MeServiceBase::manageSubscription()
 
 void MeServiceBase::triggeredEvent(short int event)
 {
+
+    //chiamo direttamente la newSubscriptionEvent
     cMessage *msg = new cMessage("subscriptionEvent", event);
     scheduleAt(NOW, msg);
 }
@@ -308,4 +310,34 @@ MeServiceBase::~MeServiceBase(){
     cancelAndDelete(requestService_);
     cancelAndDelete(subscriptionService_);
 }
+
+
+Http::DataType MeServiceBase::getDataType(std::string& packet_){
+    // HTTP request or HTTP response
+    if (packet_.rfind("HTTP", 0) == 0) { // is a response
+        // parse it
+        return Http::RESPONSE;
+    }
+    else if(packet_.rfind("GET", 0) == 0 || packet_.rfind("POST", 0) == 0 ||
+            packet_.rfind("DELETE", 0) == 0 || packet_.rfind("PUT", 0) == 0)
+    {
+        return Http::REQUEST;
+        // is a request
+    }
+    else
+    {
+        return Http::UNKNOWN;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
 

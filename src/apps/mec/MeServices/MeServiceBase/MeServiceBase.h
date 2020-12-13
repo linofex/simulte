@@ -12,6 +12,7 @@
 #include <queue>
 #include "corenetwork/binder/LteBinder.h"
 #include "common/MecCommon.h"
+#include "apps/mec/MeServices/httpUtils/httpUtils.h"
 
 /**
  * @author Alessandro Noferi
@@ -176,6 +177,8 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
          * @param connection connection object to be deleted
          */
         virtual void removeConnection(SocketManager *connection);
+
+        virtual Http::DataType getDataType(std::string& packet_);
 };
 
 
