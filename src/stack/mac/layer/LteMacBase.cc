@@ -26,6 +26,7 @@ LteMacBase::LteMacBase()
 {
     mbuf_.clear();
     macBuffers_.clear();
+    flowManager_ = nullptr;
 }
 
 LteMacBase::~LteMacBase()
@@ -378,11 +379,13 @@ void LteMacBase::finish()
 
 void LteMacBase::discardMacPdu(LogicalCid lcid, unsigned int macPduId)
 {
-    flowManager_->discardMacPdu(lcid, macPduId);
+    if(flowManager_!= nullptr)
+        flowManager_->discardMacPdu(lcid, macPduId);
 }
 void LteMacBase::harqAckToFlowManager(LogicalCid lcid, unsigned int macPduId)
 {
-    flowManager_->macPduArrived(lcid, macPduId);
+    if(flowManager_!= nullptr)
+        flowManager_->macPduArrived(lcid, macPduId);
 }
 
 

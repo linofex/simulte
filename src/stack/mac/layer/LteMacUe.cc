@@ -102,7 +102,8 @@ void LteMacUe::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER)
     {
         cellId_ = getAncestorPar("masterId");
-        flowManager_ = check_and_cast<PacketFlowManagerUe *>(getParentModule()->getSubmodule("packetFlowManager"));
+        if(getParentModule()->findSubmodule("packetFlowManager") != -1)
+            flowManager_ = check_and_cast<PacketFlowManagerUe *>(getParentModule()->getSubmodule("packetFlowManager"));
 
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3)
@@ -140,9 +141,11 @@ void LteMacUe::initialize(int stage)
         const char* moduleName = getParentModule()->getParentModule()->getFullName();
         binder_->registerName(nodeId_, moduleName);
         // provisional
-        UeStatsCollector *ue = check_and_cast<UeStatsCollector *> (getParentModule()->getParentModule()->getSubmodule("ueCollector"));
-        binder_->addUeCollectorToEnodeB(nodeId_, ue,cellId_);
-
+        if(getParentModule()->getParentModule()->findSubmodule("ueCollector") != -1)
+        {
+            UeStatsCollector *ue = check_and_cast<UeStatsCollector *> (getParentModule()->getParentModule()->getSubmodule("ueCollector"));
+            binder_->addUeCollectorToEnodeB(nodeId_, ue,cellId_);
+        }
 
     }
 }
@@ -298,6 +301,13 @@ bool LteMacUe::bufferizePacket(cPacket* pkt)
             }
 
             EV << "LteMacBuffers : Dropped packet: queue" << cid << " is full\n";
+            // @author Alessandro Noferi
+            // discard the RLC
+            if(flowManager_ != nullptr)
+            {
+                unsigned int rlcSno = check_and_cast<LteRlcUmDataPdu *>(pkt)->getPduSequenceNumber();
+                flowManager_->discardRlcPdu(lteInfo->getLcid(),rlcSno);
+            }
             delete pkt;
             return false;
         }
@@ -510,7 +520,8 @@ void LteMacUe::macPduMake(MacCid cid)
         {
             txBuf->insertPdu(txList.first,cw, macPkt);
             LogicalCid lcid = (check_and_cast<UserControlInfo *> (macPkt->getControlInfo()))->getLcid();
-            flowManager_->insertMacPdu(lcid , macPkt->getId(), rlcPduSet);
+            if(flowManager_!= nullptr)
+                flowManager_->insertMacPdu(lcid , macPkt->getId(), rlcPduSet);
 
         }
     }

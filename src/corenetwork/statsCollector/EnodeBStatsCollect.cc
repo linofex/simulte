@@ -16,6 +16,14 @@
 #include <string>
 
 Define_Module(EnodeBStatsCollector);
+EnodeBStatsCollector::EnodeBStatsCollector()
+{
+    rlc_ = nullptr;
+    packetDelay_ = nullptr;
+    mac_ = nullptr;
+    pdcp_ = nullptr;
+}
+
 
 EnodeBStatsCollector::~EnodeBStatsCollector()
 {
@@ -47,7 +55,8 @@ void EnodeBStatsCollector::initialize(int stage){
             throw cRuntimeError("EnodeBStatsCollector::initialize - EnodeB statistic collector only works with RLC in UM mode");
         }
         
-        flowManager_ = check_and_cast<PacketFlowManagerEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("packetFlowManager"));
+        if(getParentModule()->getSubmodule("lteNic")->findSubmodule("packetFlowManager") != -1)
+            flowManager_ = check_and_cast<PacketFlowManagerEnb *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("packetFlowManager"));
 
         cellInfo_ = check_and_cast<LteCellInfo *>(getParentModule()->getSubmodule("cellInfo"));
         ecgi_.cellId = std::to_string(cellInfo_->getMacCellId());
@@ -72,10 +81,15 @@ void EnodeBStatsCollector::initialize(int stage){
         dataVolumePeriod_   = par("dataVolumePeriod");
 
         // start scheduling the l2 meas
+        // schedule only stats not using packetFlowManager
+
         scheduleAt(NOW + prbUsagePeriod_, prbUsage_);
         scheduleAt(NOW + activeUsersPeriod_, activeUsers_);
-        scheduleAt(NOW + discardRatePeriod_, discardRate_);
-        scheduleAt(NOW + delayPacketPeriod_, packetDelay_);
+        if(flowManager_ != nullptr)
+        {
+            scheduleAt(NOW + discardRatePeriod_, discardRate_);
+            scheduleAt(NOW + delayPacketPeriod_, packetDelay_);
+        }
         scheduleAt(NOW + dataVolumePeriod_, pdcpBytes_);
     }
 }
@@ -103,9 +117,11 @@ void EnodeBStatsCollector::handleMessage(cMessage *msg)
         else if(strcmp(msg->getName(), "discardRate_") == 0)
         {
             add_dl_nongbr_pdr_cell();
+            add_ul_nongbr_pdr_cell();
 
             // add packet discard rate stats for each user
             add_dl_nongbr_pdr_cell_perUser();
+            // ul is done add_ul_nongbr_pdr_cell
 
             //reset counters
             pdcp_->resetPktCounter();
@@ -117,6 +133,8 @@ void EnodeBStatsCollector::handleMessage(cMessage *msg)
         else if(strcmp(msg->getName(), "packetDelay_") == 0)
         {
             add_dl_nongbr_delay_perUser();
+            add_ul_nongbr_delay_perUser();
+
             //reset counter
             resetDelayCounterPerUe();
             scheduleAt(NOW + delayPacketPeriod_, packetDelay_);
@@ -156,6 +174,7 @@ void EnodeBStatsCollector::resetDelayCounterPerUe()
     for(; it != end ; ++it)
     {
         flowManager_->resetDelayCounterPerUe(it->first);
+        it->second->resetDelayCounter();
     }
 }
 
@@ -291,6 +310,17 @@ void EnodeBStatsCollector::add_dl_nongbr_pdr_cell_perUser()
     }
 }
 
+void EnodeBStatsCollector::add_ul_nongbr_delay_perUser()
+{
+    UeStatsCollectorMap::iterator it = ueCollectors_.begin();
+    UeStatsCollectorMap::iterator end = ueCollectors_.end();
+    double delay;
+    for(; it != end ; ++it)
+    {
+        it->second->add_ul_nongbr_delay_ue();
+    }
+}
+
 void EnodeBStatsCollector::add_dl_nongbr_delay_perUser()
 {
     UeStatsCollectorMap::iterator it = ueCollectors_.begin();
@@ -298,10 +328,12 @@ void EnodeBStatsCollector::add_dl_nongbr_delay_perUser()
     double delay;
     for(; it != end ; ++it)
     {
-        delay = flowManager_->getDelayStatsPerUe(it->first);
-        it->second->add_dl_nongbr_delay_ue(delay);
+        it->second->add_ul_nongbr_delay_ue();
     }
 }
+
+
+
 
 void EnodeBStatsCollector::add_ul_nongbr_data_volume_ue_perUser()
 {

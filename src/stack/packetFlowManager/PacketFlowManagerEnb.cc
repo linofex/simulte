@@ -34,7 +34,10 @@ PacketFlowManagerEnb::PacketFlowManagerEnb()
 
 PacketFlowManagerEnb::~PacketFlowManagerEnb()
 {
-//times_.clear();
+    connectionMap_.clear();
+    pktDiscardCounterPerUe_.clear();
+    pdcpDelay_.clear();
+    pdcpThroughput_.clear();
 }
 
 void PacketFlowManagerEnb::initialize(int stage)
@@ -67,7 +70,7 @@ void PacketFlowManagerEnb::initLcid(LogicalCid lcid, MacNodeId nodeId)
     newDesc.rlcPdusPerSdu_.clear();
     newDesc.rlcSdusPerPdu_.clear();
     newDesc.macSdusPerPdu_.clear();
-    newDesc.macPduPerProcess_.resize(harqProcesses_, 0);
+    //newDesc.macPduPerProcess_.resize(harqProcesses_, 0);
 
     BurstStatus newBurstStatus;
     newBurstStatus.burstSize = 0;
@@ -112,8 +115,8 @@ void PacketFlowManagerEnb::clearLcid(LogicalCid lcid)
         connectionMap_[lcid].burstState_ = false;
 
 
-        for (int i=0; i<harqProcesses_; i++)
-            connectionMap_[lcid].macPduPerProcess_[i] = 0;
+//        for (int i=0; i<harqProcesses_; i++)
+            //connectionMap_[lcid].macPduPerProcess_[i] = 0;
     }
 
     EV_FATAL << NOW << "node id "<< connectionMap_[lcid].nodeId_ << " PacketFlowManagerEnb::clearLcid - cleared data structures for lcid " << lcid << endl;
@@ -820,7 +823,7 @@ double PacketFlowManagerEnb::getThroughputStatsPerUe(MacNodeId id)
 
 //    if(it->second.pktSizeCount == 0) // a burst is not finished yet, return a tput of this period
 
-    double time = (it->second.time.dbl()); // ms
+    double time = (it->second.time.dbl()*1000); // ms
     double throughput = (it->second.pktSizeCount)/time;
     return throughput;
 }

@@ -85,7 +85,7 @@ class EnodeBStatsCollector: public cSimpleModule
         double dataVolumePeriod_;
 
     public:
-        EnodeBStatsCollector(){}
+        EnodeBStatsCollector();
         virtual ~EnodeBStatsCollector();
 
         const mec::Ecgi& getEcgi() const;
@@ -151,6 +151,7 @@ class EnodeBStatsCollector: public cSimpleModule
 
         // save stats into UeCollectors
         void add_dl_nongbr_delay_perUser();
+        void add_ul_nongbr_delay_perUser();
         void add_dl_nongbr_pdr_cell_perUser();
         void add_ul_nongbr_data_volume_ue_perUser();
         void add_dl_nongbr_data_volume_ue_perUser();

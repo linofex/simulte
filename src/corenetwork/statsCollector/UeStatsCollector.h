@@ -63,11 +63,12 @@ class UeStatsCollector: public cSimpleModule
         bool handover_;
 
     public:
-        UeStatsCollector(){}
+        UeStatsCollector();
         virtual ~UeStatsCollector(){}
 
         void add_ul_nongbr_delay_ue();
         void add_dl_nongbr_delay_ue(double value);// called by the eNodeBCollector
+        void resetDelayCounter();
 
         void add_ul_nongbr_pdr_ue(double value); // called by this module, but from a method
         void add_dl_nongbr_pdr_ue(double value); // called by the eNodeBCollector

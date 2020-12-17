@@ -42,6 +42,7 @@ void TrafficFlowFilterSimplified::initialize(int stage)
     // ENB SIDE
     if(getParentModule()->hasPar("meHost")){
         meHost = getParentModule()->par("meHost").stringValue();
+        EV << "TrafficFlowFilterSimplified::initialize - Mehost "<< meHost << "-" <<endl;
         if(ownerType_ == ENB &&  strcmp(meHost.c_str(), "")){
             //@author Alessandro Noferi
             //begin
@@ -61,8 +62,9 @@ void TrafficFlowFilterSimplified::initialize(int stage)
             meHostAddress = inet::L3AddressResolver().resolve(meHost.c_str());
 
             EV << "TrafficFlowFilterSimplified::initialize - meHost: " << meHost << " meHostAddress: " << meHostAddress.str() << endl;
-            EV << "TrafficFlowFilterSimplified::initialize - meHostadd: " << meHostExtAddress_.str()<< " meHostAddress: " << meHostExtAddressMask_ << endl;
+            EV << "TrafficFlowFilterSimplified::initialize - meHost External address: " << meHostExtAddress_.str()<< " meHostAddress: " << meHostExtAddressMask_ << endl;
         }
+
     }
     //end mec
 }

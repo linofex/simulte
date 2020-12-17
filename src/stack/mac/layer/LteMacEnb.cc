@@ -280,7 +280,8 @@ void LteMacEnb::initialize(int stage)
         const char* moduleName = getParentModule()->getParentModule()->getFullName();
         binder_->registerName(nodeId_, moduleName);
 
-        flowManager_ = check_and_cast<PacketFlowManagerEnb *>(getParentModule()->getSubmodule("packetFlowManager"));
+        if(getParentModule()->findSubmodule("packetFlowManager") != -1)
+            flowManager_ = check_and_cast<PacketFlowManagerEnb *>(getParentModule()->getSubmodule("packetFlowManager"));
 
     }
 }
@@ -662,8 +663,11 @@ void LteMacEnb::macPduMake(MacCid cid)
              * insert the new MAC pdu in the packet flow manager
              * TODO finish description
              */
-            flowManager_->insertMacPdu(MacCidToLcid(cid), macPkt->getId(), rlcPduSet);
-            flowManager_->insertHarqProcess(MacCidToLcid(cid), txList.first, macPkt->getId());
+            if(flowManager_ != nullptr)
+            {
+                flowManager_->insertMacPdu(MacCidToLcid(cid), macPkt->getId(), rlcPduSet);
+                flowManager_->insertHarqProcess(MacCidToLcid(cid), txList.first, macPkt->getId());
+            }
 
         }
     }
@@ -798,8 +802,11 @@ bool LteMacEnb::bufferizePacket(cPacket* pkt)
             EV << "LteMacBuffers : Dropped packet: queue" << cid << " is full\n";
             // @author Alessandro Noferi
             // discard the RLC
-            unsigned int rlcSno = check_and_cast<LteRlcUmDataPdu *>(pkt)->getPduSequenceNumber();
-            flowManager_->discardRlcPdu(lteInfo->getLcid(),rlcSno);
+            if(flowManager_ != nullptr)
+            {
+                unsigned int rlcSno = check_and_cast<LteRlcUmDataPdu *>(pkt)->getPduSequenceNumber();
+                flowManager_->discardRlcPdu(lteInfo->getLcid(),rlcSno);
+            }
             delete pkt;
             return false;
         }

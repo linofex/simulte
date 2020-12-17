@@ -16,6 +16,13 @@
 
 Define_Module(UeStatsCollector);
 
+UeStatsCollector::UeStatsCollector()
+{
+    pdcp_ = nullptr;
+    mac_ = nullptr;
+    flowManager_ = nullptr;
+
+}
 
 void UeStatsCollector::initialize(int stage){
     if (stage == INITSTAGE_NETWORK_LAYER_3) // same as lteMacUe, when read the interface entry
@@ -32,7 +39,8 @@ void UeStatsCollector::initialize(int stage){
         associateId_.value = ipv4if->getIPAddress().str();
         mac_ = check_and_cast<LteMacUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("mac"));
         pdcp_ = check_and_cast<LtePdcpRrcUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("pdcpRrc"));
-        flowManager_ = check_and_cast<PacketFlowManagerUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("packetFlowManager"));
+        if(getParentModule()->getSubmodule("lteNic")->findSubmodule("packetFlowManager") != -1)
+            flowManager_ = check_and_cast<PacketFlowManagerUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("packetFlowManager"));
         handover_ = false;
 
         // packet delay
@@ -50,8 +58,16 @@ void UeStatsCollector::initialize(int stage){
     }
 }
 
+void UeStatsCollector::resetDelayCounter()
+{
+    flowManager_ ->resetDelayCounter();
+}
 
-void UeStatsCollector::add_ul_nongbr_delay_ue(){}
+void UeStatsCollector::add_ul_nongbr_delay_ue()
+{
+    double delay = flowManager_->getDelayStats();
+    ul_nongbr_delay_ue.addValue(delay);
+}
 
 // called by the eNodeBCollector
 void UeStatsCollector::add_dl_nongbr_delay_ue(double value)

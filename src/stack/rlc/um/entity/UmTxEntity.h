@@ -48,6 +48,7 @@ class UmTxEntity : public cSimpleModule
     {
         flowControlInfo_ = NULL;
         lteRlc_ = NULL;
+        packetFlowManager_ = nullptr;
     }
     virtual ~UmTxEntity()
     {

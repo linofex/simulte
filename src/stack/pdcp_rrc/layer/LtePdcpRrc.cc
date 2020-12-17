@@ -142,7 +142,8 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
 
         // create lcid in packet flow manager
         //check if it is the UE the node id i src
-        packetFlowManager_->initLcid(mylcid, lteInfo->getDestId());
+        if(packetFlowManager_ != nullptr)
+            packetFlowManager_->initLcid(mylcid, lteInfo->getDestId());
         // if(getDirection() == DL)
         //     packetFlowManager_->initLcid(mylcid, lteInfo->getDestId());
         // else if (getDirection() == UL)
@@ -184,8 +185,8 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
 
     EV << "LtePdcp : Sending packet " << pdcpPkt->getName() << " on port "
        << (lteInfo->getRlcType() == UM ? "UM_Sap$o\n" : "AM_Sap$o\n");
-
-    packetFlowManager_->insertPdcpSdu(mylcid, sno, sduHeaderSize,  arrivalTime);
+    if(packetFlowManager_!= nullptr)
+        packetFlowManager_->insertPdcpSdu(mylcid, sno, sduHeaderSize,  arrivalTime);
 
     // Send message
     send(pdcpPkt, (lteInfo->getRlcType() == UM ? umSap_[OUT] : amSap_[OUT]));
@@ -354,8 +355,11 @@ void LtePdcpRrcEnb::initialize(int stage)
 {
     LtePdcpRrcBase::initialize(stage);
     if (stage == inet::INITSTAGE_LOCAL)
+    {
         nodeId_ = getAncestorPar("macNodeId");
-        packetFlowManager_ = check_and_cast<PacketFlowManagerEnb *> (getParentModule()->getSubmodule("packetFlowManager"));
+        if(getParentModule()->findSubmodule("packetFlowManager")!= -1)
+            packetFlowManager_ = check_and_cast<PacketFlowManagerEnb *> (getParentModule()->getSubmodule("packetFlowManager"));
+    }
 }
 
 
@@ -381,7 +385,7 @@ void LtePdcpRrcEnb::fromDataPort(cPacket* pkt)
 
 void LtePdcpRrcEnb::toDataPort(cPacket* pkt)
 {
-    emit(receivedPacketFromLowerLayer, pkt);
+        emit(receivedPacketFromLowerLayer, pkt);
        LtePdcpPdu* pdcpPkt = check_and_cast<LtePdcpPdu*>(pkt);
        FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(
            pdcpPkt->removeControlInfo());
@@ -399,7 +403,7 @@ void LtePdcpRrcEnb::toDataPort(cPacket* pkt)
        EV << "LtePdcp : Sending packet " << upPkt->getName()
           << " on port DataPort$o\n";
 
-       // save sta
+       // save staTS
        if(pdcpSduBytesUl_.find(srcId) == pdcpSduBytesUl_.end())
         {
          pdcpSduBytesUl_[srcId] = 0;
@@ -480,7 +484,8 @@ void LtePdcpRrcUe::initialize(int stage)
     if (stage == inet::INITSTAGE_NETWORK_LAYER_3)
     {
         nodeId_ = getAncestorPar("macNodeId");
-        packetFlowManager_ = check_and_cast<PacketFlowManagerUe *> (getParentModule()->getSubmodule("packetFlowManager"));
+        if(getParentModule()->findSubmodule("packetFlowManager") != -1)
+            packetFlowManager_ = check_and_cast<PacketFlowManagerUe *> (getParentModule()->getSubmodule("packetFlowManager"));
     }
 }
 

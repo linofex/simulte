@@ -62,7 +62,7 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
         ConnectionMap connectionMap_; // lcid to the corresponding StatusDescriptor
 
     LtePdcpRrcUe *pdcp_;
-    std::pair< simtime_t, unsigned int > pdcpDelay;
+    Delay pdcpDelay;
 
     //debug vars to be deleted
     cOutVector times_;
@@ -167,6 +167,9 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
 
     DiscardedPkts getDiscardedPkt();
     void resetDiscardPktCounter();
+
+    double getDelayStats();
+    void resetDelayCounter();
 
     virtual ~PacketFlowManagerUe();
     virtual void finish();

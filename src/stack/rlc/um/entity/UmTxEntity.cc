@@ -38,9 +38,15 @@ void UmTxEntity::initialize()
 
     // @author Alessandro Noferi
     if(mac->getNodeType() == ENODEB)
-        packetFlowManager_ = check_and_cast<PacketFlowManagerEnb *>(getParentModule()->getParentModule()->getSubmodule("packetFlowManager"));
+    {
+        if(getParentModule()->getParentModule()->findSubmodule("packetFlowManager") != -1)
+            packetFlowManager_ = check_and_cast<PacketFlowManagerEnb *>(getParentModule()->getParentModule()->getSubmodule("packetFlowManager"));
+    }
     else if(mac->getNodeType() == UE)
-        packetFlowManager_ = check_and_cast<PacketFlowManagerUe *>(getParentModule()->getParentModule()->getSubmodule("packetFlowManager"));
+    {
+        if(getParentModule()->getParentModule()->findSubmodule("packetFlowManager") != -1)
+            packetFlowManager_ = check_and_cast<PacketFlowManagerUe *>(getParentModule()->getParentModule()->getSubmodule("packetFlowManager"));
+    }
     burstStatus_ = INACTIVE;
 }
 

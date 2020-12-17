@@ -25,11 +25,8 @@ Define_Module(PacketFlowManagerUe);
 
 PacketFlowManagerUe::PacketFlowManagerUe()
 {
-//    connectionMap_.clear();
-//    lcidToNodeIdmap_.clear();
-//    pktDiscardCounterPerUe_.clear();
-//    pdcpDelay_.clear();
-//    pdcpThroughput_.clear();
+    connectionMap_.clear();
+    pdcpDelay = {0, 0};
 }
 
 PacketFlowManagerUe::~PacketFlowManagerUe()
@@ -476,9 +473,8 @@ void PacketFlowManagerUe::macPduArrived(LogicalCid lcid, unsigned int macPdu)
                 { // the whole current pdcp seqNum has been received
                     EV_FATAL << NOW << "node id "<< desc->nodeId_-1025 << " PacketFlowManagerUe::macPduArrived - ----> PDCP PDU [" << pdcpPduSno << "] has been completely sent, remove from PDCP buffer" << endl;
 
-                    simtime_t time = (simTime() - pit->second.entryTime);
-                    pdcpDelay.first = time;
-                    pdcpDelay.second += 1;
+                    pdcpDelay.time += simTime() - pit->second.entryTime;
+                    pdcpDelay.pktCount += 1;
 
                     EV_FATAL << NOW << "node id "<< desc->nodeId_-1025 << " PacketFlowManagerUe::macPduArrived - PDCP PDU "<< pdcpPduSno << " of lcid " << lcid << " acknowledged. Delay time: " << time << "ms"<< endl;
 
@@ -571,6 +567,15 @@ void PacketFlowManagerUe::resetDiscardPktCounter()
  pktDiscardCounterTotal_ = 0;
 }
 
+
+double PacketFlowManagerUe::getDelayStats()
+{
+    return (pdcpDelay.time.dbl()*1000)/pdcpDelay.pktCount;
+}
+void PacketFlowManagerUe::resetDelayCounter()
+{
+    pdcpDelay = {0,0};
+}
 
 
 

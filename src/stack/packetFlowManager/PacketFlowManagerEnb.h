@@ -68,7 +68,7 @@ private:
         std::map<unsigned int, SequenceNumberSet> rlcPdusPerSdu_;  // for each RLC SDU, stores the RLC PDUs where the former was fragmented
         std::map<unsigned int, SequenceNumberSet> rlcSdusPerPdu_;  // for each RLC PDU, stores the included RLC SDUs
         std::map<unsigned int, SequenceNumberSet> macSdusPerPdu_;  // for each MAC PDU, stores the included MAC SDUs (should be a 1:1 association)
-        std::vector<unsigned int> macPduPerProcess_;               // for each HARQ process, stores the included MAC PDU
+        //std::vector<unsigned int> macPduPerProcess_;               // for each HARQ process, stores the included MAC PDU
     } StatusDescriptor;
 
     typedef  std::map<LogicalCid, StatusDescriptor> ConnectionMap;
