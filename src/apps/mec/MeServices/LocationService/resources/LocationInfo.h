@@ -15,12 +15,13 @@ class LocationInfo : public AttributeBase
 {
     public:
         LocationInfo();
-        LocationInfo(inet::Coord coordinates);
+        LocationInfo(const inet::Coord& coordinates, const inet::Coord& speed);
         virtual ~LocationInfo();
         nlohmann::ordered_json toJson() const override;
 
     private:
         inet::Coord coordinates_;
+        inet::Coord speed_;
 };
 
 

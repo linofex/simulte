@@ -10,13 +10,15 @@
 #include "apps/mec/MeServices/LocationService/resources/UserInfo.h"
 
 UserInfo::UserInfo():timestamp_(), locationInfo_(){}
-UserInfo::UserInfo(const LocationInfo& location, const std::string& address, MacCellId accessPointId, const std::string& resourceUrl): locationInfo_(location)
+UserInfo::UserInfo(const LocationInfo& location, const std::string& address, MacCellId accessPointId, const std::string& resourceUrl):
+        locationInfo_(location)
 {
     address_ = address;
     accessPointId_ = accessPointId;
     resourceUrl_ = resourceUrl;
 }
-UserInfo::UserInfo(const inet::Coord& location, const std::string& address, MacCellId accessPointId, const std::string& resourceUrl): locationInfo_(location)
+UserInfo::UserInfo(const inet::Coord& location, const inet::Coord& speed,  const std::string& address, MacCellId accessPointId, const std::string& resourceUrl):
+        locationInfo_(location, speed)
 {
     address_ = address;
     accessPointId_ = accessPointId;

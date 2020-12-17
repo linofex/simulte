@@ -7,6 +7,8 @@
 #include "corenetwork/binder/LteBinder.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include "apps/mec/MeServices/Resources/TimeStamp.h"
+//#include "inet/common/geometry/common/Coord.h"
+
 
 class LteCellInfo;
 
@@ -31,6 +33,8 @@ class LocationResource : public AttributeBase
 		nlohmann::ordered_json toJsonUe(std::vector<IPv4Address>& uesID) const;
 		nlohmann::ordered_json toJson(std::vector<MacNodeId>& cellsID, std::vector<IPv4Address>& uesID) const;
 		
+		inet::Coord getSpeed(const MacNodeId id) const ;
+		inet::Coord getCoords(const MacNodeId id) const ;
 
 	protected:
 		//better mappa <cellID, Cellingo>
@@ -38,6 +42,8 @@ class LocationResource : public AttributeBase
 		TimeStamp timestamp_;
 		std::map<MacCellId, LteCellInfo*> eNodeBs_;
 		std::string baseUri_;
+
+
 };
 
 

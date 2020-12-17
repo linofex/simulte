@@ -21,7 +21,7 @@ class UserInfo : public AttributeBase
         */
         UserInfo();
         UserInfo(const LocationInfo& location, const std::string& address, const MacCellId accessPointId_, const std::string& resourceUrl_);
-        UserInfo(const inet::Coord& location, const std::string& address, const MacCellId accessPointId_,  const std::string& resourceUrl_);
+        UserInfo(const inet::Coord& location, const inet::Coord& speed,  const std::string& address, const MacCellId accessPointId_,  const std::string& resourceUrl_);
 
         virtual ~UserInfo(){};
 
