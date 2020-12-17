@@ -43,7 +43,6 @@ class  MeAppBase : public cSimpleModule, public inet::TCPSocket::CallbackInterfa
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 
-    virtual void dataArrived(cPacket *msg) = 0;
     virtual void handleSelfMsg(cMessage *msg) = 0;
 
     /* Utility functions */

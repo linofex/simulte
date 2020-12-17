@@ -20,6 +20,7 @@ void SocketManager::dataArrived(cMessage *msg, bool urgent){
         if (type == Http::REQUEST)
         {
             //Request req = {msg, packet};
+            EV << "queue size: " << service->requestQueueSize();
             service->newRequest(msg);
         }
         else if(type == Http::RESPONSE)
@@ -27,9 +28,29 @@ void SocketManager::dataArrived(cMessage *msg, bool urgent){
             // manage depending the method used
             delete msg;
         }
-        else
+        else if(packet.find("BulkRequest") != std::string::npos)
         {
-            delete msg;
+            EV << "Bulk Request ";
+            std::string size = lte::utils::splitString(packet, ": ")[1];
+            int requests = std::stoi(size);
+            if(requests < 0)
+              throw cRuntimeError("Number of request must be non negative");
+            EV << " of size "<< requests << endl;
+            for(int i = 0 ; i < requests ; ++i)
+            {
+              if(i == requests -1)
+              {
+                  msg->setName("lastFakeRequest");
+                  service->newRequest(msg); //use it to send back response message (only for the last message)
+              }
+              else
+              {
+                  cMessage *request = new cMessage("fakeRequest");
+                  service->newRequest(request);
+
+              }
+            }
+            return;
         }
 
 }

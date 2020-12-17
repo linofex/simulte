@@ -18,17 +18,7 @@ void MeAppBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == inet::INITSTAGE_LOCAL) {
-        numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
-
-        WATCH(numSessions);
-        WATCH(numBroken);
-        WATCH(packetsSent);
-        WATCH(packetsRcvd);
-        WATCH(bytesSent);
-        WATCH(bytesRcvd);
-    }
-    else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
+    if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
         // parameters
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
@@ -103,14 +93,7 @@ void MeAppBase::socketEstablished(int, void *)
 
 void MeAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
 {
-//    // *redefine* to perform or schedule next sending
-//    packetsRcvd++;
-//    bytesRcvd += msg->getByteLength();
-//    //emit(rcvdPkSignal, msg);
-//    delete msg;
-//
-    dataArrived(msg);
-
+    delete msg;
 }
 
 void MeAppBase::socketPeerClosed(int, void *)
@@ -139,9 +122,9 @@ void MeAppBase::finish()
 {
     std::string modulePath = getFullPath();
 
-    EV_INFO << modulePath << ": opened " << numSessions << " sessions\n";
-    EV_INFO << modulePath << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    EV_INFO << modulePath << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+//    EV_INFO << modulePath << ": opened " << numSessions << " sessions\n";
+//    EV_INFO << modulePath << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
+//    EV_INFO << modulePath << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 }
 
 

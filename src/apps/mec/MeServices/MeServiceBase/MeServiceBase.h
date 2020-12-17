@@ -35,6 +35,10 @@
  *
  */
 
+
+#define REQUEST_RNG 0
+#define SUBSCRIPTION_RNG 0
+
 typedef std::map<std::string, std::string> reqMap;
 
 class SocketManager;
@@ -54,6 +58,9 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
 
         // maybe it is better to add a variable that holds the current served message
         // and pop it from the queue length
+        cMessage *currentRequestServed_;
+        cMessage *currentSubscriptionServed_;
+
 
         cMessage *requestService_;
         double requestServiceTime_;
@@ -82,8 +89,12 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
          * This method checks the queues length and in case it simulates a request/subscription
          * execution time.
          * Subscriptions have precedence wrt requests
+         *
+         * if parameter is true -> scheduleAt(NOW)
+         *
+         * @param now when to send the next event
          */
-        virtual void scheduleNextEvent(double time);
+        virtual void scheduleNextEvent(bool now = false);
 
         virtual void initialize(int stage) override;
         virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
@@ -179,6 +190,8 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
         virtual void removeConnection(SocketManager *connection);
 
         virtual Http::DataType getDataType(std::string& packet_);
+
+        virtual int requestQueueSize() {return requests_.length();}
 };
 
 

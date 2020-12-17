@@ -16,7 +16,7 @@ Define_Module(MeAppGet);
 MeAppGet::~MeAppGet(){}
 
 
-void MeAppGet::dataArrived(cPacket *msg){
+void MeAppGet::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent){
     std::string packet = lte::utils::getPacketPayload(msg);
     EV_INFO << "payload: " << packet << endl;
     delete msg;
@@ -48,7 +48,7 @@ void MeAppGet::initialize(int stage){
     if(stage == inet::INITSTAGE_APPLICATION_LAYER)
     {
         cMessage *m = new cMessage("connect");
-        scheduleAt(simTime()+0.5, m);
+        scheduleAt(simTime()+0.000012, m);
     }
 }
 

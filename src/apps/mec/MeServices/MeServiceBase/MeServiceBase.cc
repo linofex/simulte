@@ -40,6 +40,8 @@ void MeServiceBase::initialize(int stage)
         subscriptionServiceTime_ = par("subscriptionServiceTime");
         subscriptionService_ = new cMessage("serveSubscription");
 
+        currentRequestServed_ = nullptr;
+        currentSubscriptionServed_ = nullptr;
 
         serverSocket.setOutputGate(gate("tcpOut"));
         serverSocket.readDataTransferModePar(*this);
@@ -78,12 +80,12 @@ void MeServiceBase::handleMessage(cMessage *msg)
         else if(strcmp(msg->getName(), "serveSubscription") == 0)
         {
             bool res = manageSubscription();
-            res == true ? scheduleNextEvent(subscriptionServiceTime_) : scheduleNextEvent(0);
+            scheduleNextEvent(!res);
         }
         else if(strcmp(msg->getName(), "serveRequest") == 0)
         {
             bool res = manageRequest();
-            res == true ? scheduleNextEvent(requestServiceTime_): scheduleNextEvent(0);
+            scheduleNextEvent(!res);
         }
         else
         {
@@ -118,61 +120,73 @@ void MeServiceBase::handleMessage(cMessage *msg)
 
 bool MeServiceBase::manageRequest()
 {
-    EV << "start manageRequest" << endl;
-    cMessage *msg = check_and_cast<cMessage *>(requests_.pop());
-    inet::TCPSocket *socket = socketMap.findSocketFor(msg);
+  //  EV << "MeServiceBase::manageRequest - start manageRequest" << endl;
+    inet::TCPSocket *socket = socketMap.findSocketFor(currentRequestServed_);
     if(socket)
     {
         EV_INFO <<" dataArrived - handleRequest" << endl;
-        handleRequest(msg, socket);
-        delete msg;
+        handleRequest(currentRequestServed_, socket);
+        if(currentRequestServed_!= nullptr)
+            delete currentRequestServed_;
+        currentRequestServed_ = nullptr;
         return true;
     }
     else // socket has been closed or some error occurs, discard request
     {
         // I should schedule immediately a new request execution
-        delete msg;
+        if(currentRequestServed_!= nullptr)
+            delete currentRequestServed_;
         return false;
     }
 }
 
-void MeServiceBase::scheduleNextEvent(double time)
+void MeServiceBase::scheduleNextEvent(bool now)
 {
     // schedule next event
-    if(subscriptions_.getLength() != 0)
-        scheduleAt(simTime() + time , subscriptionService_);
-    else if (requests_.getLength() != 0)
+    if(subscriptions_.getLength() != 0 && !subscriptionService_->isScheduled())
     {
-        EV << "scheduleNextEvent - Request execution started" << endl;
-        scheduleAt(simTime() + time , requestService_);
+        currentSubscriptionServed_ = check_and_cast<cMessage *>(subscriptions_.pop());
+        if(now)
+            scheduleAt(simTime() + 0 , subscriptionService_);
+        else
+        {
+            double time = poisson(subscriptionServiceTime_, REQUEST_RNG);
+            EV <<"time: "<< time*1e-6 << endl;
+            scheduleAt(simTime() + time*1e-6 , subscriptionService_);
+        }
+    }
+    else if (requests_.getLength() != 0 && !requestService_->isScheduled() )
+    {
+        currentRequestServed_ = check_and_cast<cMessage *>(requests_.pop());
+       // EV << "scheduleNextEvent - Request execution started" << endl;
+        if(now)
+            scheduleAt(simTime() + 0 , requestService_);
+        else
+        {
+            double time = poisson(requestServiceTime_, REQUEST_RNG);
+         //   EV <<"time: "<< time << "-> " <<time*1e-6 << endl;
+            scheduleAt(simTime() + time*1e-6 , requestService_);
+        }
     }
 }
 
 void MeServiceBase::newRequest(cMessage *msg)
 {
-    int oldSize = requests_.getLength();
+    //EV << "Queue length: " << requests_.length() << endl;
     requests_.insert(msg);
-    // save timestamp if needed with setArrivalTime
-    if(oldSize == 0 && subscriptions_.getLength() == 0 && !subscriptionService_->isScheduled()){ // start serving requests after subscriptions
-        EV << "Request execution started" << endl;
-        scheduleNextEvent(requestServiceTime_);
-    }
-    EV << "Request queue length: " << requests_.getLength() << endl;
+
+    scheduleNextEvent();
 }
 
 void MeServiceBase::newSubscriptionEvent(cMessage *msg)
 {
-    int oldSize = subscriptions_.getLength();
     subscriptions_.insert(msg);
-    // save timestamp if needed with setArrivalTime
-    if(oldSize == 0 && !requestService_->isScheduled()) // start serving subscriptions
-        scheduleNextEvent(subscriptionServiceTime_);
+    scheduleNextEvent();
 }
 
 bool MeServiceBase::manageSubscription()
 {
-    cMessage *msg = check_and_cast<cMessage *>(subscriptions_.pop());
-    return handleSubscriptionType(msg);
+    return handleSubscriptionType(currentSubscriptionServed_);
 
 }
 
@@ -309,6 +323,22 @@ MeServiceBase::~MeServiceBase(){
     socketMap.deleteSockets(); //it calls delete, too
     cancelAndDelete(requestService_);
     cancelAndDelete(subscriptionService_);
+    cancelAndDelete(currentRequestServed_);
+    cancelAndDelete(currentSubscriptionServed_);
+
+    cObject* msg;
+    while(!requests_.isEmpty())
+    {
+        msg = requests_.pop();
+        delete msg;
+    }
+
+    while(!subscriptions_.isEmpty())
+    {
+        msg = subscriptions_.pop();
+        delete msg;
+
+    }
 }
 
 
