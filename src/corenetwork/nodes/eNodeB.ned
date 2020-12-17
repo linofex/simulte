@@ -60,7 +60,7 @@ module eNodeB
 
         //#mec	
         //@author Angelo Buono
-        string meHost = default("");		// symbolic name of the connected MEHost in the Network
+        string meHost = default("meHost");		// symbolic name of the connected MEHost in the Network
         //@author Alessandro Noferi
         //use it in case of emulation
         string meHostExtConn = default("192.168.1.0/24"); // Network Address of the external MeApp IP/mask
@@ -96,9 +96,9 @@ module eNodeB
             @display("p=50,225;is=s");
         }
         
-        collector: EnodeBStatsCollector {
-            @display("p=50,275;is=s");
-        }
+//        collector: EnodeBStatsCollector {
+//            @display("p=50,275;is=s");
+//        }
 
         //#
         //# lteNic modules

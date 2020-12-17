@@ -35,7 +35,7 @@ network MecSingleCell
         double playgroundSizeX @unit(m); // x size of the area the nodes are in (in meters)
         double playgroundSizeY @unit(m); // y size of the area the nodes are in (in meters)
         double playgroundSizeZ @unit(m); // z size of the area the nodes are in (in meters)
-        @display("bgb=1100,500");
+        @display("bgb=800,500");
 
     submodules:
 
@@ -63,7 +63,7 @@ network MecSingleCell
         }
         pgw: PgwStandardSimplified {
             nodeType = "PGW";
-            @display("p=530,250;is=l");
+            @display("p=100,100;is=l");
             gates:
                 pppg[];
         }
@@ -71,7 +71,7 @@ network MecSingleCell
        
         //# MEC module
         meHost: MEHost {
-            @display("p=400,100;is=l");
+            @display("p=600,100;is=l");
         }
 
 

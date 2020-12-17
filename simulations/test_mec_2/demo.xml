@@ -1,6 +1,6 @@
 <config>
     <!-- Assign to the wlan interface of all eNodeBs and UEs one address of type 10.x.x.x, since dynamic-created UEs will be assigned one such address -->
-    <interface hosts="eNodeB*" names="wlan" address="10.x.x.x" netmask="255.0.0.0"/>
+    <interface hosts="" names="wlan" address="10.x.x.x" netmask="255.0.0.0"/>
     
     
     <interface hosts="meHost.virtualisationInfrastructure" names="ppp0" address="195.168.5.x" netmask="255.255.255.0"/>

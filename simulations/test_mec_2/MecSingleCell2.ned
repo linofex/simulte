@@ -31,7 +31,10 @@ import lte.corenetwork.nodes.mec.MEPlatform.MEPlatform;
 network MecSingleCell2
 {
     parameters:
-        int numUe = default(1);
+        int numUes = default(1);
+        double playgroundSizeX @unit(m); // x size of the area the nodes are in (in meters)
+        double playgroundSizeY @unit(m); // y size of the area the nodes are in (in meters)
+        double playgroundSizeZ @unit(m); // z size of the area the nodes are in (in meters)
         @display("i=block/network2;bgb=991,558;bgi=background/budapest");
     submodules:
         channelControl: LteChannelControl {
@@ -60,8 +63,8 @@ network MecSingleCell2
         eNB: eNodeB {
             @display("p=391,259;is=vl");
         }
-        ue[numUe]: Ue {
-            @display("p=783,278");
+        ue[numUes]: Ue {
+            @display("p=262.2,357.41998");
         }
         
          //# MEC module
