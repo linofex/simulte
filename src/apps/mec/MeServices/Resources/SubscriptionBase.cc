@@ -1,20 +1,22 @@
-#include "apps/mec/MeServices/RNIService/resources/MeasRepUeNotification.h"
+#include "apps/mec/MeServices/Resources/SubscriptionBase.h"
+
 #include "corenetwork/statsCollector/UeStatsCollector.h"
 #include "corenetwork/statsCollector/EnodeBStatsCollector.h"
 
-#include "CellUEInfo.h"
+SubscriptionBase::SubscriptionBase() {}
 
-MeasRepUeNotification::MeasRepUeNotification() {}
-
-MeasRepUeNotification::MeasRepUeNotification(std::vector<cModule*>& eNodeBs) {
+SubscriptionBase::SubscriptionBase(unsigned int subId, inet::TCPSocket *socket, const std::string& baseResLocation,  std::vector<cModule*>& eNodeBs) {
 	std::vector<cModule*>::iterator it = eNodeBs.begin();
 	for(; it != eNodeBs.end() ; ++it){
 		EnodeBStatsCollector * collector = check_and_cast<EnodeBStatsCollector *>((*it)->getSubmodule("collector"));
 		eNodeBs_.insert(std::pair<MacCellId, EnodeBStatsCollector *>(collector->getCellId(), collector));
 	}
+	subscriptionId_ = subId;
+	socket_ = socket;
+	baseResLocation_ = baseResLocation;
 }
 
-void MeasRepUeNotification::addEnodeB(std::vector<cModule*>& eNodeBs) {
+void SubscriptionBase::addEnodeB(std::vector<cModule*>& eNodeBs) {
     std::vector<cModule*>::iterator it = eNodeBs.begin();
         for(; it != eNodeBs.end() ; ++it){
 			EnodeBStatsCollector * collector = check_and_cast<EnodeBStatsCollector *>((*it)->getSubmodule("collector"));
@@ -22,37 +24,18 @@ void MeasRepUeNotification::addEnodeB(std::vector<cModule*>& eNodeBs) {
         }
 }
 
-void MeasRepUeNotification::addEnodeB(cModule* eNodeB) {
+void SubscriptionBase::addEnodeB(cModule* eNodeB) {
     EnodeBStatsCollector * collector = check_and_cast<EnodeBStatsCollector *>(eNodeB->getSubmodule("collector"));
 	eNodeBs_.insert(std::pair<MacCellId, EnodeBStatsCollector *>(collector->getCellId(), collector));
 }
 
-bool MeasRepUeNotification::startNotification(std::vector<MacNodeId>& cellsID, std::vector<MacNodeId>& uesID, Trigger trigger)
-{
-    // Even it is a vector, thhis first implementation manages only vectors with size == 1
-    //check if the node id is in the cell and
-    MacCellId cellId = cellsID.at(0);
-    MacNodeId ue = uesID.at(0);
-    std::map<MacCellId, EnodeBStatsCollector*>::const_iterator it = eNodeBs_.find(cellId);
-    if(it != eNodeBs_.end())
-    {
-        if(it->second->hasUeCollector(ue))
-        {
-            UeStatsCollector *ueColl = it->second->getUeCollector(ue);
-            //ueColl->startNotification(trigger);
-            return true;
-        }
-    }
-    return false;
-}
+
+SubscriptionBase::~SubscriptionBase() {}
 
 
-MeasRepUeNotification::~MeasRepUeNotification() {}
-
-
-nlohmann::ordered_json MeasRepUeNotification::toJson() const {
+nlohmann::ordered_json SubscriptionBase::toJson() const {
 //	nlohmann::ordered_json val ;
-//	nlohmann::ordered_json MeasRepUeNotification;
+//	nlohmann::ordered_json SubscriptionBase;
 //	nlohmann::ordered_json cellArray;
 //	nlohmann::ordered_json ueArray;
 //
@@ -90,62 +73,61 @@ nlohmann::ordered_json MeasRepUeNotification::toJson() const {
 //		val["CellUEInfo"] = ueArray[0];
 //	}
 //
-//	MeasRepUeNotification["MeasRepUeNotification"] = val;
-//	return MeasRepUeNotification;
+//	SubscriptionBase["SubscriptionBase"] = val;
+//	return SubscriptionBase;
 }
 
 //
-nlohmann::ordered_json MeasRepUeNotification::toJsonUe(std::vector<MacNodeId>& uesID) const {
-	nlohmann::ordered_json val ;
-	nlohmann::ordered_json MeasRepUeNotification;
-	nlohmann::ordered_json ueArray;
-
-	if (timestamp_.isValid())
-	{
-//		timestamp_.setSeconds();
-		val["timestamp"] = timestamp_.toJson();
-	}
-
-
-	std::vector<MacNodeId>::const_iterator uit = uesID.begin();
-	std::map<MacCellId, EnodeBStatsCollector*>::const_iterator eit;
-	bool found = false;
-	for(; uit != uesID.end() ; ++uit){
-	    found = false;
-	    eit = eNodeBs_.begin();
-	    for(; eit != eNodeBs_.end() ; ++eit){
-            if(eit->second->hasUeCollector(*uit))
-            {
-                UeStatsCollector *ueColl = eit->second->getUeCollector(*uit);
-                CellUEInfo cellUeInfo = CellUEInfo(ueColl, eit->second->getEcgi());
-                ueArray.push_back(cellUeInfo.toJson());
-                found = true;
-                break; // next ue id
-            }
-        }
-        if(!found)
-        {
-
-        }
-	}
-
-	if(ueArray.size() > 1){
-        val["CellUEInfo"] = ueArray;
-	}
-    else if(ueArray.size() == 1){
-        val["CellUEInfo"] = ueArray[0];
-    }
-
-	MeasRepUeNotification["MeasRepUeNotification"] = val;
-	return MeasRepUeNotification;
+nlohmann::ordered_json SubscriptionBase::toJsonUe(std::vector<MacNodeId>& uesID) const {
+//	nlohmann::ordered_json val ;
+//	nlohmann::ordered_json SubscriptionBase;
+//	nlohmann::ordered_json ueArray;
+//
+//	if (timestamp_.isValid())
+//	{
+////		timestamp_.setSeconds();
+//		val["timestamp"] = timestamp_.toJson();
+//	}
+//
+//
+//	std::vector<MacNodeId>::const_iterator uit = uesID.begin();
+//	std::map<MacCellId, EnodeBStatsCollector*>::const_iterator eit;
+//	bool found = false;
+//	for(; uit != uesID.end() ; ++uit){
+//	    found = false;
+//	    eit = eNodeBs_.begin();
+//	    for(; eit != eNodeBs_.end() ; ++eit){
+//            if(eit->second->hasUeCollector(*uit))
+//            {
+//                UeStatsCollector *ueColl = eit->second->getUeCollector(*uit);
+//                CellUEInfo cellUeInfo = CellUEInfo(ueColl, eit->second->getEcgi());
+//                ueArray.push_back(cellUeInfo.toJson());
+//                found = true;
+//                break; // next ue id
+//            }
+//        }
+//        if(!found)
+//        {
+//
+//        }
+//	}
+//
+//	if(ueArray.size() > 1){
+//        val["CellUEInfo"] = ueArray;
+//	}
+//    else if(ueArray.size() == 1){
+//        val["CellUEInfo"] = ueArray[0];
+//    }
+//
+//	SubscriptionBase["SubscriptionBase"] = val;
+//	return SubscriptionBase;
 }
 
-
 //
-nlohmann::ordered_json MeasRepUeNotification::toJsonCell(std::vector<MacCellId>& cellsID) const
+nlohmann::ordered_json SubscriptionBase::toJsonCell(std::vector<MacCellId>& cellsID) const
 {
 //    nlohmann::ordered_json val ;
-//    nlohmann::ordered_json MeasRepUeNotification;
+//    nlohmann::ordered_json SubscriptionBase;
 //    nlohmann::ordered_json cellArray;
 //
 //        if (timestamp_.isValid())
@@ -171,19 +153,60 @@ nlohmann::ordered_json MeasRepUeNotification::toJsonCell(std::vector<MacCellId>&
 //            val["cellInfo"] = cellArray[0];
 //        }
 //
-//        MeasRepUeNotification["MeasRepUeNotification"] = val;
-//        return MeasRepUeNotification;
+//        SubscriptionBase["SubscriptionBase"] = val;
+//        return SubscriptionBase;
 
 }
 ////
-nlohmann::ordered_json MeasRepUeNotification::toJson(std::vector<MacCellId>& cellsID, std::vector<MacNodeId>& uesID) const
+nlohmann::ordered_json SubscriptionBase::toJson(std::vector<MacCellId>& cellsID, std::vector<MacNodeId>& uesID) const
 {
-	nlohmann::ordered_json val ;
-    nlohmann::ordered_json MeasRepUeNotification;
-	val["cellInfo"] = toJsonCell(cellsID)["MeasRepUeNotification"]["cellInfo"];
-	val["CellUEInfo"] = toJsonUe(uesID)["MeasRepUeNotification"]["CellUEInfo"];
-	MeasRepUeNotification["MeasRepUeNotification"] = val;
-	return MeasRepUeNotification;
-
 	
+}
+
+
+bool SubscriptionBase::fromJson(const nlohmann::ordered_json& jsonBody)
+{
+
+    if(!jsonBody.contains("callbackReference") || jsonBody["callbackReference"].is_array())
+    {
+
+        Http::send400Response(socket_); // callbackReference is mandatory and takes exactly 1 att
+        return false;
+    }
+
+    if(std::string(jsonBody["callbackReference"]).find('/') == -1) //bad uri
+    {
+        Http::send400Response(socket_); // must be ipv4
+        return false;
+    }
+
+    callbackReference_ = jsonBody["callbackReference"];
+
+    //chek expiration time
+    // TODO add end timer
+    if(jsonBody.contains("expiryDeadline") && !jsonBody["expiryDeadline"].is_array())
+    {
+        expiryTime_.setSeconds(jsonBody["expiryDeadline"]["seconds"]);
+        expiryTime_.setNanoSeconds(jsonBody["expiryDeadline"]["nanoSeconds"]);
+        expiryTime_.setValid(true);
+    }
+    else
+    {
+        expiryTime_.setValid(false);
+    }
+
+    links_ = baseResLocation_ +std::to_string(subscriptionId_);
+
+    return true;
+}
+
+
+void SubscriptionBase::set_links(std::string& link)
+{
+    links_ = link+"sub"+std::to_string(subscriptionId_);
+}
+
+std::string SubscriptionBase::getSubscriptionType() const
+{
+    return subscriptionType_;
 }

@@ -5,21 +5,22 @@
  *      Author: linofex
  */
 
-#ifndef APPS_MEC_MESERVICES_RNISERVICE_RESOURCES_MEASREPUENOTIFICATION_H_
-#define APPS_MEC_MESERVICES_RNISERVICE_RESOURCES_MEASREPUENOTIFICATION_H_
+#ifndef APPS_MEC_MESERVICES_RESOURCES_SUBSCRIPTIONBASE_H_
+#define APPS_MEC_MESERVICES_RESOURCES_SUBSCRIPTIONBASE_H_
 
 #include "apps/mec/MeServices/Resources/AttributeBase.h"
 #include "apps/mec/MeServices/Resources/TimeStamp.h"
-#include "apps/mec/MeServices/RNIService/resources/Ecgi.h"
-#include "apps/mec/MeServices/RNIService/resources/AssociateId.h"
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "apps/mec/MeServices/httpUtils/httpUtils.h"
 
 class EnodeBStatsCollector;
-class MeasRepUeNotification : public AttributeBase
+
+class SubscriptionBase : public AttributeBase
 {
     public:
-        MeasRepUeNotification();
-        MeasRepUeNotification(std::vector<cModule*>& eNodeBs);
-        virtual ~MeasRepUeNotification();
+        SubscriptionBase();
+        SubscriptionBase(unsigned int subId, inet::TCPSocket *socket , const std::string& baseResLocation,  std::vector<cModule*>& eNodeBs);
+        virtual ~SubscriptionBase();
 
         nlohmann::ordered_json toJson() const override;
 
@@ -30,18 +31,31 @@ class MeasRepUeNotification : public AttributeBase
         nlohmann::ordered_json toJsonUe(std::vector<MacNodeId>& uesID) const;
         nlohmann::ordered_json toJson(std::vector<MacCellId>& cellsID, std::vector<MacNodeId>& uesID) const;
 
-        bool startNotification(std::vector<MacCellId>& cellsID, std::vector<MacNodeId>& uesID, Trigger trigger);
-        void stopNotification(std::vector<MacCellId>& cellsID, std::vector<MacNodeId>& uesID, Trigger trigger);
+        virtual void set_links(std::string& link);
+
+        virtual bool fromJson(const nlohmann::ordered_json& json);
+        virtual void sendSubscriptionResponse() = 0;
+        virtual void sendNotification() = 0;
+
+
+        virtual std::string getSubscriptionType() const;
 
 
     protected:
-
-
+        inet::TCPSocket *socket_;
         TimeStamp timestamp_;
+
+        std::string baseResLocation_;
+
         std::map<MacCellId, EnodeBStatsCollector*> eNodeBs_;
+        unsigned int subscriptionId_;
 
+        std::string subscriptionType_;
+        std::string notificationType_;
+        std::string links_;
 
-
+        std::string callbackReference_;
+        TimeStamp expiryTime_;
 
 };
 
@@ -50,4 +64,5 @@ class MeasRepUeNotification : public AttributeBase
 
 
 
-#endif /* APPS_MEC_MESERVICES_RNISERVICE_RESOURCES_MEASREPUENOTIFICATION_H_ */
+
+#endif /* APPS_MEC_MESERVICES_RESOURCES_SUBSCRIPTIONBASE_H_ */
