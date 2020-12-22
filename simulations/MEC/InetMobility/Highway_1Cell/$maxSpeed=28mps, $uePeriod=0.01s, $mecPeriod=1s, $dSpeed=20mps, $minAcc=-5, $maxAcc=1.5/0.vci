@@ -1,0 +1,1535 @@
+file 31447080 1608633076                                        
+version 2
+run Highway_1Cell-0-20201222-11:30:49-32710
+attr configname Highway_1Cell
+attr datetime 20201222-11:30:49
+attr experiment Highway_1Cell
+attr inifile simple_platooning_scenario.ini
+attr iterationvars "$maxSpeed=28mps, $uePeriod=0.01s, $mecPeriod=1s, $dSpeed=20mps, $minAcc=-5, $maxAcc=1.5"
+attr iterationvarsf maxSpeed=28mps,uePeriod=0.01s,mecPeriod=1s,dSpeed=20mps,minAcc=-5,maxAcc=1.5-
+attr measurement "$maxSpeed=28mps, $uePeriod=0.01s, $mecPeriod=1s, $dSpeed=20mps, $minAcc=-5, $maxAcc=1.5"
+attr network lte.simulations.MEC.InetMobility.MecInetSingleCell
+attr processid 32710
+attr repetition 0
+attr replication #0
+attr resultdir Highway_1Cell
+attr runnumber 0
+attr seedset 0
+itervar dSpeed 20mps
+itervar maxAcc 1.5
+itervar maxSpeed 28mps
+itervar mecPeriod 1s
+itervar minAcc -5
+itervar uePeriod 0.01s
+param *.eNodeB*.x2App[*].server.localPort "6000 + ancestorIndex(1)"
+param *.eNodeB1.numX2Apps 0
+param **.sctp.nagleEnabled false
+param **.sctp.enableHeartbeats false
+param **.car[*].masterId 1
+param **.car[*].macCellId 1
+param **.coreDebug false
+param **.routingRecorder.enabled false
+param *.playgroundSizeX 1000m
+param *.playgroundSizeY 4999m
+param *.playgroundSizeZ 50m
+param **.channelControl.pMax 10W
+param **.channelControl.alpha 1.0
+param **.channelControl.carrierFrequency 2100e+6Hz
+param **.lteNic.phy.channelModel "xmldoc(\"config_channel.xml\")"
+param **.feedbackComputation "xmldoc(\"config_channel.xml\")"
+param **.rbAllocationType "\"localized\""
+param **.feedbackType "\"ALLBANDS\""
+param **.feedbackGeneratorType "\"IDEAL\""
+param **.maxHarqRtx 3
+param **.cellInfo.ruRange 50
+param **.cellInfo.ruTxPower "\"50,50,50;\""
+param **.cellInfo.antennaCws "\"2;\""
+param **.cellInfo.numRbDl 25
+param **.cellInfo.numRbUl 25
+param **.numBands 25
+param **.fbDelay 1
+param *.car[*].lteNic.phy.enableHandover true
+param *.eNodeB*.lteNic.phy.enableHandover true
+param *.eNodeB*.lteNic.phy.broadcastMessageInterval 0.5s
+param **.msHarqInterrupt false
+param **.mobility.constraintAreaMinZ 0m
+param **.mobility.constraintAreaMaxZ 0m
+param *.car[*].mobility.initFromDisplayString false
+param *.car[*].mobilityType "\"LinearMobility\""
+param *.car[*].mobility.updateInterval 0.05s
+param **.numClusters 1
+param **.numRoads 1
+param **.numCars 5
+param **.car[0].mobility.initialX 150m
+param **.car[0].mobility.initialY 10m
+param **.car[0].mobility.angle 90deg
+param **.car[0].mobility.speed 20mps
+param **.car[0].mobility.acceleration 0
+param **.car[1].mobility.initialX 150m
+param **.car[1].mobility.initialY 100m
+param **.car[1].mobility.angle 90deg
+param **.car[1].mobility.speed 10mps
+param **.car[1].mobility.acceleration 0
+param **.car[2].mobility.initialX 150m
+param **.car[2].mobility.initialY 150m
+param **.car[2].mobility.angle 90deg
+param **.car[2].mobility.speed 5mps
+param **.car[2].mobility.acceleration 0
+param **.car[3].mobility.initialX 150m
+param **.car[3].mobility.initialY 400m
+param **.car[3].mobility.angle 90deg
+param **.car[3].mobility.speed 10mps
+param **.car[3].mobility.acceleration 0
+param **.car[4].mobility.initialX 150m
+param **.car[4].mobility.initialY 800m
+param **.car[4].mobility.angle 90deg
+param **.car[4].mobility.speed 15mps
+param **.car[4].mobility.acceleration 0
+param **.car[*].mobility.maxSpeed 28mps
+param *.eNodeB*.nicType "\"LteNicEnb\""
+param *.car[*].nicType "\"LteNicUe\""
+param **.amcMode "\"AUTO\""
+param *.car[*].numUdpApps 1
+param *.car[*].udpApp[0].typename "\"UEClusterizeApp\""
+param *.car[*].udpApp[0].startTime 0s
+param *.car[*].udpApp[0].period 0.01s
+param *.car[*].udpApp[0].stopTime 500s
+param *.car[*].udpApp[0].meHostAddress "\"meHost.virtualisationInfrastructure\""
+param *.meHost.maxMEApps 5
+param *.meHost.maxRam 32GB
+param *.meHost.maxDisk 100TB
+param *.meHost.maxCpu 1
+param *.meHost.mePlatform.numServices 1
+param *.meHost.mePlatform.udpService[0].typename "\"MEPlatooningService\""
+param *.meHost.mePlatform.udpService[0].startTime 0s
+param *.meHost.mePlatform.udpService[0].period 1s
+param *.meHost.mePlatform.udpService[0].preconfiguredTxMode "\"DOWNLINK_UNICAST\""
+param *.meHost.mePlatform.udpService[0].shape "\"rectangle\""
+param *.meHost.mePlatform.udpService[0].directionDelimiterThreshold 0.09817rad
+param *.meHost.mePlatform.udpService[0].proximityThreshold 500m
+param *.meHost.mePlatform.udpService[0].roadLaneSize 2.75m
+param *.meHost.mePlatform.udpService[0].triangleAngle 0.18rad
+param *.meHost.mePlatform.udpService[0].desiredVelocity 20mps
+param *.meHost.mePlatform.udpService[0].criticalDistance 0.05m
+param *.meHost.mePlatform.udpService[0].minAcceleration -5
+param *.meHost.mePlatform.udpService[0].maxAcceleration 1.5
+param **.eNodeB*.meHost "\"meHost\""
+
+vector 0 MecInetSingleCell.eNodeB1.pppIf.queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 1 MecInetSingleCell.eNodeB1.pppIf.ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 2 MecInetSingleCell.eNodeB1.pppMEHostIf.queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 3 MecInetSingleCell.eNodeB1.pppMEHostIf.ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 4 MecInetSingleCell.pgw.ppp[0].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 5 MecInetSingleCell.pgw.ppp[0].ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 6 MecInetSingleCell.pgw.pppInterface.queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 7 MecInetSingleCell.pgw.pppInterface.ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 8 MecInetSingleCell.meHost.virtualisationInfrastructure.pppIf[0].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 9 MecInetSingleCell.meHost.virtualisationInfrastructure.pppIf[0].ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 10 MecInetSingleCell.meHost.gtpEndpoint.ppp[0].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 11 MecInetSingleCell.meHost.gtpEndpoint.ppp[0].ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 12 MecInetSingleCell.meHost.gtpEndpoint.pppInterface.queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 13 MecInetSingleCell.meHost.gtpEndpoint.pppInterface.ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 14 MecInetSingleCell.car[0].lteNic.phy servingCell:vector ETV
+attr source servingCell
+attr title "ID of the serving eNodeB for the UE, vector"
+attr unit ""
+vector 15 MecInetSingleCell.car[1].lteNic.phy servingCell:vector ETV
+attr source servingCell
+attr title "ID of the serving eNodeB for the UE, vector"
+attr unit ""
+vector 16 MecInetSingleCell.car[2].lteNic.phy servingCell:vector ETV
+attr source servingCell
+attr title "ID of the serving eNodeB for the UE, vector"
+attr unit ""
+vector 17 MecInetSingleCell.car[3].lteNic.phy servingCell:vector ETV
+attr source servingCell
+attr title "ID of the serving eNodeB for the UE, vector"
+attr unit ""
+vector 18 MecInetSingleCell.car[4].lteNic.phy servingCell:vector ETV
+attr source servingCell
+attr title "ID of the serving eNodeB for the UE, vector"
+attr unit ""
+vector 19 MecInetSingleCell.car[0].udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 20 MecInetSingleCell.car[1].udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 21 MecInetSingleCell.car[2].udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 22 MecInetSingleCell.car[3].udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 23 MecInetSingleCell.car[4].udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 24 MecInetSingleCell.car[0].lteNic.pdcpRrc receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 25 MecInetSingleCell.car[0].lteNic.pdcpRrc sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 26 MecInetSingleCell.car[1].lteNic.pdcpRrc receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 27 MecInetSingleCell.car[1].lteNic.pdcpRrc sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 28 MecInetSingleCell.car[2].lteNic.pdcpRrc receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 29 MecInetSingleCell.car[2].lteNic.pdcpRrc sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 30 MecInetSingleCell.car[3].lteNic.pdcpRrc receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 31 MecInetSingleCell.car[3].lteNic.pdcpRrc sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 32 MecInetSingleCell.car[4].lteNic.pdcpRrc receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 33 MecInetSingleCell.car[4].lteNic.pdcpRrc sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 34 MecInetSingleCell.car[0].lteNic.rlc.um receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 35 MecInetSingleCell.car[1].lteNic.rlc.um receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 36 MecInetSingleCell.car[2].lteNic.rlc.um receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 37 MecInetSingleCell.car[3].lteNic.rlc.um receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 38 MecInetSingleCell.car[4].lteNic.rlc.um receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 39 MecInetSingleCell.car[0].lteNic.mac receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 40 MecInetSingleCell.car[1].lteNic.mac receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 41 MecInetSingleCell.car[2].lteNic.mac receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 42 MecInetSingleCell.car[3].lteNic.mac receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 43 MecInetSingleCell.car[4].lteNic.mac receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 44 MecInetSingleCell.car[0].lteNic.mac sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 45 MecInetSingleCell.car[1].lteNic.mac sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 46 MecInetSingleCell.car[2].lteNic.mac sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 47 MecInetSingleCell.car[3].lteNic.mac sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 48 MecInetSingleCell.car[4].lteNic.mac sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 49 MecInetSingleCell.eNodeB1.lteNic.mac avgServedBlocksUl:vector ETV
+attr source avgServedBlocksUl
+attr title "LTE Avg Served Blocks Ul, vector"
+attr unit blocks
+vector 50 MecInetSingleCell.eNodeB1.lteNic.mac avgServedBlocksDl:vector ETV
+attr source avgServedBlocksDl
+attr title "LTE Avg Served Blocks Dl, vector"
+attr unit blocks
+vector 51 MecInetSingleCell.eNodeB1.lteNic.mac receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 52 MecInetSingleCell.eNodeB1.lteNic.mac sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 53 MecInetSingleCell.car[0].lteNic.mac receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 54 MecInetSingleCell.car[1].lteNic.mac receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 55 MecInetSingleCell.car[2].lteNic.mac receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 56 MecInetSingleCell.car[3].lteNic.mac receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 57 MecInetSingleCell.car[4].lteNic.mac receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 58 MecInetSingleCell.car[2].lteNic.mac sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 59 MecInetSingleCell.car[2].lteNic.rlc.um sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 60 MecInetSingleCell.car[3].lteNic.mac sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 61 MecInetSingleCell.car[3].lteNic.rlc.um sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 62 MecInetSingleCell.car[2].lteNic.phy averageCqiUl:vector ETV
+attr source averageCqiUl
+attr title "Average Cqi reported in UL, vector"
+attr unit cqi
+vector 63 MecInetSingleCell.car[3].lteNic.phy averageCqiUl:vector ETV
+attr source averageCqiUl
+attr title "Average Cqi reported in UL, vector"
+attr unit cqi
+vector 64 MecInetSingleCell.eNodeB1.lteNic.channelModel rcvdSinr:vector ETV
+attr source rcvdSinr
+attr title "SINR measured at packet reception, vector"
+attr unit dB
+vector 65 MecInetSingleCell.car[2].lteNic.mac macDelayUl:vector ETV
+attr source macDelayUl
+attr title "Delay at the MAC layer UL, vector"
+attr unit s
+vector 66 MecInetSingleCell.eNodeB1.lteNic.mac sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 67 MecInetSingleCell.car[3].lteNic.mac macDelayUl:vector ETV
+attr source macDelayUl
+attr title "Delay at the MAC layer UL, vector"
+attr unit s
+vector 68 MecInetSingleCell.eNodeB1.lteNic.mac measuredItbs:vector ETV
+attr source measuredItbs
+attr title "TBS index, vector"
+attr unit ""
+vector 69 MecInetSingleCell.eNodeB1.lteNic.rlc.um receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 70 MecInetSingleCell.car[2].lteNic.mac harqErrorRate_1st_Ul:vector ETV
+attr source harqErrorRate_1st_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 71 MecInetSingleCell.car[2].lteNic.mac harqErrorRateUl:vector ETV
+attr source harqErrorRateUl
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 72 MecInetSingleCell.car[3].lteNic.mac harqErrorRate_1st_Ul:vector ETV
+attr source harqErrorRate_1st_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 73 MecInetSingleCell.car[3].lteNic.mac harqErrorRateUl:vector ETV
+attr source harqErrorRateUl
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 74 MecInetSingleCell.eNodeB1.lteNic.rlc.um sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 75 MecInetSingleCell.eNodeB1.lteNic.pdcpRrc receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 76 MecInetSingleCell.eNodeB1.lteNic.pdcpRrc sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 77 MecInetSingleCell.eNodeB1.udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 78 MecInetSingleCell.eNodeB1.pppMEHostIf.queue rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 79 MecInetSingleCell.eNodeB1.pppMEHostIf.queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 80 MecInetSingleCell.eNodeB1.pppMEHostIf.ppp rcvdPkFromHL:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 81 MecInetSingleCell.eNodeB1.pppMEHostIf.ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 82 MecInetSingleCell.meHost.gtpEndpoint.ppp[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 83 MecInetSingleCell.meHost.gtpEndpoint.ppp[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 84 MecInetSingleCell.meHost.gtpEndpoint.udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 85 MecInetSingleCell.meHost.gtpEndpoint.udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 86 MecInetSingleCell.meHost.gtpEndpoint.pppInterface.queue rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 87 MecInetSingleCell.meHost.gtpEndpoint.pppInterface.queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 88 MecInetSingleCell.meHost.gtpEndpoint.pppInterface.ppp rcvdPkFromHL:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 89 MecInetSingleCell.meHost.gtpEndpoint.pppInterface.ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 90 MecInetSingleCell.meHost.virtualisationInfrastructure.pppIf[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 91 MecInetSingleCell.meHost.virtualisationInfrastructure.pppIf[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 92 MecInetSingleCell.meHost.virtualisationInfrastructure.udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 93 MecInetSingleCell.meHost.virtualisationInfrastructure.udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 94 MecInetSingleCell.meHost.virtualisationInfrastructure.udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 95 MecInetSingleCell.meHost.virtualisationInfrastructure.pppIf[0].queue rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 96 MecInetSingleCell.meHost.virtualisationInfrastructure.pppIf[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 97 MecInetSingleCell.meHost.virtualisationInfrastructure.pppIf[0].ppp rcvdPkFromHL:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 98 MecInetSingleCell.meHost.virtualisationInfrastructure.pppIf[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 99 MecInetSingleCell.meHost.gtpEndpoint.pppInterface.ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 100 MecInetSingleCell.meHost.gtpEndpoint.pppInterface.ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 101 MecInetSingleCell.meHost.gtpEndpoint.udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 102 MecInetSingleCell.meHost.gtpEndpoint.ppp[0].queue rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 103 MecInetSingleCell.meHost.gtpEndpoint.ppp[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 104 MecInetSingleCell.meHost.gtpEndpoint.ppp[0].ppp rcvdPkFromHL:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 105 MecInetSingleCell.meHost.gtpEndpoint.ppp[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 106 MecInetSingleCell.eNodeB1.pppMEHostIf.ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 107 MecInetSingleCell.eNodeB1.pppMEHostIf.ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 108 MecInetSingleCell.eNodeB1.udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 109 MecInetSingleCell.eNodeB1.udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 110 MecInetSingleCell.eNodeB1.lteNic.pdcpRrc receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 111 MecInetSingleCell.eNodeB1.lteNic.pdcpRrc sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 112 MecInetSingleCell.eNodeB1.lteNic.rlc.um receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 113 MecInetSingleCell.eNodeB1.lteNic.mac receivedPacketFromUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromUpperLayer
+vector 114 MecInetSingleCell.eNodeB1.lteNic.rlc.um sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 115 MecInetSingleCell.car[2].lteNic.phy averageCqiDl:vector ETV
+attr source averageCqiDl
+attr title "Average Cqi reported in DL, vector"
+attr unit cqi
+vector 116 MecInetSingleCell.car[2].lteNic.channelModel rcvdSinr:vector ETV
+attr source rcvdSinr
+attr title "SINR measured at packet reception, vector"
+attr unit dB
+vector 117 MecInetSingleCell.car[3].lteNic.phy averageCqiDl:vector ETV
+attr source averageCqiDl
+attr title "Average Cqi reported in DL, vector"
+attr unit cqi
+vector 118 MecInetSingleCell.car[3].lteNic.channelModel rcvdSinr:vector ETV
+attr source rcvdSinr
+attr title "SINR measured at packet reception, vector"
+attr unit dB
+vector 119 MecInetSingleCell.eNodeB1.lteNic.mac macDelayDl:vector ETV
+attr source macDelayDl
+attr title "Delay at the MAC layer UL, vector"
+attr unit s
+vector 120 MecInetSingleCell.car[2].lteNic.rlc.um receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 121 MecInetSingleCell.car[2].lteNic.rlc.um sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 122 MecInetSingleCell.car[2].lteNic.pdcpRrc receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 123 MecInetSingleCell.car[2].lteNic.pdcpRrc sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 124 MecInetSingleCell.car[2].udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 125 MecInetSingleCell.car[2].udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 126 MecInetSingleCell.car[3].lteNic.rlc.um receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 127 MecInetSingleCell.car[3].lteNic.rlc.um sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 128 MecInetSingleCell.car[3].lteNic.pdcpRrc receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 129 MecInetSingleCell.car[3].lteNic.pdcpRrc sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 130 MecInetSingleCell.car[3].udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 131 MecInetSingleCell.car[3].udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 132 MecInetSingleCell.car[2].lteNic.mac harqErrorRate_1st_Dl:vector ETV
+attr source harqErrorRate_1st_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 133 MecInetSingleCell.car[2].lteNic.mac harqErrorRateDl:vector ETV
+attr source harqErrorRateDl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 134 MecInetSingleCell.car[3].lteNic.mac harqErrorRate_1st_Dl:vector ETV
+attr source harqErrorRate_1st_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 135 MecInetSingleCell.car[3].lteNic.mac harqErrorRateDl:vector ETV
+attr source harqErrorRateDl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 136 MecInetSingleCell.car[1].lteNic.mac sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 137 MecInetSingleCell.car[1].lteNic.rlc.um sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 138 MecInetSingleCell.car[1].lteNic.phy averageCqiUl:vector ETV
+attr source averageCqiUl
+attr title "Average Cqi reported in UL, vector"
+attr unit cqi
+vector 139 MecInetSingleCell.car[1].lteNic.mac macDelayUl:vector ETV
+attr source macDelayUl
+attr title "Delay at the MAC layer UL, vector"
+attr unit s
+vector 140 MecInetSingleCell.car[1].lteNic.mac harqErrorRate_1st_Ul:vector ETV
+attr source harqErrorRate_1st_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 141 MecInetSingleCell.car[1].lteNic.mac harqErrorRateUl:vector ETV
+attr source harqErrorRateUl
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 142 MecInetSingleCell.car[1].lteNic.phy averageCqiDl:vector ETV
+attr source averageCqiDl
+attr title "Average Cqi reported in DL, vector"
+attr unit cqi
+vector 143 MecInetSingleCell.car[1].lteNic.channelModel rcvdSinr:vector ETV
+attr source rcvdSinr
+attr title "SINR measured at packet reception, vector"
+attr unit dB
+vector 144 MecInetSingleCell.car[1].lteNic.rlc.um receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 145 MecInetSingleCell.car[1].lteNic.rlc.um sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 146 MecInetSingleCell.car[1].lteNic.pdcpRrc receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 147 MecInetSingleCell.car[1].lteNic.pdcpRrc sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 148 MecInetSingleCell.car[1].udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 149 MecInetSingleCell.car[1].udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 150 MecInetSingleCell.car[1].lteNic.mac harqErrorRate_1st_Dl:vector ETV
+attr source harqErrorRate_1st_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 151 MecInetSingleCell.car[1].lteNic.mac harqErrorRateDl:vector ETV
+attr source harqErrorRateDl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 152 MecInetSingleCell.car[1].lteNic.mac harqErrorRate_2nd_Ul:vector ETV
+attr source harqErrorRate_2nd_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 153 MecInetSingleCell.car[0].lteNic.mac sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 154 MecInetSingleCell.car[0].lteNic.rlc.um sentPacketToLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToLowerLayer
+vector 155 MecInetSingleCell.car[0].lteNic.phy averageCqiUl:vector ETV
+attr source averageCqiUl
+attr title "Average Cqi reported in UL, vector"
+attr unit cqi
+vector 156 MecInetSingleCell.car[0].lteNic.mac macDelayUl:vector ETV
+attr source macDelayUl
+attr title "Delay at the MAC layer UL, vector"
+attr unit s
+vector 157 MecInetSingleCell.car[0].lteNic.mac harqErrorRate_1st_Ul:vector ETV
+attr source harqErrorRate_1st_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 158 MecInetSingleCell.car[0].lteNic.mac harqErrorRateUl:vector ETV
+attr source harqErrorRateUl
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 159 MecInetSingleCell.car[0].lteNic.phy averageCqiDl:vector ETV
+attr source averageCqiDl
+attr title "Average Cqi reported in DL, vector"
+attr unit cqi
+vector 160 MecInetSingleCell.car[0].lteNic.channelModel rcvdSinr:vector ETV
+attr source rcvdSinr
+attr title "SINR measured at packet reception, vector"
+attr unit dB
+vector 161 MecInetSingleCell.car[0].lteNic.rlc.um receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 162 MecInetSingleCell.car[0].lteNic.rlc.um sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 163 MecInetSingleCell.car[0].lteNic.pdcpRrc receivedPacketFromLowerLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source receivedPacketFromLowerLayer
+vector 164 MecInetSingleCell.car[0].lteNic.pdcpRrc sentPacketToUpperLayer:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPacketToUpperLayer
+vector 165 MecInetSingleCell.car[0].udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 166 MecInetSingleCell.car[0].udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 167 MecInetSingleCell.car[0].lteNic.mac harqErrorRate_1st_Dl:vector ETV
+attr source harqErrorRate_1st_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 168 MecInetSingleCell.car[0].lteNic.mac harqErrorRateDl:vector ETV
+attr source harqErrorRateDl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 169 MecInetSingleCell.car[2].udpApp[0] clusterizeInfoSentMsg:vector ETV
+attr source clusterizeInfoSentMsg
+attr title "ClusterizeInfo messages sent, vector"
+attr unit ""
+vector 170 MecInetSingleCell.car[3].udpApp[0] clusterizeInfoSentMsg:vector ETV
+attr source clusterizeInfoSentMsg
+attr title "ClusterizeInfo messages sent, vector"
+attr unit ""
+vector 171 MecInetSingleCell.car[1].udpApp[0] clusterizeInfoSentMsg:vector ETV
+attr source clusterizeInfoSentMsg
+attr title "ClusterizeInfo messages sent, vector"
+attr unit ""
+vector 172 MecInetSingleCell.car[0].udpApp[0] clusterizeInfoSentMsg:vector ETV
+attr source clusterizeInfoSentMsg
+attr title "ClusterizeInfo messages sent, vector"
+attr unit ""
+vector 173 MecInetSingleCell.meHost.MEClusterizeApp[car[3]] clusterizeInfoRcvdMsg:vector ETV
+attr source clusterizeInfoRcvdMsg
+attr title "ClusterizeInfo Messages Received, vector"
+attr unit s
+vector 174 MecInetSingleCell.meHost.MEClusterizeApp[car[3]] clusterizeInfoDelay:vector ETV
+attr source clusterizeInfoDelay
+attr title "ClusterizeInfo Delay, vector"
+attr unit s
+vector 175 MecInetSingleCell.car[0].lteNic.mac harqErrorRate_2nd_Ul:vector ETV
+attr source harqErrorRate_2nd_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 176 MecInetSingleCell.meHost.MEClusterizeApp[car[2]] clusterizeInfoRcvdMsg:vector ETV
+attr source clusterizeInfoRcvdMsg
+attr title "ClusterizeInfo Messages Received, vector"
+attr unit s
+vector 177 MecInetSingleCell.meHost.MEClusterizeApp[car[2]] clusterizeInfoDelay:vector ETV
+attr source clusterizeInfoDelay
+attr title "ClusterizeInfo Delay, vector"
+attr unit s
+vector 178 MecInetSingleCell.meHost.MEClusterizeApp[car[0]] clusterizeInfoRcvdMsg:vector ETV
+attr source clusterizeInfoRcvdMsg
+attr title "ClusterizeInfo Messages Received, vector"
+attr unit s
+vector 179 MecInetSingleCell.meHost.MEClusterizeApp[car[0]] clusterizeInfoDelay:vector ETV
+attr source clusterizeInfoDelay
+attr title "ClusterizeInfo Delay, vector"
+attr unit s
+vector 180 MecInetSingleCell.meHost.MEClusterizeApp[car[1]] clusterizeInfoRcvdMsg:vector ETV
+attr source clusterizeInfoRcvdMsg
+attr title "ClusterizeInfo Messages Received, vector"
+attr unit s
+vector 181 MecInetSingleCell.meHost.MEClusterizeApp[car[1]] clusterizeInfoDelay:vector ETV
+attr source clusterizeInfoDelay
+attr title "ClusterizeInfo Delay, vector"
+attr unit s
+vector 182 MecInetSingleCell.car[2].lteNic.mac harqErrorRate_2nd_Ul:vector ETV
+attr source harqErrorRate_2nd_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 183 MecInetSingleCell.meHost.MEClusterizeApp[car[3]] clusterizeConfigSentMsg:vector ETV
+attr source clusterizeConfigSentMsg
+attr title "ClusterizeConfig messages sent, vector"
+attr unit ""
+vector 184 MecInetSingleCell.meHost.MEClusterizeApp[car[2]] clusterizeConfigSentMsg:vector ETV
+attr source clusterizeConfigSentMsg
+attr title "ClusterizeConfig messages sent, vector"
+attr unit ""
+vector 185 MecInetSingleCell.meHost.MEClusterizeApp[car[1]] clusterizeConfigSentMsg:vector ETV
+attr source clusterizeConfigSentMsg
+attr title "ClusterizeConfig messages sent, vector"
+attr unit ""
+vector 186 MecInetSingleCell.meHost.MEClusterizeApp[car[0]] clusterizeConfigSentMsg:vector ETV
+attr source clusterizeConfigSentMsg
+attr title "ClusterizeConfig messages sent, vector"
+attr unit ""
+vector 187 MecInetSingleCell.car[0].udpApp[0] clusterizeConfigRcvdMsg:vector ETV
+attr source clusterizeConfigRcvdMsg
+attr title "ClusterizeConfig Messages Received, vector"
+attr unit s
+vector 188 MecInetSingleCell.car[0].udpApp[0] clusterizeConfigDelay:vector ETV
+attr source clusterizeConfigDelay
+attr title "ClusterizeConfig Delay, vector"
+attr unit s
+vector 189 MecInetSingleCell.car[0].udpApp[0] clusterizeDistancies:vector ETV
+attr "" "Clusterize Distancies"
+attr source clusterizeDistancies
+attr unit m
+vector 190 MecInetSingleCell.car[0].udpApp[0] clusterizeAccelerations:vector ETV
+attr "" "Clusterize Accelerations"
+attr source clusterizeAccelerations
+attr unit ""
+vector 191 MecInetSingleCell.car[0].udpApp[0] clusterizeVelocities:vector ETV
+attr "" "Clusterize Velocities"
+attr source clusterizeVelocities
+attr unit mps
+vector 192 MecInetSingleCell.car[1].udpApp[0] clusterizeConfigRcvdMsg:vector ETV
+attr source clusterizeConfigRcvdMsg
+attr title "ClusterizeConfig Messages Received, vector"
+attr unit s
+vector 193 MecInetSingleCell.car[1].udpApp[0] clusterizeConfigDelay:vector ETV
+attr source clusterizeConfigDelay
+attr title "ClusterizeConfig Delay, vector"
+attr unit s
+vector 194 MecInetSingleCell.car[1].udpApp[0] clusterizeDistancies:vector ETV
+attr "" "Clusterize Distancies"
+attr source clusterizeDistancies
+attr unit m
+vector 195 MecInetSingleCell.car[1].udpApp[0] clusterizeAccelerations:vector ETV
+attr "" "Clusterize Accelerations"
+attr source clusterizeAccelerations
+attr unit ""
+vector 196 MecInetSingleCell.car[1].udpApp[0] clusterizeVelocities:vector ETV
+attr "" "Clusterize Velocities"
+attr source clusterizeVelocities
+attr unit mps
+vector 197 MecInetSingleCell.car[2].udpApp[0] clusterizeConfigRcvdMsg:vector ETV
+attr source clusterizeConfigRcvdMsg
+attr title "ClusterizeConfig Messages Received, vector"
+attr unit s
+vector 198 MecInetSingleCell.car[2].udpApp[0] clusterizeConfigDelay:vector ETV
+attr source clusterizeConfigDelay
+attr title "ClusterizeConfig Delay, vector"
+attr unit s
+vector 199 MecInetSingleCell.car[2].udpApp[0] clusterizeDistancies:vector ETV
+attr "" "Clusterize Distancies"
+attr source clusterizeDistancies
+attr unit m
+vector 200 MecInetSingleCell.car[2].udpApp[0] clusterizeAccelerations:vector ETV
+attr "" "Clusterize Accelerations"
+attr source clusterizeAccelerations
+attr unit ""
+vector 201 MecInetSingleCell.car[2].udpApp[0] clusterizeVelocities:vector ETV
+attr "" "Clusterize Velocities"
+attr source clusterizeVelocities
+attr unit mps
+vector 202 MecInetSingleCell.car[3].udpApp[0] clusterizeConfigRcvdMsg:vector ETV
+attr source clusterizeConfigRcvdMsg
+attr title "ClusterizeConfig Messages Received, vector"
+attr unit s
+vector 203 MecInetSingleCell.car[3].udpApp[0] clusterizeConfigDelay:vector ETV
+attr source clusterizeConfigDelay
+attr title "ClusterizeConfig Delay, vector"
+attr unit s
+vector 204 MecInetSingleCell.car[3].udpApp[0] clusterizeDistancies:vector ETV
+attr "" "Clusterize Distancies"
+attr source clusterizeDistancies
+attr unit m
+vector 205 MecInetSingleCell.car[3].udpApp[0] clusterizeAccelerations:vector ETV
+attr "" "Clusterize Accelerations"
+attr source clusterizeAccelerations
+attr unit ""
+vector 206 MecInetSingleCell.car[3].udpApp[0] clusterizeVelocities:vector ETV
+attr "" "Clusterize Velocities"
+attr source clusterizeVelocities
+attr unit mps
+vector 207 MecInetSingleCell.car[3].lteNic.mac harqErrorRate_2nd_Ul:vector ETV
+attr source harqErrorRate_2nd_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 208 MecInetSingleCell.car[0].lteNic.mac harqErrorRate_3rd_Ul:vector ETV
+attr source harqErrorRate_3rd_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 209 MecInetSingleCell.car[3].lteNic.mac harqErrorRate_3rd_Ul:vector ETV
+attr source harqErrorRate_3rd_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 210 MecInetSingleCell.car[3].lteNic.mac harqErrorRate_4th_Ul:vector ETV
+attr source harqErrorRate_4th_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+52	40037 588922 141 498369 0.002 12.866 32768 0 520 9124 1433480
+vector 211 MecInetSingleCell.car[3].lteNic.mac harqErrorRate_2nd_Dl:vector ETV
+attr source harqErrorRate_2nd_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+51	629124 598233 131 543443 0.002 13.961 32768 0 679 631966 55485716
+0	1227357 8 0 0 0 0 1 0 0 0 0
+1	1227365 8 0 0 0 0 1 0 0 0 0
+2	1227373 74098 0 739035 0 17.6150001304 3545 0 9 2926 5040
+3	1301471 278724 0 739043 0 17.6150002608 12767 0 1 6383 6383
+4	1580195 8 0 0 0 0 1 0 0 0 0
+5	1580203 8 0 0 0 0 1 0 0 0 0
+6	1580211 8 0 0 0 0 1 0 0 0 0
+7	1580219 8 0 0 0 0 1 0 0 0 0
+8	1580227 1826 0 709366 0 17.0000002712 97 0 3 144 304
+9	1582053 4368 0 709383 0 17.0000003616 193 0 1 96 96
+10	1586421 2435 0 709401 0 17.0000004788 97 0 1 48 48
+11	1588856 4704 0 709412 0 17.0000005916 193 0 1 96 96
+12	1593560 9 0 0 0 0 1 0 0 0 0
+13	1593569 324169 0 739057 0 17.6150004188 12767 0 1 6383 6383
+14	1917738 9 0 0 0 0 1 1 1 1 1
+15	1917747 9 0 0 0 0 1 1 1 1 1
+16	1917756 9 0 0 0 0 1 1 1 1 1
+17	1917765 9 0 0 0 0 1 1 1 1 1
+18	1917774 9 0 0 0 0 1 1 1 1 1
+19	1917783 32249 66 738747 0 17.61 1680 108 108 181440 19595520
+20	1950032 32080 67 738746 0 17.61 1670 108 108 180360 19478880
+21	1982112 31995 68 738744 0 17.61 1665 108 108 179820 19420560
+22	2014107 31995 69 738745 0 17.61 1665 108 108 179820 19420560
+23	2046102 33689 70 738748 0 17.61 1762 108 108 190296 20551968
+24	2079791 32249 81 738762 0 17.61 1680 128 128 215040 27525120
+25	2112040 32249 81 738762 0 17.61 1680 129 129 216720 27956880
+26	2144289 32080 82 738761 0 17.61 1670 128 128 213760 27361280
+27	2176369 32080 82 738761 0 17.61 1670 129 129 215430 27790470
+28	2208449 31995 83 738759 0 17.61 1665 128 128 213120 27279360
+29	2240444 31995 83 738759 0 17.61 1665 129 129 214785 27707265
+30	2272439 31995 84 738760 0 17.61 1665 128 128 213120 27279360
+31	2304434 31995 84 738760 0 17.61 1665 129 129 214785 27707265
+32	2336429 33690 85 738763 0 17.61 1762 128 128 225536 28868608
+33	2370119 33690 85 738763 0 17.61 1762 129 129 227298 29321442
+34	2403809 32249 86 738767 0 17.61 1680 129 129 216720 27956880
+35	2436058 32080 87 738766 0 17.61 1670 129 129 215430 27790470
+36	2468138 31995 88 738764 0 17.61 1665 129 129 214785 27707265
+37	2500133 31995 89 738765 0 17.61 1665 129 129 214785 27707265
+38	2532128 33690 90 738768 0 17.61 1762 129 129 227298 29321442
+39	2565818 105966 96 738951 0 17.614 5533 3 677 441102 48714302
+40	2671784 97369 97 738821 0 17.611 5078 3 523 437676 47859696
+41	2769153 98405 98 738957 0 17.614 5135 3 440 436382 45801662
+42	2867558 110055 99 739076 0 17.616 5652 4 223 404780 38369574
+43	2977613 33691 100 738778 0 17.61 1762 129 129 227298 29321442
+44	3011304 119501 111 738988 0.001 17.615 6403 0 679 235887 22033379
+45	3130805 109906 113 738836 0.001 17.611 5899 0 525 230819 21197011
+46	3240711 111984 115 738991 0.001 17.615 6006 0 442 229068 19037488
+47	3352695 136291 117 738993 0.001 17.615 7131 0 225 231809 13121279
+48	3488986 64285 119 739077 0.001 17.616 3524 0 0 0 0
+49	3553271 326647 121 738996 0.001 17.615 17615 0 25 187061 4351529
+50	3879918 319381 121 738996 0.001 17.615 17615 0 25 393 6095
+51	4199299 210399 543445 739034 13.961 17.615 10871 0 442 295617 19903441
+52	4409698 315302 498369 739079 12.866 17.616 16642 0 111 2381 247745
+53	4725000 206537 168 738924 0.003 17.613 11393 0 520 4158 715182
+54	4931537 178633 170 739026 0.003 17.615 9823 0 391 2828 471728
+55	5110170 178617 172 738926 0.003 17.613 9792 0 133 2175 250203
+56	5288787 246132 174 739028 0.003 17.615 13324 0 133 2344 244112
+57	5534919 92996 176 738983 0.003 17.614 5074 0 0 0 0
+58	5627915 63167 196 738953 0.005 17.614 3489 0 131 2137 241579
+59	5691082 66410 198 738955 0.005 17.614 3470 3 440 221597 18094397
+60	5757492 74500 201 739072 0.005 17.616 4011 0 131 2147 221663
+61	5831992 78060 203 739074 0.005 17.616 3987 4 223 189995 10662309
+62	5910052 65256 211 738976 0.005 17.614 3478 2 15 40042 532398
+63	5975308 87375 213 738978 0.005 17.614 4690 2 15 11842 45280
+64	6062683 494801 233 739033 0.006 17.615 15398 3.5386206244856 109.33537132906 592185.41395969 27630572.020093
+65	6557484 77246 301 739079 0.009 17.616 3468 0.004 0.012 13.935999999999 0.056512000000002
+66	6634730 286503 301 739079 0.009 17.616 14804 0 677 857873 69565633
+67	6921233 89753 301 738964 0.009 17.614 3981 0.004 1.3 25.908000000002 4.6376479999989
+68	7010986 190521 301 739079 0.009 17.616 10318 0 26 48845 1010637
+69	7201507 284799 308 739003 0.009 17.615 14708 3 677 857825 69563329
+70	7486306 62899 384 738802 0.01 17.61 3466 0 1 8 8
+71	7549205 63047 384 738802 0.01 17.61 3474 0 1 8 8
+72	7612252 73939 386 738922 0.01 17.613 3985 0 1 629 629
+73	7686191 87219 386 739024 0.01 17.615 4688 0 1 707 707
+74	7773410 129659 516 739002 0.015 17.615 6383 129 129 823407 106219503
+75	7903069 129659 518 739005 0.015 17.615 6383 129 129 823407 106219503
+76	8032728 129659 518 739005 0.015 17.615 6383 128 128 817024 104579072
+77	8162387 129659 526 739013 0.015 17.615 6383 136 136 868088 118059968
+78	8292046 129659 530 739017 0.015 17.615 6383 156 156 995748 155336688
+79	8421705 143565 530 739035 0.015 17.6150001304 6383 0 1.1736e-06 0.0003063096 6.7727569280001e-11
+80	8565270 142157 532 739036 0.015 17.6150001304 6383 156 156 995748 155336688
+81	8707427 142157 532 739036 0.015 17.6150001304 6383 163 163 1040429 169589927
+82	8849584 174857 547 739045 0.0150001804 17.6150003108 6383 163 163 1040429 169589927
+83	9024441 174857 547 739045 0.0150001804 17.6150003108 6383 156 156 995748 155336688
+84	9199298 174857 549 739047 0.0150001804 17.6150003108 6383 136 136 868088 118059968
+85	9374155 180133 549 739047 0.0150001804 17.6150003108 6383 1 6383 20374536 86707233704
+86	9554288 174857 551 739049 0.0150001804 17.6150003108 6383 128 128 817024 104579072
+87	9729145 162091 551 739049 0.0150001804 17.6150003108 6383 0 0 0 0
+88	9891236 174857 552 739050 0.0150001804 17.6150003108 6383 128 128 817024 104579072
+89	10066093 174857 552 739050 0.0150001804 17.6150003108 6383 135 135 861705 116330175
+90	10240950 174835 561 739058 0.0150003384 17.6150004688 6383 135 135 861705 116330175
+91	10415785 174835 561 739058 0.0150003384 17.6150004688 6383 128 128 817024 104579072
+92	10590620 174835 563 739060 0.0150003384 17.6150004688 6383 108 108 689364 74451312
+93	10765455 180111 563 739060 0.0150003384 17.6150004688 6383 1 6383 20374536 86707233704
+94	10945566 1788 567 709268 0.0150003384 17 96 86 108 8960 846592
+95	10947354 1852 569 709286 0.0150003384 17 96 106 128 10880 1243392
+96	10949206 2556 569 709366 0.0150003384 17.0000002712 96 0 2.712e-07 8.6784e-06 1.83056384e-12
+97	10951762 2380 570 709367 0.0150003384 17.0000002712 96 106 128 10880 1243392
+98	10954142 2380 570 709367 0.0150003384 17.0000002712 96 113 135 11552 1400416
+99	10956522 2556 583 709386 0.0150004964 17.0000004116 96 113 135 11552 1400416
+100	10959078 2652 583 709386 0.0150004964 17.0000004116 96 106 128 10880 1243392
+101	10961730 2652 586 709389 0.0150004964 17.0000004116 96 114 136 11648 1423616
+102	10964382 2652 588 709391 0.0150004964 17.0000004116 96 134 156 13568 1927936
+103	10967034 2780 588 709401 0.0150004964 17.0000004788 96 0 6.72e-08 2.1504e-06 1.1239424e-13
+104	10969814 2636 589 709402 0.0150004964 17.0000004788 96 134 156 13568 1927936
+105	10972450 2636 589 709402 0.0150004964 17.0000004788 96 141 163 14240 2122592
+106	10975086 2635 599 709413 0.0150006768 17.0000006416 96 141 163 14240 2122592
+107	10977721 2635 599 709413 0.0150006768 17.0000006416 96 134 156 13568 1927936
+108	10980356 2635 601 709415 0.0150006768 17.0000006416 96 114 136 11648 1423616
+109	10982991 2530 601 709415 0.0150006768 17.0000006416 96 1 96 4656 299536
+110	10985521 2635 604 709418 0.0150006768 17.0000006416 96 106 128 10880 1243392
+111	10988156 2635 604 709418 0.0150006768 17.0000006416 96 107 129 10976 1265248
+112	10990791 2635 605 709419 0.0150006768 17.0000006416 96 107 129 10976 1265248
+113	10993426 4596 607 709492 0.0150006768 17.002 191 29 518 22142 2887664
+114	10998022 1961 637 709490 0.016 17.002 95 29 518 11166 1622416
+115	10999983 379 674 709512 0.017 17.002 19 14 15 284 4246
+116	11000362 620 674 709512 0.017 17.002 19 51.295833986137 97.466710822344 1252.0242321452 84856.876322327
+117	11000982 504 676 709551 0.017 17.003 26 2 15 186 1882
+118	11001486 859 676 709551 0.017 17.003 26 22.675786767613 46.41204201511 925.35975870552 34561.20564436
+119	11002345 2156 759 709661 0.02 17.006 95 0.004 0.01 0.392 0.001688
+120	11004501 398 763 709627 0.02 17.005 19 109 131 2137 241579
+121	11004899 398 763 709627 0.02 17.005 19 107 129 2099 233107
+122	11005297 398 764 709628 0.02 17.005 19 107 129 2099 233107
+123	11005695 398 764 709628 0.02 17.005 19 106 128 2080 228928
+124	11006093 382 767 709631 0.02 17.005 19 86 108 1700 153328
+125	11006475 370 767 709631 0.02 17.005 19 1 19 190 2470
+126	11006845 498 773 709664 0.02 17.006 24 29 131 2147 221663
+127	11007343 398 773 709664 0.02 17.006 19 107 129 2099 233107
+128	11007741 398 774 709665 0.02 17.006 19 107 129 2099 233107
+129	11008139 398 774 709665 0.02 17.006 19 106 128 2080 228928
+130	11008537 382 777 709668 0.02 17.006 19 86 108 1700 153328
+131	11008919 370 777 709668 0.02 17.006 19 1 19 190 2470
+132	11009289 360 906 709710 0.021 17.006 19 0 0 0 0
+133	11009649 360 906 709710 0.021 17.006 19 0 0 0 0
+134	11010009 458 911 709766 0.021 17.007 24 0 1 2 2
+135	11010467 498 911 709766 0.021 17.007 26 0 1 2 2
+136	11010965 65543 1908 738817 0.06 17.611 3429 0 389 2786 460500
+137	11076508 68697 1910 738819 0.06 17.611 3408 3 523 222246 20069226
+138	11145205 67759 1919 738837 0.06 17.611 3434 2 15 36883 486995
+139	11212964 79284 1986 738996 0.064 17.615 3408 0.004 0.068 14.055999999999 0.069632000000005
+140	11292248 65211 2010 739022 0.065 17.615 3407 0 1 26 26
+141	11357459 65684 2010 739022 0.065 17.615 3433 0 1 26 26
+142	11423143 417 2347 709510 0.074 17.002 21 15 15 315 4725
+143	11423560 684 2347 709510 0.074 17.002 21 48.232485845113 96.917869341336 1348.3228747378 90177.570630878
+144	11424244 438 2402 709617 0.077 17.005 21 109 389 2786 460500
+145	11424682 495 2402 709617 0.077 17.005 24 107 129 2744 316312
+146	11425177 495 2404 709618 0.077 17.005 24 107 129 2744 316312
+147	11425672 495 2404 709618 0.077 17.005 24 106 128 2720 310848
+148	11426167 479 2409 709621 0.077 17.005 24 86 108 2240 211648
+149	11426646 462 2409 709621 0.077 17.005 24 1 24 300 4900
+150	11427108 396 2458 709705 0.078 17.006 21 0 0 0 0
+151	11427504 396 2458 709705 0.078 17.006 21 0 0 0 0
+152	11427900 473 2776 128496 0.084 3.49 26 0 0 0 0
+153	11428373 74234 4296 738947 0.155 17.614 3884 0 518 4096 698674
+154	11502607 77570 4298 738949 0.155 17.614 3853 3 677 224382 20757422
+155	11580177 75968 4307 738974 0.155 17.614 3919 2 15 26038 284932
+156	11656145 89322 4372 738686 0.159 17.609 3852 0.004 0.812 19.16 1.0186880000001
+157	11745467 73609 4414 738798 0.16 17.61 3852 0 1 65 65
+158	11819076 74852 4414 738798 0.16 17.61 3918 0 1 66 66
+159	11893928 596 4673 709508 0.168 17.002 31 7 15 457 6799
+160	11894524 997 4673 709508 0.168 17.002 31 32.443503328437 96.762486889429 1468.1983716913 74518.353950921
+161	11895521 626 4808 709607 0.171 17.005 31 109 518 4096 698674
+162	11896147 686 4808 709607 0.171 17.005 34 107 129 4034 482722
+163	11896833 686 4810 709608 0.171 17.005 34 107 129 4034 482722
+164	11897519 686 4810 709608 0.171 17.005 34 106 128 4000 474688
+165	11898205 670 4815 709611 0.171 17.005 34 86 108 3320 328288
+166	11898875 643 4815 709611 0.171 17.005 34 1 34 595 13685
+167	11899518 567 4864 709700 0.172 17.006 31 0 0 0 0
+168	11900085 567 4864 709700 0.172 17.006 31 0 0 0 0
+169	11900652 30289 17347 738734 1 17.61 1662 1 1 1662 1662
+170	11930941 30289 17348 738735 1 17.61 1662 1 1 1662 1662
+171	11961230 30289 17349 738736 1 17.61 1662 1 1 1662 1662
+172	11991519 30289 17350 738737 1 17.61 1662 1 1 1662 1662
+173	12021808 37307 17975 738945 1.01300086 17.6130003384 1402 1 1 1402 1402
+174	12059115 52714 17975 738945 1.01300086 17.6130003384 1402 0.0040003384 7.8790003384 5598.3705743232 32449.884647559
+175	12111829 1224 18048 494096 1.014 12.749 65 0 1 1 1
+176	12113053 43731 18077 738361 1.0140003384 17.6000004688 1660 1 1 1660 1660
+177	12156784 61989 18077 738361 1.0140003384 17.6000004688 1660 0.0040003384 0.1770003384 21.3096642384 0.48040803568606
+178	12218773 42914 18229 738732 1.0180003384 17.6090003384 1629 1 1 1629 1629
+179	12261687 60811 18229 738732 1.0180003384 17.6090003384 1629 0.0040003384 0.2580003384 35.8365954592 2.1252419266196
+180	12322498 43732 18309 739062 1.0190003384 17.6150004688 1660 1 1 1660 1660
+181	12366230 61986 18309 739062 1.0190003384 17.6150004688 1660 0.0040003384 0.0750003384 21.599619772 0.37125311256608
+182	12428216 156 23357 713976 1.143 17.094 8 0 0 0 0
+183	12428372 247 60191 709247 2 17 16 1 1 16 16
+184	12428619 247 60192 709248 2 17 16 1 1 16 16
+185	12428866 247 60193 709249 2 17 16 1 1 16 16
+186	12429113 247 60194 709250 2 17 16 1 1 16 16
+187	12429360 311 60616 709612 2.005 17.005 16 1 1 16 16
+188	12429671 375 60616 709612 2.005 17.005 16 0.005 0.005 0.08 0.0004
+189	12430046 534 60616 709612 2.005 17.005 16 49.188913331471 74.728761104864 928.55050940039 54973.211308719
+190	12430580 506 60616 709612 2.005 17.005 16 -5 1.1408865797068 -3.2539737468431 56.329758153037
+191	12431086 502 60616 709612 2.005 17.005 16 9.5930025755091 20 203.88958731688 2736.488511845
+192	12431588 311 60626 709622 2.005 17.005 16 1 1 16 16
+193	12431899 375 60626 709622 2.005 17.005 16 0.005 0.005 0.08 0.0004
+194	12432274 534 60626 709622 2.005 17.005 16 38.137852951037 93.264197663284 932.21930849155 59332.043021217
+195	12432808 500 60626 709622 2.005 17.005 16 -4.9021278201277 1.5 11.111722801557 43.39792096237
+196	12433308 522 60626 709622 2.005 17.005 16 5.1223828189729 21.105608756329 205.87266398821 2997.3470552003
+197	12433830 311 60636 709632 2.005 17.005 16 1 1 16 16
+198	12434141 375 60636 709632 2.005 17.005 16 0.005 0.005 0.08 0.0004
+199	12434516 498 60636 709632 2.005 17.005 16 260 294.68224610788 4518.9606456506 1278164.8550443
+200	12435014 341 60636 709632 2.005 17.005 16 0 1.5 22.5 33.75
+201	12435355 439 60636 709632 2.005 17.005 16 5 27.492500000001 259.8875 4986.1758437502
+202	12435794 311 60645 709669 2.005 17.006 16 1 1 16 16
+203	12436105 375 60645 709669 2.005 17.006 16 0.005 0.011 0.095 0.000627
+204	12436480 311 60645 709669 2.005 17.006 16 0 0 0 0
+205	12436791 491 60645 709669 2.005 17.006 16 0 1.5 9.6350999203475 9.9611601955013
+206	12437282 493 60645 709669 2.005 17.006 16 10 19.635530399674 268.19703345241 4635.80896305
+207	12437775 12484 66887 739024 2.143 17.615 628 0 1 65 65
+208	12450259 19 176393 176393 4.561 4.561 1 0 0 0 0
+209	12450278 1299 456436 738113 11.897 17.597 65 0 1 10 10
+210	12451577 200 486198 732375 12.533 17.477 10 0 1 3 3
+211	12451777 40 503901 600487 13.012 15.012 2 0 0 0 0
+vector 212 MecInetSingleCell.car[1].lteNic.mac harqErrorRate_3rd_Ul:vector ETV
+attr source harqErrorRate_3rd_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 213 MecInetSingleCell.car[1].lteNic.mac harqErrorRate_4th_Ul:vector ETV
+attr source harqErrorRate_4th_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+52	12452147 635117 739079 1220737 17.616 31.292 32768 0 111 6459 614681
+51	13087264 642516 739089 1237071 17.616 31.82 32768 0 800 509539 59411739
+vector 214 MecInetSingleCell.car[3].lteNic.mac harqErrorRate_3rd_Dl:vector ETV
+attr source harqErrorRate_3rd_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 215 MecInetSingleCell.car[1].lteNic.mac harqErrorRate_2nd_Dl:vector ETV
+attr source harqErrorRate_2nd_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 216 MecInetSingleCell.car[0].lteNic.mac harqErrorRate_4th_Ul:vector ETV
+attr source harqErrorRate_4th_Ul
+attr title "Harq Error Rate Ul, vector"
+attr unit ""
+vector 217 MecInetSingleCell.car[2].lteNic.mac harqErrorRate_2nd_Dl:vector ETV
+attr source harqErrorRate_2nd_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 218 MecInetSingleCell.car[2].lteNic.mac harqErrorRate_3rd_Dl:vector ETV
+attr source harqErrorRate_3rd_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 219 MecInetSingleCell.car[0].lteNic.mac harqErrorRate_2nd_Dl:vector ETV
+attr source harqErrorRate_2nd_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 220 MecInetSingleCell.car[0].lteNic.mac harqErrorRate_3rd_Dl:vector ETV
+attr source harqErrorRate_3rd_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 221 MecInetSingleCell.car[1].lteNic.mac harqErrorRate_3rd_Dl:vector ETV
+attr source harqErrorRate_3rd_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+2	13731100 58724 739636 1565786 17.628 42.8800001304 2670 0 25 4107 21471
+3	13789824 189941 739169 1565794 17.618 42.8800002608 8232 0 1 4116 4116
+8	13979765 3156 758468 1568652 18 43.0000002712 156 0 3 234 494
+9	13982921 5066 758476 1568669 18 43.0000003616 208 0 1 104 104
+10	13987987 4144 758544 1568687 18.0000002308 43.0000004788 156 0 1 78 78
+11	13992131 5508 758536 1568698 18.0000001404 43.0000005916 208 0 1 104 104
+13	13997639 217811 739203 1565808 17.6180001804 42.8800004188 8232 0 1 4116 4116
+19	14215450 54090 739253 1588535 17.62 43.84 2623 108 108 283284 30594672
+20	14269540 54090 739252 1588534 17.62 43.84 2623 108 108 283284 30594672
+21	14323630 54090 739250 1588532 17.62 43.84 2623 108 108 283284 30594672
+22	14377720 54090 739251 1588533 17.62 43.84 2623 108 108 283284 30594672
+23	14431810 54090 739254 1588536 17.62 43.84 2623 108 108 283284 30594672
+24	14485900 54091 739268 1588550 17.62 43.84 2623 128 128 335744 42975232
+25	14539991 54091 739268 1588550 17.62 43.84 2623 129 129 338367 43649343
+26	14594082 54091 739267 1588549 17.62 43.84 2623 128 128 335744 42975232
+27	14648173 54091 739267 1588549 17.62 43.84 2623 129 129 338367 43649343
+28	14702264 54090 739265 1588547 17.62 43.84 2623 128 128 335744 42975232
+29	14756354 54090 739265 1588547 17.62 43.84 2623 129 129 338367 43649343
+30	14810444 54090 739266 1588548 17.62 43.84 2623 128 128 335744 42975232
+31	14864534 54090 739266 1588548 17.62 43.84 2623 129 129 338367 43649343
+32	14918624 54091 739269 1588551 17.62 43.84 2623 128 128 335744 42975232
+33	14972715 54091 739269 1588551 17.62 43.84 2623 129 129 338367 43649343
+34	15026806 54091 739273 1588555 17.62 43.84 2623 129 129 338367 43649343
+35	15080897 54091 739272 1588554 17.62 43.84 2623 129 129 338367 43649343
+36	15134988 54091 739270 1588552 17.62 43.84 2623 129 129 338367 43649343
+37	15189079 54091 739271 1588553 17.62 43.84 2623 129 129 338367 43649343
+38	15243170 54091 739274 1588556 17.62 43.84 2623 129 129 338367 43649343
+39	15297261 178729 739215 1588765 17.619 43.849 8665 3 798 658535 67627207
+40	15475990 121556 739282 1588564 17.62 43.84 5930 3 622 510056 58776786
+41	15597546 75735 739114 1588562 17.617 43.84 3702 3 798 428820 66198860
+42	15673281 61848 739222 1588563 17.619 43.84 3013 4 129 355623 44434247
+43	15735129 54091 739284 1588566 17.62 43.84 2623 129 129 338367 43649343
+44	15789220 230921 739227 1588773 17.619 43.849 11377 0 800 412733 29601435
+45	16020141 190092 739287 1588737 17.62 43.848 9450 0 624 266996 20853338
+46	16210233 122414 739125 1588711 17.617 43.847 6194 0 800 95333 23361989
+47	16332647 113262 739085 1588768 17.616 43.849 5730 0 50 23208 1102296
+48	16445909 103564 739322 1588699 17.621 43.846 5246 0 0 0 0
+49	16549473 526113 739079 1588771 17.616 43.849 26234 0 25 280364 6676136
+50	17075586 515084 739079 1588771 17.616 43.849 26234 0 25 2945 69313
+51	17590670 543056 1237076 1588782 31.82 43.849 27091 0 800 288683 15505015
+52	18133726 519888 1220748 1588777 31.293 43.849 26156 0 111 6939 502125
+53	18653614 400918 739138 1588780 17.617 43.849 20342 0 111 3108 344988
+54	19054532 311987 739098 1588706 17.616 43.846 15929 0 111 3437 299061
+55	19366519 188807 739100 1588784 17.616 43.849 9707 0 111 3168 260192
+56	19555326 146895 739142 1588708 17.617 43.846 7491 0 111 3685 212565
+57	19702221 107770 739196 1588755 17.618 43.848 5457 0 0 0 0
+58	19809991 21387 739110 1569135 17.617 43.014 1125 0 109 2874 238938
+59	19831378 21644 739112 1004322 17.617 24.49 1079 3 798 90453 22549517
+60	19853022 8742 739218 1569085 17.619 43.012 456 0 109 2914 165570
+61	19861764 7757 739220 773965 17.619 18.294 390 4 48 17256 784904
+62	19869521 21059 739126 1004346 17.617 24.49 1113 2 8 3905 18037
+63	19890580 9450 739086 774143 17.616 18.298 500 2 2 1000 2000
+64	19900030 407352 739135 1588600 17.617 43.841 12197 -0.59852831312077 97.64853367928 338856.07605384 11229989.86189
+65	20307382 24792 739117 1004509 17.617 24.494 1081 0.004 0.06 4.7079999999999 0.02792
+66	20332174 220724 739117 1588654 17.617 43.844 10762 0 798 588341 61915137
+67	20552898 8978 739296 774326 17.62 18.302 393 0.004 0.028 2.516 0.024592
+68	20561876 204922 739079 1588453 17.616 43.837 10435 0 26 19811 348797
+69	20766798 217078 739083 1588658 17.616 43.844 10578 3 798 588389 61917441
+70	20983876 20526 739100 1004607 17.616 24.495 1083 0 1 34 34
+71	21004402 21176 739100 1004607 17.616 24.495 1117 0 1 34 34
+72	21025578 7402 739238 774190 17.619 18.299 392 0 1 96 96
+73	21032980 9482 739186 774411 17.618 18.303 502 0 1 109 109
+74	21042462 88062 739161 1565760 17.618 42.88 4116 129 129 530964 68494356
+75	21130524 88062 739162 1565762 17.618 42.88 4116 129 129 530964 68494356
+76	21218586 88062 739162 1565762 17.618 42.88 4116 128 128 526848 67436544
+77	21306648 88062 739166 1565770 17.618 42.88 4116 136 136 559776 76129536
+78	21394710 88062 739168 1565774 17.618 42.88 4116 156 156 642096 100166976
+79	21482772 99924 739168 1565786 17.618 42.8800001304 4116 0 3.26e-06 0.0003548184 2.1746620223999e-10
+80	21582696 97474 739169 1565787 17.618 42.8800001304 4116 156 156 642096 100166976
+81	21680170 97474 739169 1565787 17.618 42.8800001304 4116 163 163 670908 109358004
+82	21777644 117163 739198 1565796 17.6180001804 42.8800003108 4116 163 163 670908 109358004
+83	21894807 117163 739198 1565796 17.6180001804 42.8800003108 4116 156 156 642096 100166976
+84	22011970 117163 739200 1565798 17.6180001804 42.8800003108 4116 136 136 559776 76129536
+85	22129133 121779 739200 1565798 17.6180001804 42.8800003108 4116 6384 10499 34745214 299112643046
+86	22250912 117163 739202 1565800 17.6180001804 42.8800003108 4116 128 128 526848 67436544
+87	22368075 108931 739202 1565800 17.6180001804 42.8800003108 4116 0 0 0 0
+88	22477006 117163 739203 1565801 17.6180001804 42.8800003108 4116 128 128 526848 67436544
+89	22594169 117163 739203 1565801 17.6180001804 42.8800003108 4116 135 135 555660 75014100
+90	22711332 117112 739205 1565809 17.6180003384 42.8800004688 4116 135 135 555660 75014100
+91	22828444 117112 739205 1565809 17.6180003384 42.8800004688 4116 128 128 526848 67436544
+92	22945556 117112 739207 1565811 17.6180003384 42.8800004688 4116 108 108 444528 48009024
+93	23062668 121728 739207 1565811 17.6180003384 42.8800004688 4116 6384 10499 34745214 299112643046
+94	23184396 1740 758449 1568580 18 43 104 86 86 8944 769184
+95	23186136 1844 758467 1568598 18 43 104 106 106 11024 1168544
+96	23187980 3092 758467 1568652 18 43.0000002712 104 0 2.712e-07 1.41024e-05 2.97466624e-12
+97	23191072 2702 758476 1568653 18 43.0000002712 104 106 106 11024 1168544
+98	23193774 2702 758476 1568653 18 43.0000002712 104 113 113 11752 1327976
+99	23196476 2988 758530 1568672 18.0000001404 43.0000004116 104 113 113 11752 1327976
+100	23199464 3092 758530 1568672 18.0000001404 43.0000004116 104 106 106 11024 1168544
+101	23202556 3092 758533 1568675 18.0000001404 43.0000004116 104 114 114 11856 1351584
+102	23205648 3092 758535 1568677 18.0000001404 43.0000004116 104 134 134 13936 1867424
+103	23208740 3404 758535 1568687 18.0000001404 43.0000004788 104 0 6.72e-08 3.4944e-06 1.8264064e-13
+104	23212144 3066 758536 1568688 18.0000001404 43.0000004788 104 134 134 13936 1867424
+105	23215210 3066 758536 1568688 18.0000001404 43.0000004788 104 141 141 14664 2067624
+106	23218276 3066 758549 1568699 18.0000003032 43.0000006416 104 141 141 14664 2067624
+107	23221342 3066 758549 1568699 18.0000003032 43.0000006416 104 134 134 13936 1867424
+108	23224408 3066 758551 1568701 18.0000003032 43.0000006416 104 114 114 11856 1351584
+109	23227474 3063 758551 1568701 18.0000003032 43.0000006416 104 97 200 15444 2387164
+110	23230537 3066 758554 1568704 18.0000003032 43.0000006416 104 106 106 11024 1168544
+111	23233603 3066 758554 1568704 18.0000003032 43.0000006416 104 107 107 11128 1190696
+112	23236669 3066 758555 1568705 18.0000003032 43.0000006416 104 107 107 11128 1190696
+113	23239735 7161 758557 1568813 18.0000003032 43.004 289 0 109 22624 2148180
+114	23246896 4095 758625 1568811 18.001 43.004 185 0 109 11496 957484
+115	23250991 1069 758697 1569077 18.002 43.011 51 2 15 200 1354
+116	23252060 1773 758697 1569077 18.002 43.011 51 15.550197281614 46.392329522523 1373.6763531243 41580.770257854
+117	23253833 1625 758699 1568978 18.002 43.009 78 2 10 198 666
+118	23255458 2672 758699 1568978 18.002 43.009 77 12.678982111114 32.39585342666 1761.8878435783 41703.448467926
+119	23258130 4542 758858 1569211 18.005 43.017 184 0.004 0.047 0.937 0.007941
+120	23262672 1017 758881 1569138 18.005 43.014 46 5 109 2874 238938
+121	23263689 590 758881 1569138 18.005 43.014 26 107 107 2782 297674
+122	23264279 590 758883 1569139 18.005 43.014 26 107 107 2782 297674
+123	23264869 590 758883 1569139 18.005 43.014 26 106 106 2756 292136
+124	23265459 564 758888 1569142 18.005 43.014 26 86 86 2236 192296
+125	23266023 564 758888 1569142 18.005 43.014 26 20 45 845 28925
+126	23266587 1437 758894 1569088 18.005 43.012 66 3 109 2914 165570
+127	23268024 590 758894 1569088 18.005 43.012 26 107 107 2782 297674
+128	23268614 590 758895 1569089 18.005 43.012 26 107 107 2782 297674
+129	23269204 590 758895 1569089 18.005 43.012 26 106 106 2756 292136
+130	23269794 564 758898 1569092 18.005 43.012 26 86 86 2236 192296
+131	23270358 564 758898 1569092 18.005 43.012 26 20 45 845 28925
+132	23270922 955 758976 1568975 18.006 43.009 46 0 1 4 4
+133	23271877 1059 758976 1569174 18.006 43.015 51 0 1 5 5
+134	23272936 1366 758978 1568911 18.006 43.007 66 0 1 11 11
+135	23274302 1616 758978 1569123 18.006 43.013 78 0 1 12 12
+136	23275918 68429 739445 1569211 17.624 43.017 3353 0 109 2874 244070
+137	23344347 70772 739447 1547800 17.624 42.126 3307 3 622 171689 15127443
+138	23415119 104968 739473 1547813 17.624 42.126 5109 2 15 14010 62424
+139	23520087 76408 739611 1547989 17.628 42.13 3139 0.004 1.788 63.139999999999 18.942256
+140	23596495 67541 739098 1548017 17.616 42.131 3308 0 1 1039 1039
+141	23664036 105027 739098 1548017 17.616 42.131 5110 0 1 1970 1970
+142	23769063 1099 758695 1569155 18.002 43.014 52 2 15 313 3431
+143	23770162 1771 758695 1569155 18.002 43.014 51 17.959109263333 63.528576375791 1574.4402493807 55411.829907428
+144	23771933 1017 758871 1569214 18.005 43.017 46 9 109 2874 244070
+145	23772950 587 758871 1569214 18.005 43.017 26 107 107 2782 297674
+146	23773537 587 758872 1569215 18.005 43.017 26 107 107 2782 297674
+147	23774124 587 758872 1569215 18.005 43.017 26 106 106 2756 292136
+148	23774711 561 758875 1569218 18.005 43.017 26 86 86 2236 192296
+149	23775272 561 758875 1569218 18.005 43.017 26 25 50 975 38025
+150	23775833 955 758974 1568879 18.006 43.006 46 0 1 4 4
+151	23776788 1081 758974 1569244 18.006 43.018 52 0 1 6 6
+152	23777869 21594 765907 1547722 18.145 42.122 1039 0 1 483 483
+153	23799463 125201 739211 1588761 17.619 43.849 6068 0 109 2834 308906
+154	23924664 130680 739213 1588763 17.619 43.849 6042 3 798 320168 23977864
+155	24055344 159707 739228 1588774 17.619 43.849 7669 2 15 32630 288816
+156	24215051 146921 739152 1588654 17.618 43.844 5964 0.004 0.636 62.111999999999 4.372416
+157	24361972 124651 739234 1588674 17.619 43.844 6041 0 1 1271 1271
+158	24486623 158621 739234 1588689 17.619 43.845 7668 0 1 1704 1704
+159	24645244 603 758693 1568766 18.002 43.002 28 4 15 359 4993
+160	24645847 969 758693 1568766 18.002 43.002 28 17.67195450305 100.07145802323 1142.4938137985 60026.012593016
+161	24646816 591 758862 1568838 18.005 43.005 26 109 109 2834 308906
+162	24647407 591 758862 1568838 18.005 43.005 26 107 107 2782 297674
+163	24647998 591 758863 1568839 18.005 43.005 26 107 107 2782 297674
+164	24648589 591 758863 1568839 18.005 43.005 26 106 106 2756 292136
+165	24649180 565 758866 1568842 18.005 43.005 26 86 86 2236 192296
+166	24649745 565 758866 1568842 18.005 43.005 26 35 60 1235 60125
+167	24650310 539 758969 1568877 18.006 43.006 26 0 1 1 1
+168	24650849 581 758969 1568877 18.006 43.006 28 0 1 2 2
+169	24651430 51487 739245 1588790 17.62 43.85 2624 1 1 2624 2624
+170	24702917 51467 739246 1588528 17.62 43.84 2623 1 1 2623 2623
+171	24754384 51467 739247 1588529 17.62 43.84 2623 1 1 2623 2623
+172	24805851 51467 739248 1588530 17.62 43.84 2623 1 1 2623 2623
+173	24857318 3483 739924 774396 17.6330003384 18.3020004688 129 1 1 129 129
+174	24860801 4902 739924 774396 17.6330003384 18.3020004688 129 1.9620004688 2.5730003384 296.115052912 684.20624368842
+175	24865703 26472 1018585 1588581 24.903 43.84 1268 0 1 242 242
+176	24892175 18466 739209 1004497 17.6180003384 24.4930003384 685 1 1 685 685
+177	24910641 25951 739209 1004497 17.6180003384 24.4930003384 685 0.0040003384 1.1920003384 213.9783593352 143.70545755969
+178	24936592 60418 739438 1565813 17.6230003384 42.8800004688 2183 1 1 2183 2183
+179	24997010 84404 739438 1565813 17.6230003384 42.8800004688 2183 0.0040003384 1.6300003384 292.6308453944 178.92882938951
+180	25081414 30629 740027 1547919 17.6340003384 42.1280003384 1119 1 1 1119 1119
+181	25112043 42936 740027 1547919 17.6340003384 42.1280003384 1119 0.0040003384 11.8220003384 1198.0034900312 8015.0109344093
+182	25154979 684 744295 1003993 17.723 24.483 34 0 0 0 0
+183	25155663 435 758431 1568559 18 43 26 1 1 26 26
+184	25156098 435 758432 1568560 18 43 26 1 1 26 26
+185	25156533 435 758433 1568561 18 43 26 1 1 26 26
+186	25156968 435 758434 1568562 18 43 26 1 1 26 26
+187	25157403 539 758867 1568843 18.005 43.005 26 1 1 26 26
+188	25157942 643 758867 1568843 18.005 43.005 26 0.005 0.017 0.142 0.000914
+189	25158585 901 758867 1568843 18.005 43.005 26 79.307899850374 132.76389826126 3032.031738138 360337.23519973
+190	25159486 858 758867 1568843 18.005 43.005 26 -3.1717113274758 1.5 4.6540020120387 60.74536825846
+191	25160344 902 758867 1568843 18.005 43.005 26 17.571669780462 24.221030801784 567.37201302054 12452.971068428
+192	25161246 535 758876 1569219 18.005 43.017 26 1 1 26 26
+193	25161781 635 758876 1569219 18.005 43.017 26 0.005 0.017 0.195 0.001789
+194	25162416 897 758876 1569219 18.005 43.017 26 99.767458877178 142.0139582951 3452.7114040415 461789.61481214
+195	25163313 820 758876 1569219 18.005 43.017 26 -2.6314193005965 1.5 2.0812849090025 67.693725614776
+196	25164133 890 758876 1569219 18.005 43.017 26 21.674023386209 26.012468485626 623.95524556007 15006.368205608
+197	25165023 538 758889 1569143 18.005 43.014 26 1 1 26 26
+198	25165561 641 758889 1569143 18.005 43.014 26 0.005 0.019 0.197 0.001941
+199	25166202 897 758889 1569143 18.005 43.014 26 128.15743041738 263.88268197988 4582.371003841 850322.615338
+200	25167099 901 758889 1569143 18.005 43.014 26 -2.2552731031437 1.5 -6.2647320937223 42.582100412878
+201	25168000 897 758889 1569143 18.005 43.014 26 21.206857656097 31.35904331063 662.01041304678 17081.473775194
+202	25168897 538 758899 1569093 18.005 43.012 26 1 1 26 26
+203	25169435 641 758899 1569093 18.005 43.012 26 0.005 0.051 0.378 0.00972
+204	25170076 538 758899 1569093 18.005 43.012 26 0 0 0 0
+205	25170614 973 758899 1569093 18.005 43.012 26 0.00029162885785965 0.077193515930484 0.38480106422097 0.016552179087166
+206	25171587 901 758899 1569093 18.005 43.012 26 19.712839705878 20.021011003747 519.03394135319 10361.567970039
+207	25172488 1931 739186 774017 17.618 18.295 97 0 1 12 12
+208	25174419 4995 1171049 1588462 29.644 43.837 239 0 1 120 120
+209	25179414 239 739568 774411 17.626 18.303 12 0 1 1 1
+210	25179653 20 740000 740000 17.634 17.634 1 0 0 0 0
+211	25179673 229 1022588 1569123 25.012 43.013 11 0 1 1 1
+212	25179902 10064 775680 1546110 18.336 42.081 483 0 1 280 280
+213	25189966 5828 775982 1544742 18.344 42.032 280 0 1 168 168
+214	25195794 21 1275687 1275687 33.038 33.038 1 0 0 0 0
+215	25195815 84 1305625 1569101 34.012 43.012 4 0 1 2 2
+216	25195899 2503 1345642 1588689 35.164 43.845 120 0 1 71 71
+217	25198402 84 1400984 1569174 37.014 43.015 4 0 1 1 1
+218	25198486 20 1401192 1401192 37.02 37.02 1 0 0 0 0
+219	25198506 21 1486806 1486806 40.012 40.012 1 1 1 1 1
+220	25198527 21 1486996 1486996 40.018 40.018 1 0 0 0 0
+221	25198548 42 1486998 1569244 40.018 43.018 2 0 0 0 0
+vector 222 MecInetSingleCell.car[3].lteNic.mac harqErrorRate_4th_Dl:vector ETV
+attr source harqErrorRate_4th_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+vector 223 MecInetSingleCell.car[1].lteNic.mac harqErrorRate_4th_Dl:vector ETV
+attr source harqErrorRate_4th_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+51	25198920 651984 1588841 1973560 43.85 60.638 32768 0 50 100152 4947696
+vector 224 MecInetSingleCell.car[2].lteNic.mac harqErrorRate_4th_Dl:vector ETV
+attr source harqErrorRate_4th_Dl
+attr title "Harq Error Rate Dl, vector"
+attr unit ""
+2	25851069 5782 1592002 1755065 43.971 50.2190001304 258 0 4 275 509
+3	25856851 14472 1592003 1797796 43.971 52.2190001304 604 0 1 302 302
+8	25871323 3243 1592937 2171845 44 70 159 0 3 240 508
+9	25874566 5137 1592945 2171851 44 70 209 0 1 105 105
+10	25879703 4186 1593007 2151131 44.0000002308 69.0000004788 156 0 1 78 78
+11	25883889 5564 1592999 2151142 44.0000001404 69.0000005916 208 0 1 104 104
+13	25889453 16302 1592024 1797803 43.9710001804 52.2190002884 604 0 1 302 302
+19	25905755 54620 1588798 2171813 43.85 70 2616 108 108 282528 30513024
+20	25960375 54620 1588797 2171812 43.85 70 2616 108 108 282528 30513024
+21	26014995 54620 1588795 2171810 43.85 70 2616 108 108 282528 30513024
+22	26069615 54620 1588796 2171811 43.85 70 2616 108 108 282528 30513024
+23	26124235 54620 1588799 2171814 43.85 70 2616 108 108 282528 30513024
+24	26178855 54620 1588813 2171840 43.85 70 2616 128 128 334848 42860544
+25	26233475 54620 1588813 2171840 43.85 70 2616 129 129 337464 43532856
+26	26288095 54620 1588812 2171839 43.85 70 2616 128 128 334848 42860544
+27	26342715 54620 1588812 2171839 43.85 70 2616 129 129 337464 43532856
+28	26397335 54620 1588810 2171837 43.85 70 2616 128 128 334848 42860544
+29	26451955 54620 1588810 2171837 43.85 70 2616 129 129 337464 43532856
+30	26506575 54620 1588811 2171838 43.85 70 2616 128 128 334848 42860544
+31	26561195 54620 1588811 2171838 43.85 70 2616 129 129 337464 43532856
+32	26615815 54620 1588814 2171841 43.85 70 2616 128 128 334848 42860544
+33	26670435 54620 1588814 2171841 43.85 70 2616 129 129 337464 43532856
+34	26725055 54620 1588818 2171849 43.85 70 2616 129 129 337464 43532856
+35	26779675 54620 1588817 2171848 43.85 70 2616 129 129 337464 43532856
+36	26834295 54620 1588815 2171846 43.85 70 2616 129 129 337464 43532856
+37	26888915 54620 1588816 2171847 43.85 70 2616 129 129 337464 43532856
+38	26943535 54620 1588819 2171850 43.85 70 2616 129 129 337464 43532856
+39	26998155 78735 1588828 2171860 43.85 70 3770 46 129 392120 46122488
+40	27076890 54620 1588827 2171859 43.85 70 2616 129 129 337464 43532856
+41	27131510 54620 1588825 2171857 43.85 70 2616 129 129 337464 43532856
+42	27186130 54620 1588826 2171858 43.85 70 2616 129 129 337464 43532856
+43	27240750 54620 1588829 2171861 43.85 70 2616 129 129 337464 43532856
+44	27295370 143304 1588837 2171862 43.85 70 7094 0 50 104966 5181868
+45	27438674 107963 1588891 2171755 43.853 69.998 5399 0 0 0 0
+46	27546637 107153 1588877 2171743 43.852 69.997 5358 0 0 0 0
+47	27653790 107783 1588915 2171780 43.854 69.999 5390 0 0 0 0
+48	27761573 104600 1588863 2171727 43.851 69.996 5230 0 0 0 0
+49	27866173 522071 1588835 2171868 43.85 70 26151 0 25 51033 1222009
+50	28388244 520526 1588835 2171868 43.85 70 26151 0 25 10290 242560
+51	28908770 347208 1973562 2171871 60.638 70 17499 0 50 4862 236476
+52	29255978 647445 1588835 2171871 43.85 70 32554 0 111 23248 1202864
+53	29903423 183842 1588854 2171753 43.85 69.997 9221 0 111 4019 204533
+54	30087265 129542 1588858 2171874 43.85 70 6615 0 111 7673 457817
+55	30216807 120323 1588927 2171789 43.854 69.999 6029 0 111 5011 240271
+56	30337130 109122 1588874 2171735 43.851 69.996 5449 0 79 6545 300243
+57	30446252 104820 1588905 2171776 43.853 69.998 5241 0 0 0 0
+58	30551072 1628 1593528 2151481 44.01 69.012 78 3 109 2831 132297
+60	30552700 1439 1593634 2151620 44.013 69.016 69 3 77 2453 104347
+64	30554139 51682 1589569 2118408 43.882 67.43 1531 1.3575970734739 26.461297538033 27578.685666712 519366.3514276
+66	30605821 28698 1589625 2151781 43.885 69.022 1387 0 48 51198 2425764
+68	30634519 32047 1590148 2151781 43.909 69.022 1609 0 26 208 2894
+69	30666566 22589 1589629 2118461 43.885 67.433 1081 46 48 51198 2425764
+74	30689155 6602 1591988 1797769 43.971 52.219 302 129 129 38958 5025582
+75	30695757 6602 1591989 1797775 43.971 52.219 302 129 129 38958 5025582
+76	30702359 6602 1591989 1797775 43.971 52.219 302 128 128 38656 4947968
+77	30708961 6602 1591997 1797779 43.971 52.219 302 136 136 41072 5585792
+78	30715563 6602 1592001 1797781 43.971 52.219 302 156 156 47112 7349472
+79	30722165 7956 1592001 1797781 43.971 52.219 302 0 5.216e-07 2.63408e-05 6.66563072e-12
+80	30730121 7528 1592003 1797782 43.971 52.219 302 156 156 47112 7349472
+81	30737649 7528 1592003 1797782 43.971 52.219 302 163 163 49226 8023838
+82	30745177 8756 1592019 1797797 43.9710001804 52.2190001804 302 163 163 49226 8023838
+83	30753933 8756 1592019 1797797 43.9710001804 52.2190001804 302 156 156 47112 7349472
+84	30762689 8756 1592021 1797799 43.9710001804 52.2190001804 302 136 136 41072 5585792
+85	30771445 9360 1592021 1797799 43.9710001804 52.2190001804 302 10500 10801 3216451 34259106651
+86	30780805 8756 1592023 1797801 43.9710001804 52.2190001804 302 128 128 38656 4947968
+87	30789561 8152 1592023 1797801 43.9710001804 52.2190001804 302 0 0 0 0
+88	30797713 8756 1592024 1797802 43.9710001804 52.2190001804 302 128 128 38656 4947968
+89	30806469 8756 1592024 1797802 43.9710001804 52.2190001804 302 135 135 40770 5503950
+90	30815225 8754 1592033 1797804 43.9710003384 52.2190003384 302 135 135 40770 5503950
+91	30823979 8754 1592033 1797804 43.9710003384 52.2190003384 302 128 128 38656 4947968
+92	30832733 8754 1592035 1797806 43.9710003384 52.2190003384 302 108 108 32616 3522528
+93	30841487 9358 1592035 1797806 43.9710003384 52.2190003384 302 10500 10801 3216451 34259106651
+94	30850845 1836 1592918 2171827 44 70 108 86 86 9288 798768
+95	30852681 1944 1592936 2171845 44 70 108 106 106 11448 1213488
+96	30854625 3136 1592936 2171842 44 70 105 0 2.712e-07 1.41024e-05 2.97466624e-12
+97	30857761 2748 1592945 2171851 44 70 105 106 106 11130 1179780
+98	30860509 2748 1592945 2171851 44 70 105 113 113 11865 1340745
+99	30863257 3016 1592993 2151116 44.0000001404 69.0000004116 104 113 113 11752 1327976
+100	30866273 3120 1592993 2151116 44.0000001404 69.0000004116 104 106 106 11024 1168544
+101	30869393 3120 1592996 2151119 44.0000001404 69.0000004116 104 114 114 11856 1351584
+102	30872513 3120 1592998 2151121 44.0000001404 69.0000004116 104 134 134 13936 1867424
+103	30875633 3432 1592998 2151131 44.0000001404 69.0000004788 104 0 6.72e-08 3.4944e-06 1.8264064e-13
+104	30879065 3094 1592999 2151132 44.0000001404 69.0000004788 104 134 134 13936 1867424
+105	30882159 3094 1592999 2151132 44.0000001404 69.0000004788 104 141 141 14664 2067624
+106	30885253 3094 1593012 2151143 44.0000003032 69.0000006416 104 141 141 14664 2067624
+107	30888347 3094 1593012 2151143 44.0000003032 69.0000006416 104 134 134 13936 1867424
+108	30891441 3094 1593014 2151145 44.0000003032 69.0000006416 104 114 114 11856 1351584
+109	30894535 3094 1593014 2151145 44.0000003032 69.0000006416 104 201 304 26260 6724380
+110	30897629 3094 1593017 2151148 44.0000003032 69.0000006416 104 106 106 11024 1168544
+111	30900723 3094 1593017 2151148 44.0000003032 69.0000006416 104 107 107 11128 1190696
+112	30903817 3094 1593018 2151149 44.0000003032 69.0000006416 104 107 107 11128 1190696
+113	30906911 9804 1593020 2151785 44.0000003032 69.022 410 0 109 22864 1787042
+114	30916715 6710 1593079 2151783 44.001 69.022 306 0 109 11736 596346
+115	30923425 2674 1593196 2151382 44.004 69.009 128 2 7 277 649
+116	30926099 3544 1593275 2151382 44.005 69.009 102 8.9440802472264 27.439364340381 1943.0000351731 38771.346935331
+117	30929643 3346 1593133 2151547 44.002 69.013 160 2 4 324 662
+118	30932989 3064 1593133 2151547 44.002 69.013 88 6.6595315479693 30.079377517942 1488.5567031859 28160.866835008
+119	30936053 6631 1593207 2151849 44.005 69.026 269 0.004 1.03 6.907 4.097079
+120	30942684 1706 1593531 2151485 44.01 69.012 78 3 109 2831 132297
+121	30944390 574 1593692 2151485 44.015 69.012 25 107 107 2675 286225
+122	30944964 574 1593693 2151486 44.015 69.012 25 107 107 2675 286225
+123	30945538 574 1593693 2151486 44.015 69.012 25 106 106 2650 280900
+124	30946112 549 1593696 2151489 44.015 69.012 25 86 86 2150 184900
+125	30946661 549 1593696 2151489 44.015 69.012 25 46 70 1450 85400
+126	30947210 1508 1593637 2151623 44.013 69.016 69 3 77 2453 104347
+127	30948718 413 1593984 2167469 44.024 69.789 18 107 107 1926 206082
+128	30949131 413 1593985 2167470 44.024 69.789 18 107 107 1926 206082
+129	30949544 413 1593985 2167470 44.024 69.789 18 106 106 1908 202248
+130	30949957 395 1593988 2167473 44.024 69.789 18 86 86 1548 133128
+131	30950352 395 1593988 2167473 44.024 69.789 18 46 63 981 53949
+132	30950747 1693 1593421 2151539 44.008 69.013 81 0 1 37 37
+133	30952440 2674 1593421 2151539 44.008 69.013 128 0 1 50 50
+134	30955114 1668 1593356 2151466 44.006 69.011 80 0 1 42 42
+135	30956782 3339 1593356 2151649 44.006 69.017 160 0 1 91 91
+136	30960121 923 1593220 2151610 44.005 69.016 42 8 109 2114 155452
+142	30961044 3536 1593131 2151545 44.002 69.013 169 2 9 415 1309
+143	30964580 2056 1593131 2151545 44.002 69.013 59 5.7918999834535 18.453645169623 751.78726770349 10147.84608411
+144	30966636 923 1593223 2151613 44.005 69.016 42 8 109 2114 155452
+145	30967559 367 1593223 2151613 44.005 69.016 16 107 107 1712 183184
+146	30967926 367 1593224 2151614 44.005 69.016 16 107 107 1712 183184
+147	30968293 367 1593224 2151614 44.005 69.016 16 106 106 1696 179776
+148	30968660 351 1593227 2151617 44.005 69.016 16 86 86 1376 118336
+149	30969011 351 1593227 2151617 44.005 69.016 16 51 66 936 55096
+150	30969362 1314 1593354 2151647 44.006 69.017 63 0 1 48 48
+151	30970676 3534 1593354 2151647 44.006 69.017 169 0 1 127 127
+153	30974210 25856 1590459 2151849 43.921 69.026 1234 0 109 2942 143362
+154	31000066 25269 1590461 2118414 43.921 67.431 1154 46 48 54656 2589632
+155	31025335 44406 1588838 2118443 43.85 67.432 2127 2 2 4254 8508
+156	31069741 26760 1589625 2118458 43.885 67.433 1081 0.004 14.892 61.26 430.218512
+157	31096501 24147 1588903 2118541 43.853 67.436 1156 0 1 629 629
+158	31120648 44468 1588903 2118556 43.853 67.437 2129 0 1 1048 1048
+159	31165116 2093 1593129 2151806 44.002 69.023 100 2 15 264 1250
+160	31167209 3272 1593129 2151806 44.002 69.023 94 8.9010317198494 35.247156931926 2031.5125398394 47868.577851253
+161	31170481 1741 1593211 2151852 44.005 69.026 80 3 109 2942 143362
+162	31172222 595 1593211 2151852 44.005 69.026 26 107 107 2782 297674
+163	31172817 595 1593213 2151853 44.005 69.026 26 107 107 2782 297674
+164	31173412 595 1593213 2151853 44.005 69.026 26 106 106 2756 292136
+165	31174007 569 1593218 2151856 44.005 69.026 26 86 86 2236 192296
+166	31174576 569 1593218 2151856 44.005 69.026 26 61 86 1911 141921
+167	31175145 1671 1593352 2151891 44.006 69.027 80 0 1 18 18
+168	31176816 2090 1593352 2151891 44.006 69.027 100 0 1 20 20
+169	31178906 51984 1589018 2171797 43.86 70 2615 1 1 2615 2615
+170	31230890 52004 1588791 2171798 43.85 70 2616 1 1 2616 2616
+171	31282894 52004 1588792 2171799 43.85 70 2616 1 1 2616 2616
+172	31334898 52004 1588793 2171800 43.85 70 2616 1 1 2616 2616
+175	31386902 13151 1589585 2118556 43.883 67.437 630 0 1 225 225
+178	31400053 8452 1592037 1797808 43.9710003384 52.2190003384 302 1 1 302 302
+179	31408505 11770 1592037 1797808 43.9710003384 52.2190003384 302 2.0980004688 6.8090003384 795.2061285376 2146.1902761767
+183	31420275 459 1592900 2171806 44 70 27 1 1 27 27
+184	31420734 459 1592901 2171807 44 70 27 1 1 27 27
+185	31421193 459 1592902 2171808 44 70 27 1 1 27 27
+186	31421652 459 1592903 2171809 44 70 27 1 1 27 27
+187	31422111 543 1593219 2151857 44.005 69.026 26 1 1 26 26
+188	31422654 644 1593219 2151857 44.005 69.026 26 0.005 0.045 0.418 0.008928
+189	31423298 903 1593219 2151857 44.005 69.026 26 120.81590554494 132.87305689981 3302.6984384562 419878.59237976
+190	31424201 816 1593219 2151857 44.005 69.026 26 -3.5379326273347 1.5 -0.78338093492387 72.325558363915
+191	31425017 907 1593219 2151857 44.005 69.026 26 19.409003540218 24.054673779596 566.77271443546 12388.940141933
+192	31425924 335 1593228 2151618 44.005 69.016 16 1 1 16 16
+193	31426259 398 1593228 2151618 44.005 69.016 16 0.005 1.127 2.482 2.315832
+194	31426657 557 1593228 2151618 44.005 69.016 16 114.82635523995 134.06649860592 2000.6866099547 250743.99057579
+195	31427214 521 1593228 2151618 44.005 69.016 16 -2.5297840432708 1.5 -5.3486579723328 46.077622760175
+196	31427735 556 1593228 2151618 44.005 69.016 16 3.8735865317436 23.63164118759 272.35459872674 5442.7426346683
+197	31428291 524 1593697 2151490 44.015 69.012 25 1 1 25 25
+198	31428815 623 1593697 2151490 44.015 69.012 25 0.005 1.016 1.387 1.038513
+199	31429438 874 1593697 2151490 44.015 69.012 25 110.61080531458 126.04340044992 2901.5368239826 337277.27192356
+200	31430312 908 1593697 2151490 44.015 69.012 25 -1.1164224775591 0.85043262953628 -0.70311794788346 17.756963891381
+201	31431220 869 1593697 2151490 44.015 69.012 25 19.81329205437 22.049232540083 520.12812922046 10832.371587181
+202	31432089 377 1593989 2167474 44.024 69.789 18 1 1 18 18
+203	31432466 448 1593989 2167474 44.024 69.789 18 0.008 2.327 5.026 7.868858
+204	31432914 377 1593989 2167474 44.024 69.789 18 0 0 0 0
+205	31433291 700 1593989 2167474 44.024 69.789 18 4.2028147696271e-06 0.00023330308628786 0.0011431372742862 1.511208351114e-07
+206	31433991 627 1593989 2167474 44.024 69.789 18 20.021246756516 20.022207430335 360.39478058034 7215.7998829367
+208	31434618 4700 1588949 2104939 43.855 66.8 225 0 1 118 118
+211	31439318 876 1593617 2151649 44.012 69.017 42 0 1 24 24
+214	31440194 503 1593804 2131222 44.018 68.033 24 0 1 14 14
+215	31440697 1007 1649237 2151632 46.012 69.016 48 0 1 32 32
+216	31441704 2470 1589681 2118512 43.887 67.435 118 0 1 76 76
+217	31444174 774 1593674 2151507 44.014 69.012 37 0 1 7 7
+218	31444948 144 1981622 2130917 61.019 68.02 7 0 1 3 3
+219	31445092 377 1621524 2151876 45.013 69.026 18 0 1 2 2
+220	31445469 42 1856842 2023796 55.046 63.021 2 0 0 0 0
+221	31445511 669 1707360 2131291 48.02 68.036 32 0 1 26 26
+222	31446180 292 1594037 2131092 44.025 68.028 14 0 1 11 11
+223	31446472 544 1835516 2088976 54.024 66.039 26 0 1 21 21
+224	31447016 63 2088588 2088647 66.024 66.026 3 1 1 3 3
+

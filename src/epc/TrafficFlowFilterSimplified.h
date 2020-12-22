@@ -52,6 +52,7 @@ class TrafficFlowFilterSimplified : public cSimpleModule
     std::string meHost;
     inet::L3Address meHostAddress;
     //only if owner type is GTPENDPOINT
+    std::string eNodeB[];
     inet::L3Address eNodeBAddress;
     int eNodeBMacId;
     //end mec
