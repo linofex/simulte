@@ -66,4 +66,9 @@ void TimeStamp::setNanoSeconds(int32_t value)
     
 }
 
+void TimeStamp::setValid(bool valid)
+{
+    valid_ = valid;
+}
+
 

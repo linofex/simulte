@@ -24,6 +24,7 @@ class  TimeStamp: public AttributeBase
 
 
         bool isValid() const;
+        void setValid(bool valid);
 
         nlohmann::ordered_json toJson() const override;
        

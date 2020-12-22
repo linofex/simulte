@@ -55,7 +55,7 @@ namespace mec {
     struct Ecgi
     {
         Plmn plmn;
-        std::string cellId;
+        MacCellId cellId;
     };
 
     struct Timestamp
