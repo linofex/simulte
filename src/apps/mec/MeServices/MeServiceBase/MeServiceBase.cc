@@ -72,12 +72,7 @@ void MeServiceBase::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         EV << "isSelfMessage" << endl;
-        if(strcmp(msg->getName(), "subscriptionEvent") == 0)
-        {
-            newSubscriptionEvent(msg);
-           // delete msg;
-        }
-        else if(strcmp(msg->getName(), "serveSubscription") == 0)
+        if(strcmp(msg->getName(), "serveSubscription") == 0)
         {
             bool res = manageSubscription();
             scheduleNextEvent(!res);
@@ -192,10 +187,9 @@ bool MeServiceBase::manageSubscription()
 
 void MeServiceBase::triggeredEvent(short int event)
 {
-
     //chiamo direttamente la newSubscriptionEvent
     cMessage *msg = new cMessage("subscriptionEvent", event);
-    scheduleAt(NOW, msg);
+    newSubscriptionEvent(msg);
 }
 
 void MeServiceBase::handleRequest(cMessage* msg, inet::TCPSocket *socket){

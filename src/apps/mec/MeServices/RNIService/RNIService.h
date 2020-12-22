@@ -32,6 +32,8 @@
 #include "corenetwork/binder/LteBinder.h"
 #include "resources/L2Meas.h"
 
+#include "apps/mec/MeServices/RNIService/resources/L2MeasSubscription.h"
+#include "apps/mec/MeServices/RNIService/resources/MeasRepUeSubscription.h"
 
 /**
  *
@@ -39,22 +41,9 @@
  *
  */
 
-typedef struct{
-    inet::TCPSocket *socket;
-    std::vector<MacCellId> cellIds;
-    std::vector<MacNodeId> ues;
-    Trigger trigger;
-    std::string consumerUri;
-    std::string appInstanceId;
-    std::string subscriptionType;
-    std::string subscriptionId;
-
-    double expirationTime;
-} SubscriptionInfo;
-
-
 
 class L2Meas;
+class SubscriptionBase;
 
 class RNIService: public MeServiceBase
 {
@@ -63,8 +52,17 @@ class RNIService: public MeServiceBase
     L2Meas L2MeasResource_;
 
 
-    typedef std::map<std::string, std::map<std::string, SubscriptionInfo >> SubscriptionsStructure;
-    SubscriptionsStructure subscriptions_;
+    typedef std::map<unsigned int, L2MeasSubscription > L2MeasSubscriptions;
+    L2MeasSubscriptions l2MeasSubscriptions_;
+
+    typedef std::map<unsigned int, MeasRepUeSubscription > MeasRepUeSubscriptions;
+    MeasRepUeSubscriptions measRepUeSubscriptions_;
+
+    std::map<const inet::TCPSocket*, std::set<unsigned int>> socketToSubId_;
+
+    typedef std::map<unsigned int, SubscriptionBase*> Subscriptions;
+    Subscriptions subscriptions_;
+
 
     double L2measSubscriptionPeriod_;
     cMessage *L2measSubscriptionEvent_;
@@ -72,6 +70,7 @@ class RNIService: public MeServiceBase
     unsigned int subscriptionId_;
     std::string baseUriQueries_;
     std::string baseUriSubscriptions_;
+    std::string baseSubscriptionLocation_;
     std::set<std::string>supportedQueryParams_;
     std::set<std::string>supportedSubscriptionParams_;
     
@@ -81,6 +80,7 @@ class RNIService: public MeServiceBase
 
   public:
     RNIService();
+    virtual void removeSubscritions(inet::TCPSocket *socket);
   protected:
 
     virtual void initialize(int stage) override;

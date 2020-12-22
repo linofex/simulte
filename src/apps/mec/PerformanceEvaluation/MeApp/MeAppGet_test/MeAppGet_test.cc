@@ -122,7 +122,7 @@ void MeAppGet_test::handleMessage(cMessage *msg)
                 ueAppPacket_->setResponseCoord(respCoord);
                 ueAppPacket_->setResponseOrientation(jsonBody["userInfo"]["locationInfo"]["speed"]["x"]);
 
-                EV<< "data received for request:  " << seqNum_<< " position " <<  respCoord.x << endl;
+                EV<< "data received for request:  " << ueAppPacket_->getSeqNum() << " position " <<  respCoord.x << endl;
                 waitingResponse_ = false;
                 scheduleAt(simTime() + executionTime_, meAppExecution_);
                 delete msg;

@@ -40,6 +40,8 @@ class  AssociateId: public AttributeBase
         std::string getValue() const;
         void setValue(std::string value);
         
+        MacNodeId getNodeId();
+
     protected:
         std::string type_;
 

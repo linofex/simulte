@@ -192,6 +192,8 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
         virtual Http::DataType getDataType(std::string& packet_);
 
         virtual int requestQueueSize() {return requests_.length();}
+
+        virtual void removeSubscritions(inet::TCPSocket *socket){};
 };
 
 

@@ -18,7 +18,7 @@
 #include "common/utils/utils.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 
-
+#include "apps/mec/MeServices/Resources/SubscriptionBase.h"
 Define_Module(RNIService);
 
 
@@ -45,6 +45,7 @@ void RNIService::initialize(int stage)
         L2MeasResource_.addEnodeB(eNodeB_);
         L2measSubscriptionEvent_ = new cMessage("L2measSubscriptionEvent");
         L2measSubscriptionPeriod_ = par("L2measSubscriptionPeriod");
+        baseSubscriptionLocation_ = host_+ baseUriSubscriptions_ + "/";
     }
 }
 
@@ -179,22 +180,22 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
 
 void RNIService::handlePOSTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket)
 {
-    // uri must be in form example/v1/rni/subscriptions/sub_type
-    std::size_t lastPart = uri.find_last_of("/");
-    if(lastPart == std::string::npos)
-    {
-        Http::send404Response(socket); //it is not a correct uri
-        return;
-    }
+    // uri must be in form example/v1/rni/subscriptions/
+//    std::size_t lastPart = uri.find_last_of("/");
+//    if(lastPart == std::string::npos)
+//    {
+//
+//    }
+//
+//    // find_last_of does not take in to account if the uri has a last /
+//    // in this case subscriptionType would be empty and the baseUri == uri
+//    // by the way the next if statement solve this problem
+//    std::string baseUri = uri.substr(0,lastPart);
+//    std::string subscriptionType =  uri.substr(lastPart+1);
 
-    // find_last_of does not take in to account if the uri has a last /
-    // in this case subscriptionType would be empty and the baseUri == uri
-    // by the way the next if statement solve this problem
-    std::string baseUri = uri.substr(0,lastPart);
-    std::string subscriptionType =  uri.substr(lastPart+1);
-
-    if(baseUri.compare(baseUriSubscriptions_) == 0)
+    if(uri.compare(baseUriSubscriptions_) == 0)
     {
+
         nlohmann::json jsonBody;
         try
         {
@@ -207,203 +208,72 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
             Http::send400Response(socket); // bad body JSON
             return;
         }
-        // check if the notification type
+        // check the subscription type
         // allowed:
-        //  - L2MeasurementNotification
-
-        SubscriptionInfo newSubscription;
+        //  - L2MeasurementSubscription
+        //  - cellChangeSubscription
 
         std::string subscription;
-        if(subscriptionType.compare("L2_meas") == 0)
+
+
+//        if(subscriptionType.compare("cell_change") == 0)
+//        {
+////            // set id
+////            int subId;
+////            CellChangeSubscription newSubscription = CellChangeSubscription();
+////            bool res =  newSubscription.parse(id, socket, jsonBody);
+////            if(res)
+////            {
+////
+////                cellSubscriptions_[Id]  = newSubscription;
+////                subid++;
+////                cell->addCellChangeNotification();
+////
+////
+////            }
+//
+//            //TODO
+//
+//        }
+//
+        if(jsonBody.contains("MeasRepUeSubscription"))
         {
-            // should check if the mecApp already make the subscription?
-            // how? TODO
-            if(jsonBody.contains("L2MeasurementSubscription")) // mandatory attribute
+            MeasRepUeSubscription newSubscription = MeasRepUeSubscription(subscriptionId_, socket , baseSubscriptionLocation_,  eNodeB_);
+            MeasRepUeSubscription* ee = new MeasRepUeSubscription(subscriptionId_, socket , baseSubscriptionLocation_,  eNodeB_);
+
+            bool res = newSubscription.fromJson(jsonBody);
+            //correct subscription post
+            if(res)
             {
-
-                subscription = "L2MeasurementSubscription";
+                std::cout << "ok" << std::endl;
+                subscriptionId_ ++;
+                measRepUeSubscriptions_[subscriptionId_] = newSubscription;
+                subscriptions_[subscriptionId_] = ee;
+                socketToSubId_[socket].insert(subscriptionId_);
+                subscriptionId_ ++;
             }
-            else
+
+        }
+
+        else if(jsonBody.contains("L2MeasurementSubscription"))
+        {
+            L2MeasSubscription newSubscription = L2MeasSubscription(subscriptionId_, socket , baseSubscriptionLocation_,  eNodeB_);
+            bool res = newSubscription.fromJson(jsonBody);
+            //correct subscription post
+            if(res)
             {
-                Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-                return;
-            }
-        }
-        else if(subscriptionType.compare("meas_rep_ue") == 0)
-        {
-            if(jsonBody.contains("MeasRepUeSubscription")) // mandatory attribute
-            {
-
-                subscription = "MeasRepUeSubscription";
-            }
-            else
-            {
-                Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-                return;
+                std::cout << "ok" << std::endl;
+                l2MeasSubscriptions_[subscriptionId_] = newSubscription;
+                socketToSubId_[socket].insert(subscriptionId_);
+                subscriptionId_ ++;
             }
 
         }
-        else
-        {
-            Http::send400Response(socket);
-            return;
-        }
-
-        jsonBody = jsonBody[subscription];// entering the structure for convenience
-        if(!jsonBody.contains("callbackReference") || jsonBody["callbackReference"].is_array())
-        {
-
-            Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-            return;
-        }
-
-        if(std::string(jsonBody["callbackReference"]).find('/') == -1) //bad uri
-        {
-            Http::send400Response(socket); // must be ipv4
-            return;
-        }
-
-        if(!jsonBody.contains("filterCriteria")) // mandatory attribute
-        {
-            Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-            return;
-        }
-
-        if(jsonBody.contains("appInstanceId") && jsonBody["appInstanceId"].is_array())
-        {
-            Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-            return;
-        }
-
-        if(!jsonBody.contains("filterCriteria") || jsonBody["filterCriteria"].is_array())
-        {
-           Http::send400Response(socket); // filterCriteria is mandatory and takes exactly 1 att
-           return;
-        }
-
-
-        nlohmann::json filterCriteria = jsonBody["filterCriteria"];
-        std::vector<MacNodeId> ues;
-        std::vector<MacNodeId> cellids;
-        Trigger trigger;
-
-        //check for appInstanceId filter
-        if(filterCriteria.contains("appInstanceId")  )
-        {
-            if(filterCriteria["appInstanceId"].is_array())
-            {
-                Http::send400Response(socket); // appInstanceId, if present, takes exactly 1 att
-                return;
-            }
-        }
-
-        //check ues filter
-        if(filterCriteria.contains("associateId"))
-        {
-            if(filterCriteria["associateId"].is_array())
-            {
-                nlohmann::json ueVector = filterCriteria["associateId"];
-                for(int i = 0; i < ueVector.size(); ++i)
-                {
-                    if(ueVector.at(i)["associateId"]["type"] == "UE_IPv4_ADDRESS")
-                    {
-                        std::string address = ueVector.at(i)["associateId"]["value"];
-                        ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
-                    }
-                    else
-                    {
-                        Http::send400Response(socket); // must be ipv4
-                        return;
-                     }
-                 }
-            }
-            else
-            {
-                if(filterCriteria["associateId"]["type"] == "UE_IPv4_ADDRESS")
-                {
-                    std::string address = filterCriteria["associateId"]["value"];
-                    ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
-                }
-            }
-        }
-        else
-        {
-            Http::send400Response(socket); // a user must be indicated
-            return;
-        }
-
-        //check cellIds filter
-        if(filterCriteria.contains("ecgi"))
-        {
-            if(filterCriteria["ecgi"].is_array())
-            {
-                nlohmann::json cellVector = filterCriteria["cellId"];
-                for(int i = 0; i < cellVector.size(); ++i)
-                {
-                    std::string cellId = cellVector.at(i)["cellId"];
-                    cellids.push_back((MacNodeId)std::stoi(cellId));
-                 }
-            }
-            else
-            {
-                std::string cellId = filterCriteria["ecgi"]["cellId"];
-                cellids.push_back((MacNodeId)std::stoi(cellId));
-            }
-        }
-
-        //check trigger filter
-        if(filterCriteria.contains("trigger"))
-        {
-            std::string trigger = filterCriteria["trigger"];
-            trigger = getTrigger(trigger);
-            //check if it is event trigger and notify, based on the state of the ues e cells
-
-        }
-
-        //chek expiration time
-        // TODO add end timer
-        if(jsonBody.contains("expiryDeadline") && !jsonBody["expiryDeadline"].is_array())
-        {
-            newSubscription.expirationTime = jsonBody["expiryDeadline"]["seconds"]; //TO DO add nanoseconds
-        }
-
-        newSubscription.cellIds = cellids;
-        newSubscription.ues = ues;
-//        newSubscription.trigger = triggers;
-        newSubscription.appInstanceId = filterCriteria["appInstanceId"];
-
-        newSubscription.consumerUri = jsonBody["callbackReference"];
-        newSubscription.consumerUri += "notifications/"+subscriptionType+"/"+ std::to_string(subscriptionId_);
-        newSubscription.socket = socket;
-
-        std::stringstream idStream;
-        idStream << subscriptionType << "sub"<< subscriptionId_;
-        newSubscription.subscriptionId = idStream.str();
-        newSubscription.subscriptionType = subscriptionType;
-
-        subscriptions_[subscriptionType][newSubscription.subscriptionId] = newSubscription;
-
-        subscriptionId_++;
-        std::string links =  host_ + baseUriSubscriptions_ + "/" + newSubscription.subscriptionId;
-        nlohmann::json response;
-        response[subscription]["_links"]["self"] = links;
-        response[subscription] = jsonBody;
-
-        std::pair<std::string, std::string> location("Location: ", links);
-        //send 201 response
-        Http::send201Response(socket, response.dump(2).c_str(), location);
-
-        if(trigger == L2_MEAS_PERIODICAL && scheduledSubscription == false)
-        {
-            cMessage *msg = new cMessage("subscriptionEvent", L2_MEAS_PERIODICAL);
-            scheduleAt(simTime() + L2measSubscriptionPeriod_ , msg);
-        }
-
-        return;
     }
     else
     {
         Http::send404Response(socket); //resource not found
+        return;
     }
 }
 
@@ -417,46 +287,33 @@ void RNIService::handleDELETERequest(const std::string& uri, inet::TCPSocket* so
     if(lastPart == std::string::npos)
     {
         throw cRuntimeError("1 - %s", uri.c_str());
-
         Http::send404Response(socket); //it is not a correct uri
         return;
     }
 
-    // find_last_of does not take in to account if the uri has a last /
-    // in this case subscriptionType would be empty and the baseUri == uri
-    // by the way the next if statement solve this problem
-    std::string subscriptionId =  uri.substr(lastPart+1);
-    std::string uriAndSubType = uri.substr(0,lastPart);
-    lastPart = uriAndSubType.find_last_of("/");
-    if(lastPart == std::string::npos)
-    {
-        throw cRuntimeError("2 - %s", uriAndSubType.c_str());
-        Http::send404Response(socket); //it is not a correct uri
-        return;
-    }
-    std::string baseUri = uriAndSubType.substr(0,lastPart);
-    std::string subscriptionType = uriAndSubType.substr(lastPart + 1);
+    std::string baseUri = uri.substr(0,lastPart);
+    unsigned int subscriptionId =  std::stoul(uri.substr(lastPart+1)); // e.g sub132
+
 
     if(baseUri.compare(baseUriSubscriptions_) == 0)
     {
-        SubscriptionsStructure::iterator it = subscriptions_.find(subscriptionType);
-        if(it == subscriptions_.end()){
-            Http::send404Response(socket);
-            return;
+        // check if the subId it is present
+        if(l2MeasSubscriptions_.find(subscriptionId) != l2MeasSubscriptions_.end())
+        {
+            l2MeasSubscriptions_.erase(subscriptionId);
+            socketToSubId_[socket].erase(subscriptionId);
+            Http::send204Response(socket);
         }
-        std::map<std::string, SubscriptionInfo >::iterator rit = it->second.find(subscriptionId);
-        if(rit != it->second.end()){
-            it->second.erase(rit);
-            if(it->second.empty() && L2measSubscriptionEvent_->isScheduled()) // no more l2meas sub, stop timer
-                cancelEvent(L2measSubscriptionEvent_);
-
+        else if(measRepUeSubscriptions_.find(subscriptionId) != measRepUeSubscriptions_.end())
+        {
+            measRepUeSubscriptions_.erase(subscriptionId);
+            socketToSubId_[socket].erase(subscriptionId);
+            Http::send204Response(socket);
         }
         else
         {
-            // manage?
+            Http::send404Response(socket);
         }
-        Http::send204Response(socket);
-
 
     }
     else
@@ -466,7 +323,6 @@ void RNIService::handleDELETERequest(const std::string& uri, inet::TCPSocket* so
         return;
     }
 }
-
 
 bool RNIService::handleSubscriptionType(cMessage *msg)
 {
@@ -483,78 +339,78 @@ bool RNIService::handleSubscriptionType(cMessage *msg)
 }
 
 bool RNIService::manageL2MeasSubscriptions(Trigger trigger){
-    SubscriptionsStructure::iterator it = subscriptions_.find("L2_meas");
-    bool sent = false;
-    if(it != subscriptions_.end())
-    {
-        std::map<std::string, SubscriptionInfo>::iterator sit = it->second.begin();
-        while(sit != it->second.end())
-        {
-            std::string body;
-            //send response
-            if(sit->second.trigger == trigger)
-            {
-                if(trigger == L2_MEAS_PERIODICAL)
-                {
-                    if(!sit->second.ues.empty() && !sit->second.cellIds.empty())
-                    {
-                        body = L2MeasResource_.toJson(sit->second.cellIds, sit->second.ues).dump(2);
-                        std::cout << "ue e cell"<<std::endl;
-                    }
-                    else if(sit->second.ues.empty() && !sit->second.cellIds.empty())
-                    {
-                        body = L2MeasResource_.toJsonCell(sit->second.cellIds).dump(2);
-                        std::cout << "cell"<<std::endl;
-                    }
-                    else if(!sit->second.ues.empty() && sit->second.cellIds.empty())
-                    {
-                        body = L2MeasResource_.toJsonUe(sit->second.ues).dump(2);
-                        std::cout << "ue"<<std::endl;
-                    }
-                    else if(sit->second.ues.empty() && sit->second.cellIds.empty())
-                    {
-                        body = L2MeasResource_.toJson().dump(2);
-                        std::cout << "tutti"<<std::endl;
-                    }
-                }
-                else if(trigger == L2_MEAS_UTI_80)
-                {
-                    // tutte le toJson con id cella
-                }
-    //                body = L2MeasResource_.toJsonCell("utilization").dump(2);
-                }
-            if(sit->second.socket->getState() == TCPSocket::CONNECTED)
-            {
-                if(body.size() > 0)
-                {
-                    int slash = sit->second.consumerUri.find('/');
-                    std::string host = sit->second.consumerUri.substr(0, slash);
-                    std::string uri = sit->second.consumerUri.substr(slash);
-                    Http::sendPostRequest(sit->second.socket, body.c_str(), host.c_str(), uri.c_str());
-                    sent = true;
-                }
-            sit++;
+//    SubscriptionsStructure::iterator it = subscriptions_.find("L2_meas");
+//    bool sent = false;
+//    if(it != subscriptions_.end())
+//    {
+//        std::map<std::string, SubscriptionInfo>::iterator sit = it->second.begin();
+//        while(sit != it->second.end())
+//        {
+//            std::string body;
+//            //send response
+//            if(sit->second.trigger == trigger)
+//            {
+//                if(trigger == L2_MEAS_PERIODICAL)
+//                {
+//                    if(!sit->second.ues.empty() && !sit->second.cellIds.empty())
+//                    {
+//                        body = L2MeasResource_.toJson(sit->second.cellIds, sit->second.ues).dump(2);
+//                        std::cout << "ue e cell"<<std::endl;
+//                    }
+//                    else if(sit->second.ues.empty() && !sit->second.cellIds.empty())
+//                    {
+//                        body = L2MeasResource_.toJsonCell(sit->second.cellIds).dump(2);
+//                        std::cout << "cell"<<std::endl;
+//                    }
+//                    else if(!sit->second.ues.empty() && sit->second.cellIds.empty())
+//                    {
+//                        body = L2MeasResource_.toJsonUe(sit->second.ues).dump(2);
+//                        std::cout << "ue"<<std::endl;
+//                    }
+//                    else if(sit->second.ues.empty() && sit->second.cellIds.empty())
+//                    {
+//                        body = L2MeasResource_.toJson().dump(2);
+//                        std::cout << "tutti"<<std::endl;
+//                    }
+//                }
+//                else if(trigger == L2_MEAS_UTI_80)
+//                {
+//                    // tutte le toJson con id cella
+//                }
+//    //                body = L2MeasResource_.toJsonCell("utilization").dump(2);
+//                }
+//            if(sit->second.socket->getState() == TCPSocket::CONNECTED)
+//            {
+//                if(body.size() > 0)
+//                {
+//                    int slash = sit->second.consumerUri.find('/');
+//                    std::string host = sit->second.consumerUri.substr(0, slash);
+//                    std::string uri = sit->second.consumerUri.substr(slash);
+//                    Http::sendPostRequest(sit->second.socket, body.c_str(), host.c_str(), uri.c_str());
+//                    sent = true;
+//                }
+//            sit++;
+//
+//            }
+//            else
+//            { //remove the subscription since the socket is not connected
+//                it->second.erase(sit++);
+//            }
 
-            }
-            else
-            { //remove the subscription since the socket is not connected
-                it->second.erase(sit++);
-            }
+//        }
 
-        }
-
-        if(!it->second.empty())
-        {
-            cMessage *msg = new cMessage("subscriptionEvent", L2_MEAS_PERIODICAL);
-            scheduleAt(simTime() + L2measSubscriptionPeriod_ , msg);
-            scheduledSubscription = true;
-        }
-        else
-        {
-            scheduledSubscription = false;
-        }
-        return sent;
-    }
+//        if(!it->second.empty())
+//        {
+//            cMessage *msg = new cMessage("subscriptionEvent", L2_MEAS_PERIODICAL);
+//            scheduleAt(simTime() + L2measSubscriptionPeriod_ , msg);
+//            scheduledSubscription = true;
+//        }
+//        else
+//        {
+//            scheduledSubscription = false;
+//        }
+//        return sent;
+//    }
     return false;
 }
 
@@ -576,6 +432,24 @@ RNIService::~RNIService(){
     cancelAndDelete(L2measSubscriptionEvent_);
 return;
 }
+
+void RNIService::removeSubscritions(inet::TCPSocket *socket)
+{
+    std::map<const inet::TCPSocket*, std::set<unsigned int>>::iterator it = socketToSubId_.find(socket);
+    if(it != socketToSubId_.end())
+    {
+       std::set<unsigned int> subs = it->second;
+       std::set<unsigned int>::iterator sit = it->second.begin();
+
+       for(; sit != it->second.end(); ++sit)
+       {
+           delete subscriptions_[*sit];
+       }
+       socketToSubId_.erase(socket);
+    }
+
+}
+
 
 
 

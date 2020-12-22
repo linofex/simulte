@@ -1,5 +1,8 @@
 
 #include "AssociateId.h"
+#include "corenetwork/binder/LteBinder.h"
+#include "inet/networklayer/contract/ipv4/IPv4Address.h"
+
 
 AssociateId::AssociateId()
 {
@@ -59,4 +62,8 @@ void AssociateId::setValue(std::string value)
     
 }
 
-
+MacNodeId AssociateId::getNodeId()
+{
+    LteBinder* binder = getBinder();
+    return binder->getMacNodeId(IPv4Address(value_.c_str()));
+}

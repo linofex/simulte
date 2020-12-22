@@ -180,13 +180,15 @@ double UeApp::calculateDeltaProcessing(UeAppPacket * pkt)
     double distance = 0.;
     if(resOrientation != reqOrientation)
     {
-        if(reqOrientation == DX)
+        if(resOrientation == DX)
         {
+            EV << "UeApp::calculateDeltaProcessing --> " << endl;
             distance += reqCoord.x - mobility_->getConstraintAreaMin().x;
             distance += resCoord.x - mobility_->getConstraintAreaMin().x;
         }
         else
         {
+            EV << "UeApp::calculateDeltaProcessing <-- " << endl;
             distance += mobility_->getConstraintAreaMax().x - reqCoord.x;
             distance += mobility_->getConstraintAreaMax().x - resCoord.x;
         }

@@ -3,15 +3,15 @@
 
 Ecgi::Ecgi():plmn_()
 {
-    cellId_ = "";
+    cellId_ = -1;
 }
 
-Ecgi::Ecgi(std::string& cellId):plmn_()
+Ecgi::Ecgi(MacCellId cellId):plmn_()
 {
     setCellId(cellId);
 }
 
-Ecgi::Ecgi(std::string& cellId, Plmn& plmn):plmn_(plmn)
+Ecgi::Ecgi(MacCellId cellId, Plmn& plmn):plmn_(plmn)
 {
     setCellId(cellId);
 }
@@ -24,7 +24,7 @@ Ecgi::Ecgi(const mec::Ecgi ecgi)
 
 Ecgi::~Ecgi(){}
 
-void Ecgi::setCellId(const std::string& cellId)
+void Ecgi::setCellId(MacCellId cellId)
 {
     cellId_ = cellId;
 }
@@ -36,7 +36,17 @@ void Ecgi::setEcgi(const mec::Ecgi& ecgi)
     plmn_.setMcc(ecgi.plmn.mcc);
 }
 
-std::string Ecgi::getCellId() const
+void Ecgi::setPlmn(const Plmn& plmn)
+{
+    plmn_ = plmn;
+}
+void Ecgi::setPlmn(const mec::Plmn plmn)
+{
+    plmn_.setMcc(plmn.mcc);
+    plmn_.setMnc(plmn.mnc);
+}
+
+MacCellId Ecgi::getCellId() const
 {
     return cellId_;
 }

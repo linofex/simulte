@@ -9,24 +9,26 @@
 
 class Ecgi : public AttributeBase {
   protected:
-    std::string cellId_;
+    MacCellId cellId_;
     Plmn plmn_;
 
     nlohmann::ordered_json toJsonCell() const; //should be private?
 
 public:
   Ecgi();
-  Ecgi(std::string& cellId);
+  Ecgi(MacCellId cellId);
   Ecgi(const mec::Ecgi ecgi);
 
-  Ecgi(std::string& cellId, Plmn& plmn);
+  Ecgi(MacCellId cellId, Plmn& plmn);
   
   virtual ~Ecgi();
   
-  void setCellId(const std::string& cellId);
+  void setCellId(const MacCellId cellId);
+  void setPlmn(const Plmn& plmn);
+  void setPlmn(const mec::Plmn plmn);
   void setEcgi(const mec::Ecgi& ecgi);
 
-  std::string getCellId() const;
+  MacCellId getCellId() const;
   Plmn getPlmn() const;
 
   nlohmann::ordered_json toJson() const override;
