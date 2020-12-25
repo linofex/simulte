@@ -59,6 +59,7 @@ class UEClusterizeApp : public cSimpleModule
     int nextSnoStart_;
     int nextSnoInfo_;
     int nextSnoStop_;
+    int nextSnoInit_;
     int size_;
     //resources required inforamtions
     int requiredRam;

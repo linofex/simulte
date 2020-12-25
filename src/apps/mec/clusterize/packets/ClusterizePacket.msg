@@ -28,6 +28,7 @@ packet ClusterizePacket extends MEAppPacket{
     int carOmnetID;	
 }
 
+
 //
 // used by MEClusterizeApp to communicate computed-configuration to the UEClusterizeApp
 //

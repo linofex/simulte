@@ -16,8 +16,8 @@
 
 //SERVICES AND UTILITIES
 #include "../../MEPlatform/GeneralServices/RadioNetworkInformation.h"
-#include "MEClusterizeService.h"
-#include "SimpleControllers.h"
+#include "../MEClusterizeService/MEClusterizeService.h"
+#include "corenetwork/nodes/mec/MEPlatform/MEClusterizeService/SimpleControllers.h"
 
 /**
  * MEPlatooningService see MEPlatooningService.ned
@@ -72,17 +72,17 @@ class MEPlatooningService : public MEClusterizeService
             void updateRniInfo();
             //computing candidate Platoon of vehicles
             void computePlatoon(std::string shape);
-                //compute vehicle adjacences according the area shape
-                void computeTriangleAdjacencies(std::map<int, std::vector<int>> &adjacencies);
-                    //checking vehicles inside the area defined by the shape
-                    bool isInTriangle(inet::Coord P, inet::Coord A, inet::Coord B, inet::Coord C);
-                void computeRectangleAdjacencies(std::map<int, std::vector<int>> &adjacencies);
-                    //checking vehicles inside the area defined by the shape
-                    bool isInRectangle(inet::Coord P, inet::Coord A, inet::Coord B, inet::Coord C, inet::Coord D);
-                //select the best follower vehicle (according to the distance)
-                void selectFollowers(std::map<int, std::vector<int>> &adjacencies);
-                //updating/building the clusters map with follower vehicle informations
-                void updateClusters();
+            //compute vehicle adjacences according the area shape
+            void computeTriangleAdjacencies(std::map<int, std::vector<int>> &adjacencies);
+            //checking vehicles inside the area defined by the shape
+            bool isInTriangle(inet::Coord P, inet::Coord A, inet::Coord B, inet::Coord C);
+            void computeRectangleAdjacencies(std::map<int, std::vector<int>> &adjacencies);
+            //checking vehicles inside the area defined by the shape
+            bool isInRectangle(inet::Coord P, inet::Coord A, inet::Coord B, inet::Coord C, inet::Coord D);
+            //select the best follower vehicle (according to the distance)
+            void selectFollowers(std::map<int, std::vector<int>> &adjacencies);
+            //updating/building the clusters map with follower vehicle informations
+            void updateClusters();
             //computing accelerations for each platoon member, for each platoon, to converge at desired speed and inter-vehicle distances
             void computePlatoonAccelerations();
         //----------------------------------------------------------------------------------------------------------------------

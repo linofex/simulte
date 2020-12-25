@@ -12,8 +12,8 @@
 //
 
 #include <cmath>
-#include "UEClusterizeApp.h"
 #include "inet/common/ModuleAccess.h"  // for multicast support
+#include "UEClusterizeApp.h"
 
 Define_Module(UEClusterizeApp);
 
@@ -28,6 +28,7 @@ UEClusterizeApp::UEClusterizeApp()
     nextSnoStart_ = 0;
     nextSnoInfo_ = 0;
     nextSnoStop_ = 0;
+    nextSnoInit_ = 0;
     //acceleration used (received from MEClusterizeService)
     requiredAcceleration = 0;
     veins_mobility = NULL;
@@ -234,13 +235,13 @@ void UEClusterizeApp::sendClusterizeInfoPacket()
 //        angularPosition = veins_mobility->getCurrentAngularPosition();
         }
 
-    //creating and sending INFO_UEAPP ClusterizeInfoPacket
-    ClusterizeInfoPacket* packet = ClusterizePacketBuilder().buildClusterizeInfoPacket(nextSnoInfo_, simTime(), size_, car->getId(), mySymbolicAddress, meHostSymbolicAddress, position, speed, angularPosition, angularSpeed);
-    //identification info
-    packet->setUeAppID(getId());
-    packet->setAcceleration(requiredAcceleration);
-    socket.sendTo(packet, destAddress_, destPort_);
-    nextSnoInfo_++;
+//    //creating and sending INFO_UEAPP ClusterizeInfoPacket
+//    ClusterizeInfoPacket* packet = ClusterizePacketBuilder().buildClusterizeInfoPacket(nextSnoInfo_, simTime(), size_, car->getId(), mySymbolicAddress, meHostSymbolicAddress, position, speed, angularPosition, angularSpeed);
+//    //identification info
+//    packet->setUeAppID(getId());
+//    packet->setAcceleration(requiredAcceleration);
+//    socket.sendTo(packet, destAddress_, destPort_);
+//    nextSnoInfo_++;
 
     //emit statistics
     emit(clusterizeInfoSentMsg_, (long)1);
@@ -307,6 +308,14 @@ void UEClusterizeApp::handleMEAppAckStart(MEAppPacket* pkt){
         EV << "UEClusterizeApp::handleMEAppAckStart - \t starting sendClusterizeStartPacket() at " << st << endl;
     }
 
+    //send the information to the Meapp in order to  add the car to the service:
+    // carId
+    // symbolicAddress (Me app already has it)
+    ClusterizePacket* packet = ClusterizePacketBuilder().buildClusterizePacket(INIT_MEAPP, nextSnoInit_, simTime(), size_, car->getId(), mySymbolicAddress, meHostSymbolicAddress);
+    packet->setUeAppID(getId());
+    socket.sendTo(packet, destAddress_, destPort_);
+    EV << "UEClusterizeApp::handleMEAppAckStart - \t Init MEApp packet with SeqNo["<< nextSnoInit_ <<"] sent"<<endl;
+    nextSnoInit_++;
     //starting sending STOP_MEAPP ClusterizePacket
     if(!selfStop_->isScheduled())
     {

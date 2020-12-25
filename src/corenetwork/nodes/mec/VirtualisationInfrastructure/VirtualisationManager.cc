@@ -154,6 +154,8 @@ void VirtualisationManager::handleMEAppPacket(MEAppPacket* pkt){
 
     /* Handling INFO_UEAPP */
     else if(!strcmp(pkt->getType(), INFO_UEAPP))    upstreamToMEApp(pkt);
+    else if(!strcmp(pkt->getType(), INIT_MEAPP))    upstreamToMEApp(pkt);
+
 
     /* Handling INFO_MEAPP */
     else if(!strcmp(pkt->getType(), INFO_MEAPP))    downstreamToUEApp(pkt);

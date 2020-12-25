@@ -12,7 +12,7 @@
 //
 
 #ifndef __SIMULTE_MECLUSTERIZEAPP_H_
-#define __SIMULTE_MECLUSTERIZEAPP_H
+#define __SIMULTE_MECLUSTERIZEAPP_H_
 
 //INET COMMUNICATION WITH UEClusterizeApp
 #include "inet/networklayer/common/L3Address.h"
@@ -66,6 +66,9 @@ class MEClusterizeApp : public cSimpleModule
         // handling INFO_MEAPP ClusterizeConfigPacket from the MEClusterizeService
         // by adding UEClusterizeApp related information and forwarding to the VirtualisationManager
         void handleClusterizeConfig(ClusterizeConfigPacket *);
+
+
+        void handleClusterizeInit(ClusterizePacket *);
 };
 
 #endif

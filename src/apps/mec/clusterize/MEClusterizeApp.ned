@@ -38,6 +38,7 @@ simple MEClusterizeApp like IMEApp
         string ueSimbolicAddress; 		// i.e. UE[x] or car[x]
         string meHostSimbolicAddress;	// i.e meHost.virtualisationInfrastructure
         
+        
         string interfaceTableModule = default("");
         
         //statistics

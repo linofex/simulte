@@ -16,6 +16,8 @@ package lte.corenetwork.nodes.mec;
 
 import lte.corenetwork.nodes.mec.VirtualisationInfrastructure.VirtualisationInfrastructure;
 import lte.corenetwork.nodes.mec.MEPlatform.MEPlatform;
+import lte.corenetwork.nodes.mec.MEPlatform.MEPlatform2;
+
 
 //lte tunneling endpoint to connect externally with an eNodeB
 import lte.corenetwork.nodes.mec.GtpEndpoint.GtpEndpoint;
@@ -58,7 +60,7 @@ module MEHost
                 @display("p=500,400");
         }
 
-        mePlatform: MEPlatform {
+        mePlatform: MEPlatform2 {
             parameters:
                 @display("p=500,50;is=m");
         }

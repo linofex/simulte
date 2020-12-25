@@ -20,6 +20,8 @@ import inet.networklayer.contract.IRoutingTable;
 import inet.networklayer.contract.INetworkLayer;
 import inet.applications.contract.IUDPApp;
 import inet.transportlayer.udp.UDP;
+import inet.transportlayer.tcp.TCP;
+
 import lte.corenetwork.nodes.mec.VirtualisationInfrastructure.VirtualisationManager;
 
 
@@ -79,9 +81,13 @@ module VirtualisationInfrastructure
         virtualisationManager: VirtualisationManager {
             @display("p=252,124,row");
         }
-
+	
+		tcp: TCP {
+            @display("p=200,231");
+        }
+        
         udp: UDP {
-            @display("p=252,231");
+            @display("p=300,231");
         }
 
         //#
@@ -107,7 +113,10 @@ module VirtualisationInfrastructure
         //#
         udp.ipOut --> networkLayer.transportIn++;
         udp.ipIn <-- networkLayer.transportOut++;
-
+        
+		tcp.ipOut --> networkLayer.transportIn++;
+        tcp.ipIn <-- networkLayer.transportOut++;
+        
         //# 
         //# VirtualisationManager to transport layer connections
         //#

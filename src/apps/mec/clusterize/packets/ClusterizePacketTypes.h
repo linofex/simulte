@@ -29,7 +29,9 @@
 #define INFO_CLUSTERIZE "ClusterizeInfo"
 #define CONFIG_CLUSTERIZE "ClusterizeConfig"
 
-// defining app and service names fro ME CLUSTERIZE SERVICE
+#define ADD_CAR "AddCar"
+
+// defining app and service names from ME CLUSTERIZE SERVICE
 
 #define ME_CLUSTERIZE_APP_MODULE_TYPE "lte.apps.mec.clusterize.MEClusterizeApp"
 #define ME_CLUSTERIZE_APP_MODULE_NAME "MEClusterizeApp"

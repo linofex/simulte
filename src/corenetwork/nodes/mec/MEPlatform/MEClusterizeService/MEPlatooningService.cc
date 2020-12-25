@@ -66,7 +66,7 @@ void MEPlatooningService::compute()
     resetClusters();
 
     //EV << "\nMEPlatooningService::compute - updating RNI infos\n" << endl;                                                //RNI not USED
-    //updateRniInfo();
+    updateRniInfo();
 
     EV << "\nMEPlatooningService::compute - updating car positions and speeds\n" << endl;
     updatePositionsAndSpeeds();
@@ -284,7 +284,6 @@ bool MEPlatooningService::isInRectangle(inet::Coord P, inet::Coord A, inet::Coor
       // behind side              D-------C
 }
 
-
 void MEPlatooningService::updatePositionsAndSpeeds(){
 
     //updating car positions based on the last position & timestamp + velocity * elapsed_time + acceleration * elapsed_time^2
@@ -301,6 +300,7 @@ void MEPlatooningService::updatePositionsAndSpeeds(){
         //update speed
         it->second.speed.x += it->second.acceleration*cos(it->second.angularPosition.alpha)*time_gap;
         it->second.speed.y += it->second.acceleration*sin(it->second.angularPosition.alpha)*time_gap;
+
         //testing
         //EV << "MEPlatooningService::updatePositionsAndSpeeds - " << it->second.symbolicAddress << " position: " << it->second.position << " speed: " << it->second.speed << " time-stamp: " << now << endl ;
     }
@@ -352,6 +352,7 @@ void MEPlatooningService::computePlatoonAccelerations(){
                 //update acceleration
                 cars[i].acceleration = acceleration;
                 //updating platoon formation info
+                EV <<" DISTANCE: " << distanceToLeading << endl;
                 cit->second.distancies.push_back(distanceToLeading);
 
                 //testing

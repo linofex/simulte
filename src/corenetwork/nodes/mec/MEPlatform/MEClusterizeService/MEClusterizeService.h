@@ -30,6 +30,12 @@
 //EMITTING V2V MULTIHOP STATISTICS
 #include "apps/d2dMultihop/statistics/MultihopD2DStatistics.h"
 
+
+#include "inet/transportlayer/contract/tcp/TCPSocket.h"
+#include "inet/common/INETDefs.h"
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/httpUtils/json.hpp"
+
+
 //################################################################################################
 //DATA STRUCTURE TYPES
 struct cluster{
@@ -45,6 +51,7 @@ struct car{
 
     int id;
     std::string symbolicAddress;        //i.e. car[x]
+    std::string ipAddress;                // ip Address of car[x]
     MacNodeId macID;                    //used for rni-service
     //----------------------------------
     //local-info                        //updated in handleClusterizeInfo()
@@ -66,6 +73,7 @@ struct car{
     std::string txMode;
     //----------------------------------
     //flags/control                     //used in compute()
+    bool hasInitialInfo = false;
     bool isLeader;
     bool isFollower;
     int followingKey = -1;
@@ -77,9 +85,18 @@ struct car{
  * MEClusterizeService See MEClusterizeService.ned
  *
  */
-class MEClusterizeService : public cSimpleModule
+class MEClusterizeService : public cSimpleModule, public TCPSocket::CallbackInterface
 {
     protected:
+
+        // Location Service connection
+        inet::TCPSocket socket;
+        std::string responseMessage;
+        int responseMessageLength;
+        bool receivingMessage;
+        cMessage *selfGet_;
+        simtime_t getPeriod_;
+
         //----------------------------------
         //auto-scheduling
         cMessage *selfSender_;
@@ -128,6 +145,27 @@ class MEClusterizeService : public cSimpleModule
         virtual void handleClusterizeInfo(ClusterizeInfoPacket*);
         // handling STOP_MEAPP ClusterizePacket by erasing cars map at the correspondent entry (arrival-gate index)
         virtual void handleClusterizeStop(ClusterizePacket*);
+        // handling ADD_CAR ClusterizePacket by adding a new car by updating cars map at the correspondent entry (arrival-gate index)
+        virtual void handleClusterizeNewCar(ClusterizePacket*);
+
+        // handling ADD_CAR ClusterizePacket by adding a new car by updating cars map at the correspondent entry (arrival-gate index)
+        virtual void updateClusterInfo();
+        virtual void updateCarInfo(nlohmann::json& userInfo);
+        virtual std::string getCarsAddressesParameters();
+
+
+
+        // internal: TCPSocket::CallbackInterface methods
+        virtual void socketDataArrived(int, void *, cPacket *msg, bool urgent) override;
+        virtual void socketEstablished(int, void *);
+        virtual void socketPeerClosed(int, void *);
+        virtual void socketClosed(int, void *) override;
+        virtual void socketFailure(int, void *, int code) override;
+//        virtual void socketStatusArrived(int, void *, inet::TCPStatusInfo *status) override { statusArrived(status); }
+
+        bool parseResponse(std::string& packet, std::map<std::string, std::string>* req);
+        virtual void connect();
+        virtual void requestUserPositions();
 };
 
 #endif

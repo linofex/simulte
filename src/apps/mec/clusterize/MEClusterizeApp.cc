@@ -72,6 +72,14 @@ void MEClusterizeApp::handleMessage(cMessage *msg)
         ClusterizeInfoPacket* ipkt = check_and_cast<ClusterizeInfoPacket*>(msg);
         handleClusterizeInfo(ipkt);
     }
+
+    else if(!strcmp(pkt->getType(), INIT_MEAPP))
+    {
+        EV << "MEClusterizeApp::handleMessage - "<< INIT_MEAPP << endl;
+        ClusterizePacket* ipkt = check_and_cast<ClusterizePacket*>(msg);
+        handleClusterizeInit(ipkt);
+    }
+
     else if(!strcmp(pkt->getType(), INFO_MEAPP))
     {
         ClusterizeConfigPacket* cpkt = check_and_cast<ClusterizeConfigPacket*>(msg);
@@ -132,3 +140,16 @@ void MEClusterizeApp::handleClusterizeInfo(ClusterizeInfoPacket *pkt){
     EV << "MEClusterizeApp::handleClusterizeInfo AngularPosition: [" << pkt->getAngularPositionA() << " ; " << pkt->getAngularPositionB() << " ; " << pkt->getAngularPositionC() << "]" << endl;
     EV << "MEClusterizeApp::handleClusterizeInfo AngularSpeed: [" << pkt->getAngularSpeedA() << " ; " << pkt->getAngularSpeedB() << " ; " << pkt->getAngularSpeedC() << "]" << endl;
 }
+
+void MEClusterizeApp::handleClusterizeInit(ClusterizePacket *pkt){
+    simtime_t delay = simTime()-pkt->getTimestamp();
+
+    EV << "MEClusterizeApp::handleClusterizeInit - Init packet received: "<< pkt->getSourceAddress() <<" SeqNo[" << pkt->getSno() << "] delay: "<< delay << endl;
+    pkt->setType(ADD_CAR);
+    //forwarding to the MEClusterizeService
+
+    EV << "MEClusterizeApp::handleClusterizeInit - Sending " << ADD_CAR << " ClusterizePacket SeqNo[" << pkt->getSno() << "] size: "<< size_ <<"\n";
+    send(pkt, "mePlatformOut");
+
+}
+
