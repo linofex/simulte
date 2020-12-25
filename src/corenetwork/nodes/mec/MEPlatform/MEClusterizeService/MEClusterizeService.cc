@@ -439,25 +439,28 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
        std::string ipAddress = address[1];
        if(it->second.ipAddress.compare(ipAddress) == 0)
        {
+           double timestamp = userInfo["timeStamp"];
+           if(timestamp >= lastRun.dbl()){
+
             double positionX = userInfo["locationInfo"]["x"];
             double positionY = userInfo["locationInfo"]["y"];
             double positionZ = userInfo["locationInfo"]["z"];
-            double timestamp = userInfo["timeStamp"];
-            if(it->second.hasInitialInfo == false){
-               // first time the service has info about UE
-               it->second.hasInitialInfo = true;
-           }
-           else
-           {
+
+//            if(it->second.hasInitialInfo == false){
+//               // first time the service has info about UE
+//               it->second.hasInitialInfo = true;
+//           }
+//           else
+//           {
                 double deltaTime = (timestamp-it->second.timestamp.dbl());
                 // compute speed and acceleration
                 double speedX = (positionX - it->second.position.x)/deltaTime;
                 double speedY = (positionY - it->second.position.y)/deltaTime;
                 double speedZ = (positionZ - it->second.position.z)/deltaTime;
 
-                it->second.speed.x = speedX;
-                it->second.speed.y = speedY;
-                it->second.speed.z = speedZ;
+                it->second.speed.x = userInfo["locationInfo"]["speed"]["x"];
+                it->second.speed.y = userInfo["locationInfo"]["speed"]["y"];
+                it->second.speed.z = userInfo["locationInfo"]["speed"]["z"];
 
 
                 //testing
@@ -465,12 +468,15 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
                 EV << "Position: [" << positionX << ", " << positionY << ", " << ", " << positionZ << "]" << endl;
                 EV << "Speed: [" << speedX << ", " << speedY << ", " << ", " << speedZ << "]" << endl;
 
-           }
+//           }
            it->second.position.x = positionX;
            it->second.position.y = positionY;
            it->second.position.z = positionZ;
            it->second.timestamp  = timestamp;
+           it->second.angularPosition.alpha = 1.5708;
            it->second.isFollower = false;
+
+       }
            break; //next user
        }
     }
