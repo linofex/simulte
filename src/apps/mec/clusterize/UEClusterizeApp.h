@@ -114,6 +114,9 @@ class UEClusterizeApp : public cSimpleModule
     simsignal_t clusterizeInfoSentMsg_;
     simsignal_t clusterizeConfigRcvdMsg_;
     simsignal_t clusterizeConfigDelay_;
+    simsignal_t clusterizeInfoDelay_;
+    simtime_t lastInfoMsg_;
+
     //platoon formation values : for tracking dynamic evolution
     simsignal_t clusterizeAccelerations_;
     simsignal_t clusterizeVelocities_;

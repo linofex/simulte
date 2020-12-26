@@ -23,7 +23,8 @@ void LocationResource::addEnodeB(std::vector<cModule*>& eNodeBs) {
     std::vector<cModule*>::iterator it = eNodeBs.begin();
         for(; it != eNodeBs.end() ; ++it){
             LteCellInfo * cellInfo = check_and_cast<LteCellInfo *>((*it)->getSubmodule("cellInfo"));
-                    eNodeBs_.insert(std::pair<MacCellId, LteCellInfo *>(cellInfo->getMacCellId(), cellInfo));
+            eNodeBs_.insert(std::pair<MacCellId, LteCellInfo *>(cellInfo->getMacCellId(), cellInfo));
+            EV << "LocationResource::addEnodeB - added eNodeB: " << cellInfo->getMacCellId() << endl;
         }
 }
 
@@ -32,6 +33,8 @@ void LocationResource::addEnodeB(cModule* eNodeB) {
     LteCellInfo * cellInfo = check_and_cast<LteCellInfo *>(eNodeB->getSubmodule("cellInfo"));
     eNodeBs_.insert(std::pair<MacCellId, LteCellInfo *>(cellInfo->getMacCellId(), cellInfo));
     EV << "LocationResource::addEnodeB with cellId: "<< cellInfo->getMacCellId() << endl;
+    EV << "LocationResource::addEnodeB - added eNodeB: " << cellInfo->getMacCellId() << endl;
+
 }
 
 void LocationResource::addBinder(LteBinder *binder)
@@ -113,8 +116,8 @@ nlohmann::ordered_json LocationResource::toJsonUe(std::vector<IPv4Address>& uesI
         }
         if(!found)
         {
-            std::string notFound = "Address: " + (*uit).str() + " Not found.";
-            ueArray.push_back(notFound);
+           // std::string notFound = "Address: " + (*uit).str() + " Not found.";
+            //ueArray.push_back(notFound);
         }
 	}
 	if(ueArray.size() > 1){

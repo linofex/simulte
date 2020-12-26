@@ -59,6 +59,8 @@ simple UEClusterizeApp like IUDPApp
         
         string interfaceTableModule;
         
+        bool getMethod = default(false);
+        
         //statstics
         //#Sender Side
         @signal[clusterizeInfoSentMsg];
@@ -70,6 +72,11 @@ simple UEClusterizeApp like IUDPApp
         
         @signal[clusterizeConfigDelay]; 
         @statistic[clusterizeConfigDelay](title="ClusterizeConfig Delay"; unit="s"; source="clusterizeConfigDelay"; record=mean,vector);
+        
+        @signal[clusterizeInfoDelay]; 
+        @statistic[clusterizeInfoDelay](title="ClusterizeConfig Info Delay"; unit="s"; source="clusterizeInfoDelay"; record=mean,vector);
+        
+        
         
         //#platooning formation values
         @signal[clusterizeAccelerations];

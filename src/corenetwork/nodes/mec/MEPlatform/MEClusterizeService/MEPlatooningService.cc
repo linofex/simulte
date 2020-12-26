@@ -291,18 +291,20 @@ void MEPlatooningService::updatePositionsAndSpeeds(){
     std::map<int, car>::iterator it;
     for(it = cars.begin(); it != cars.end(); it++)
     {
-        double old = it->second.timestamp.dbl();
-        //regulating the time_gap taking into account the previous update on MEPlatooningService!
-        double time_gap = (now-old > period_.dbl())? period_.dbl(): now - old;
-        //update position
-        it->second.position.x += it->second.speed.x*time_gap + it->second.acceleration*cos(it->second.angularPosition.alpha)*time_gap*time_gap;
-        it->second.position.y += it->second.speed.y*time_gap + it->second.acceleration*sin(it->second.angularPosition.alpha)*time_gap*time_gap;
-        //update speed
-        it->second.speed.x += it->second.acceleration*cos(it->second.angularPosition.alpha)*time_gap;
-        it->second.speed.y += it->second.acceleration*sin(it->second.angularPosition.alpha)*time_gap;
+        if(it->second.hasInitialInfo == true){
+            double old = it->second.timestamp.dbl();
+            //regulating the time_gap taking into account the previous update on MEPlatooningService!
+            double time_gap = (now-old > period_.dbl())? period_.dbl(): now - old;
+            //update position
+            it->second.position.x += it->second.speed.x*time_gap + it->second.acceleration*cos(it->second.angularPosition.alpha)*time_gap*time_gap;
+            it->second.position.y += it->second.speed.y*time_gap + it->second.acceleration*sin(it->second.angularPosition.alpha)*time_gap*time_gap;
+            //update speed
+            it->second.speed.x += it->second.acceleration*cos(it->second.angularPosition.alpha)*time_gap;
+            it->second.speed.y += it->second.acceleration*sin(it->second.angularPosition.alpha)*time_gap;
 
-        //testing
-        //EV << "MEPlatooningService::updatePositionsAndSpeeds - " << it->second.symbolicAddress << " position: " << it->second.position << " speed: " << it->second.speed << " time-stamp: " << now << endl ;
+            //testing
+            //EV << "MEPlatooningService::updatePositionsAndSpeeds - " << it->second.symbolicAddress << " position: " << it->second.position << " speed: " << it->second.speed << " time-stamp: " << now << endl ;
+        }
     }
 }
 

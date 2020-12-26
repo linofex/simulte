@@ -22,7 +22,7 @@ void SocketManager::dataArrived(cMessage *msg, bool urgent){
         if (type == Http::REQUEST)
         {
             //Request req = {msg, packet};
-            EV << "queue size: " << service->requestQueueSize();
+            //EV << "queue size: " << service->requestQueueSize();
             service->newRequest(msg);
         }
         else if(type == Http::RESPONSE)

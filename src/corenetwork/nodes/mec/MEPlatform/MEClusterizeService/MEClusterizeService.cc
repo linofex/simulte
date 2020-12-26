@@ -184,13 +184,13 @@ void MEClusterizeService::handleMessage(cMessage *msg)
         ClusterizePacket* pkt = check_and_cast<ClusterizePacket*>(msg);
         if (pkt == 0)
             throw cRuntimeError("MEClusterizeService::handleMessage - \tFATAL! Error when casting to ClusterizePacket");
-//
-//        if(!strcmp(pkt->getType(), INFO_UEAPP))
-//        {
-//            ClusterizeInfoPacket* ipkt = check_and_cast<ClusterizeInfoPacket*>(msg);
-//            handleClusterizeInfo(ipkt);
-//        }
-//
+
+        if(!strcmp(pkt->getType(), INFO_UEAPP))
+        {
+            ClusterizeInfoPacket* ipkt = check_and_cast<ClusterizeInfoPacket*>(msg);
+            handleClusterizeInfo(ipkt);
+        }
+
         if(!strcmp(pkt->getType(), ADD_CAR))
         {
             handleClusterizeNewCar(pkt);
@@ -318,6 +318,8 @@ void MEClusterizeService::handleClusterizeInfo(ClusterizeInfoPacket* pkt){
         cars[key].angularSpeed.beta = pkt->getAngularSpeedB();
         cars[key].angularSpeed.gamma = pkt->getAngularSpeedC();
         cars[key].isFollower = false;
+        cars[key].hasInitialInfo = true;
+
 
         //testing
         EV << "MEClusterizeService::handleClusterizeInfo - Updating cars[" << key <<"] --> " << cars[key].symbolicAddress << " (carID: "<< cars[key].id << ") " << endl;
@@ -427,6 +429,7 @@ void MEClusterizeService::socketDataArrived(int, void *, cPacket *msg, bool urge
 
 void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
 {
+    EV << "MEClusterizeService::updateCarInfo" << endl;
     std::map<int, car>::iterator it;
     //
     for(it = cars.begin(); it != cars.end(); it++)
@@ -439,44 +442,58 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
        std::string ipAddress = address[1];
        if(it->second.ipAddress.compare(ipAddress) == 0)
        {
+           EV << "MEClusterizeService::updateCarInfo - Car founded" << endl;
            double timestamp = userInfo["timeStamp"];
-           if(timestamp >= lastRun.dbl()){
+           if(timestamp >= lastRun.dbl())
+           {
+                double positionX = userInfo["locationInfo"]["x"];
+                double positionY = userInfo["locationInfo"]["y"];
+                double positionZ = userInfo["locationInfo"]["z"];
 
-            double positionX = userInfo["locationInfo"]["x"];
-            double positionY = userInfo["locationInfo"]["y"];
-            double positionZ = userInfo["locationInfo"]["z"];
+                bool speed  = par("speed").boolValue();
+                if(speed == true)
+                {
+                    it->second.speed.x = userInfo["locationInfo"]["speed"]["x"];
+                    it->second.speed.y = userInfo["locationInfo"]["speed"]["y"];
+                    it->second.speed.z = userInfo["locationInfo"]["speed"]["z"];
+                    it->second.hasInitialInfo = true;
+                }
 
-//            if(it->second.hasInitialInfo == false){
-//               // first time the service has info about UE
-//               it->second.hasInitialInfo = true;
-//           }
-//           else
-//           {
-                double deltaTime = (timestamp-it->second.timestamp.dbl());
-                // compute speed and acceleration
-                double speedX = (positionX - it->second.position.x)/deltaTime;
-                double speedY = (positionY - it->second.position.y)/deltaTime;
-                double speedZ = (positionZ - it->second.position.z)/deltaTime;
+                else
+                {
+                    if(it->second.hasInitialInfo == false){
+                        // first time the service has info about UE
+                        it->second.hasInitialInfo = true;
 
-                it->second.speed.x = userInfo["locationInfo"]["speed"]["x"];
-                it->second.speed.y = userInfo["locationInfo"]["speed"]["y"];
-                it->second.speed.z = userInfo["locationInfo"]["speed"]["z"];
+                    }
+                    else{
+
+                        double deltaTime = (timestamp-it->second.timestamp.dbl());
+                        double speedX = (positionX - it->second.position.x)/deltaTime;
+                        double speedY = (positionY - it->second.position.y)/deltaTime;
+                        double speedZ = (positionZ - it->second.position.z)/deltaTime;
+
+                        it->second.speed.x = speedX;
+                        it->second.speed.y = speedY;
+                        it->second.speed.z = speedZ;
+                        //testing
+                        EV << "delta time: " << deltaTime << endl;
+                        it->second.hasInitialInfo = true;
+                    }
+                }
+
+                it->second.position.x = positionX;
+                it->second.position.y = positionY;
+                it->second.position.z = positionZ;
+                it->second.timestamp  = timestamp;
+                it->second.angularPosition.alpha = 1.5708;
+                it->second.isFollower = false;
+
+                EV << "Position: [" << it->second.position.x << "; " << it->second.position.y << "; " << it->second.position.z << "]" << endl;
+                EV << "Speed: [" << it->second.speed.x << ", " << it->second.speed.y << ", " << ", " << it->second.speed.z << "]" << endl;
 
 
-                //testing
-                EV << "delta time: " << deltaTime << endl;
-                EV << "Position: [" << positionX << ", " << positionY << ", " << ", " << positionZ << "]" << endl;
-                EV << "Speed: [" << speedX << ", " << speedY << ", " << ", " << speedZ << "]" << endl;
-
-//           }
-           it->second.position.x = positionX;
-           it->second.position.y = positionY;
-           it->second.position.z = positionZ;
-           it->second.timestamp  = timestamp;
-           it->second.angularPosition.alpha = 1.5708;
-           it->second.isFollower = false;
-
-       }
+           }
            break; //next user
        }
     }
@@ -488,7 +505,7 @@ void MEClusterizeService::updateClusterInfo(){
     nlohmann::json jsonBody;
     try
     {
-        EV << "MEClusterizeService::updateClusterInfo" << endl; //- message response message "<< responseMessage << endl;
+        EV << "MEClusterizeService::updateClusterInfo - message response message "<< responseMessage << endl;
         jsonBody = nlohmann::json::parse(responseMessage); // get the JSON structure
     }
     catch(nlohmann::detail::parse_error e)

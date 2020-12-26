@@ -35,6 +35,8 @@ simple MEClusterizeService like IMEService, ITCPApp
         string connectAddress = default("");  // server address (may be symbolic)
         int connectPort = default(1000); // port number to connect to
         
+        bool speed = default(false);
+        
         //txMode information: how to send the INFO_MEAPP ClusterizeConfigPacket to the UEClusterizeApp: from ClusterizePacket_types.h
         // V2V_UNICAST_TX_MODE :				"V2V_UNICAST"
 		// V2V_MULTICAST_TX_MODE :				"V2V_MULTICAST"

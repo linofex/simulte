@@ -135,10 +135,13 @@ void UEClusterizeApp::initialize(int stage)
     clusterizeInfoSentMsg_ = registerSignal("clusterizeInfoSentMsg");
     clusterizeConfigRcvdMsg_ = registerSignal("clusterizeConfigRcvdMsg");
     clusterizeConfigDelay_ = registerSignal("clusterizeConfigDelay");
+    clusterizeInfoDelay_ = registerSignal("clusterizeInfoDelay");
+
     //platoon formation values
     clusterizeAccelerations_ = registerSignal("clusterizeAccelerations");
     clusterizeVelocities_ = registerSignal("clusterizeVelocities");
     clusterizeDistancies_ = registerSignal("clusterizeDistancies");
+
     //--------------------------------------
     //starting UEClusterizeApp
     simtime_t startTime = par("startTime");
@@ -235,13 +238,13 @@ void UEClusterizeApp::sendClusterizeInfoPacket()
 //        angularPosition = veins_mobility->getCurrentAngularPosition();
         }
 
-//    //creating and sending INFO_UEAPP ClusterizeInfoPacket
-//    ClusterizeInfoPacket* packet = ClusterizePacketBuilder().buildClusterizeInfoPacket(nextSnoInfo_, simTime(), size_, car->getId(), mySymbolicAddress, meHostSymbolicAddress, position, speed, angularPosition, angularSpeed);
-//    //identification info
-//    packet->setUeAppID(getId());
-//    packet->setAcceleration(requiredAcceleration);
-//    socket.sendTo(packet, destAddress_, destPort_);
-//    nextSnoInfo_++;
+    //creating and sending INFO_UEAPP ClusterizeInfoPacket
+    ClusterizeInfoPacket* packet = ClusterizePacketBuilder().buildClusterizeInfoPacket(nextSnoInfo_, simTime(), size_, car->getId(), mySymbolicAddress, meHostSymbolicAddress, position, speed, angularPosition, angularSpeed);
+    //identification info
+    packet->setUeAppID(getId());
+    packet->setAcceleration(requiredAcceleration);
+    socket.sendTo(packet, destAddress_, destPort_);
+    nextSnoInfo_++;
 
     //emit statistics
     emit(clusterizeInfoSentMsg_, (long)1);
@@ -300,22 +303,29 @@ void UEClusterizeApp::handleMEAppAckStart(MEAppPacket* pkt){
     //stop auto-scheduling for sending START_MEAPP ClusterizePacket
     cancelEvent(selfStart_);
 
+    bool getMethod = par("getMethod").boolValue();
+
     //starting sending INFO_UEAPP ClusterizeInfoPacket
+    if(!getMethod){
     if(!selfSender_->isScheduled())
     {
         double st = ceil(simTime().dbl());  //imposing synchronization (all INFO_UEAPP messages are sent at x_minutes:(y*period)_seconds:000_milliseconds)
         scheduleAt(st, selfSender_);
         EV << "UEClusterizeApp::handleMEAppAckStart - \t starting sendClusterizeStartPacket() at " << st << endl;
     }
+    }
 
     //send the information to the Meapp in order to  add the car to the service:
     // carId
     // symbolicAddress (Me app already has it)
+    if(getMethod){
     ClusterizePacket* packet = ClusterizePacketBuilder().buildClusterizePacket(INIT_MEAPP, nextSnoInit_, simTime(), size_, car->getId(), mySymbolicAddress, meHostSymbolicAddress);
     packet->setUeAppID(getId());
     socket.sendTo(packet, destAddress_, destPort_);
     EV << "UEClusterizeApp::handleMEAppAckStart - \t Init MEApp packet with SeqNo["<< nextSnoInit_ <<"] sent"<<endl;
     nextSnoInit_++;
+    }
+
     //starting sending STOP_MEAPP ClusterizePacket
     if(!selfStop_->isScheduled())
     {
@@ -428,6 +438,8 @@ void UEClusterizeApp::handleClusterizeConfigFromMEHost(ClusterizeConfigPacket *p
     simtime_t delay = simTime() - pkt->getTimestamp();
     emit(clusterizeConfigRcvdMsg_, (long)1);
     emit(clusterizeConfigDelay_, delay);
+    emit(clusterizeInfoDelay_, simTime() - lastInfoMsg_);
+    lastInfoMsg_ = simTime();
     stat_->recordReception(macID, pkt->getEventID(), delay, pkt->getHops());
     //platoon formation statistics
     emitPlatoonFormationStatistics(pkt);
@@ -495,6 +507,8 @@ void UEClusterizeApp::handleClusterizeConfigFromUE(ClusterizeConfigPacket *pkt){
     simtime_t delay = simTime() - pkt->getTimestamp();
     emit(clusterizeConfigRcvdMsg_, (long)1);
     emit(clusterizeConfigDelay_, delay);
+    emit(clusterizeInfoDelay_, simTime() - lastInfoMsg_);
+    lastInfoMsg_ = simTime();
     stat_->recordReception(macID, pkt->getEventID(), delay, pkt->getHops());
     //platoon formation statistics
     emitPlatoonFormationStatistics(pkt);

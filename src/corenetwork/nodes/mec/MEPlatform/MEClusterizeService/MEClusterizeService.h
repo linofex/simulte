@@ -73,7 +73,7 @@ struct car{
     std::string txMode;
     //----------------------------------
     //flags/control                     //used in compute()
-    bool hasInitialInfo = false;
+    bool hasInitialInfo;
     bool isLeader;
     bool isFollower;
     int followingKey = -1;
