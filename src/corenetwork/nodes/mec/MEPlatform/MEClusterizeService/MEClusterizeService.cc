@@ -381,7 +381,11 @@ void MEClusterizeService::socketDataArrived(int, void *, cPacket *msg, bool urge
         std::map<std::string, std::string>* res = new std::map<std::string, std::string>;
 
         bool resp = parseResponse(packet, res);
-        EV << "resp: " << resp << endl;
+//        EV << "resp: " << resp << endl;
+
+        // TODO organize code.
+        // it works correctly only with 200 response COdes
+
         if(res->find("code") != res->end()) //header plus body(maybe)
         {
             // response with
@@ -424,7 +428,9 @@ void MEClusterizeService::socketDataArrived(int, void *, cPacket *msg, bool urge
         }
         else if(responseMessageLength < 0)
             throw cRuntimeError("MEClusterizeService::socketDataArrived - read payload more than Content=Length header");
+
         delete res;
+        delete msg;
 }
 
 void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
@@ -442,7 +448,7 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
        std::string ipAddress = address[1];
        if(it->second.ipAddress.compare(ipAddress) == 0)
        {
-           EV << "MEClusterizeService::updateCarInfo - Car founded" << endl;
+           EV << "MEClusterizeService::updateCarInfo - Car found" << endl;
            double timestamp = userInfo["timeStamp"];
            if(timestamp >= lastRun.dbl())
            {
@@ -489,8 +495,17 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
                 it->second.angularPosition.alpha = 1.5708;
                 it->second.isFollower = false;
 
-                EV << "Position: [" << it->second.position.x << "; " << it->second.position.y << "; " << it->second.position.z << "]" << endl;
-                EV << "Speed: [" << it->second.speed.x << ", " << it->second.speed.y << ", " << ", " << it->second.speed.z << "]" << endl;
+//                EV << "Position: [" << it->second.position.x << "; " << it->second.position.y << "; " << it->second.position.z << "]" << endl;
+//                EV << "Speed: [" << it->second.speed.x << ", " << it->second.speed.y << ", " << ", " << it->second.speed.z << "]" << endl;
+
+                //testing
+                EV << "MEClusterizeService::handleClusterizeInfo - Updating cars[" << it->first <<"] --> " << it->second.symbolicAddress << " (carID: "<< it->second.id << ") " << endl;
+                EV << "MEClusterizeService::handleClusterizeInfo - cars[" << it->first << "].position = " << "[" << it->second.position.x << " ; "<< it->second.position.y << " ; " << it->second.position.z  << "]" << endl;
+                EV << "MEClusterizeService::handleClusterizeInfo - cars[" << it->first << "].speed = " << "[" << it->second.speed.x << " ; "<< it->second.speed.y << " ; " << it->second.speed.z  << "]" << endl;
+                EV << "MEClusterizeService::handleClusterizeInfo - cars[" << it->first << "].acceleration = " << it->second.acceleration << endl;
+//                EV << "MEClusterizeService::handleClusterizeInfo - cars[" << it->first << "].angularPostion = " << "[" << it->second.angularPosition.alpha << " ; "<< it->second.angularPosition.beta << " ; " << it->second.angularPosition.gamma  << "]" << endl;
+//                EV << "MEClusterizeService::handleClusterizeInfo - cars[" << it->first << "].angularSpeed = " << "[" << it->second.angularSpeed.alpha << " ; "<< it->second.angularSpeed.beta << " ; " << cars[key].angularSpeed.gamma  << "]" << endl;
+
 
 
            }

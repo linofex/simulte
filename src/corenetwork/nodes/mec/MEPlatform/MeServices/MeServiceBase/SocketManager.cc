@@ -16,13 +16,12 @@ Register_Class(SocketManager);
 
 
 void SocketManager::dataArrived(cMessage *msg, bool urgent){
-
+//        EV << "SocketManager::dataArrived";
         std::string packet = lte::utils::getPacketPayload(msg);
         Http::DataType type = service->getDataType(packet);
         if (type == Http::REQUEST)
         {
-            //Request req = {msg, packet};
-            //EV << "queue size: " << service->requestQueueSize();
+            service->emitRequestQueueLength();
             service->newRequest(msg);
         }
         else if(type == Http::RESPONSE)

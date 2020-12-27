@@ -56,7 +56,7 @@ namespace Http {
         res->setDataFromBuffer(payload , strlen(payload));
         res->setByteLength(strlen(payload));
         socket->send(res);
-        EV <<"sent" << endl;
+//        EV <<"sent" << endl;
     }
 
 

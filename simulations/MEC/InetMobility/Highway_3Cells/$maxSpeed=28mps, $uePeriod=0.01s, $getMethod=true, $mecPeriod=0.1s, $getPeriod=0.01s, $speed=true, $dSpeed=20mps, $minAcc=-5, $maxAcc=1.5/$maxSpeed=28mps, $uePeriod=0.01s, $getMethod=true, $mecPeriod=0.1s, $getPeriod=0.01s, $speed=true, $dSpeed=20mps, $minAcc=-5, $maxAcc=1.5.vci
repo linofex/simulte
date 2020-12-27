@@ -1,0 +1,771 @@
+file 369509 1609089320                                          
+version 2
+run Highway_3Cells-3-20201227-15:15:44-9813
+attr configname Highway_3Cells
+attr datetime 20201227-15:15:44
+attr experiment Highway_3Cells
+attr inifile simple_platooning_scenario.ini
+attr iterationvars "$maxSpeed=28mps, $uePeriod=0.01s, $getMethod=true, $mecPeriod=0.1s, $getPeriod=0.01s, $speed=true, $dSpeed=20mps, $minAcc=-5, $maxAcc=1.5"
+attr iterationvarsf maxSpeed=28mps,uePeriod=0.01s,getMethod=true,mecPeriod=0.1s,getPeriod=0.01s,speed=true,dSpeed=20mps,minAcc=-5,maxAcc=1.5-
+attr measurement "$maxSpeed=28mps, $uePeriod=0.01s, $getMethod=true, $mecPeriod=0.1s, $getPeriod=0.01s, $speed=true, $dSpeed=20mps, $minAcc=-5, $maxAcc=1.5"
+attr network lte.simulations.MEC.InetMobility.MecInetThreeCell
+attr processid 9813
+attr repetition 0
+attr replication #0
+attr resultdir Highway_3Cells
+attr runnumber 3
+attr seedset 0
+itervar dSpeed 20mps
+itervar getMethod true
+itervar getPeriod 0.01s
+itervar maxAcc 1.5
+itervar maxSpeed 28mps
+itervar mecPeriod 0.1s
+itervar minAcc -5
+itervar speed true
+itervar uePeriod 0.01s
+param **.eNodeB1.macCellId 1
+param **.eNodeB1.macNodeId 1
+param **.eNodeB2.macCellId 2
+param **.eNodeB2.macNodeId 2
+param **.eNodeB3.macCellId 3
+param **.eNodeB3.macNodeId 3
+param *.eNodeB*.x2App[*].server.localPort "6000 + ancestorIndex(1)"
+param *.eNodeB1.numX2Apps 1
+param *.eNodeB1.x2App[0].client.connectAddress "\"eNodeB2%x2ppp0\""
+param *.eNodeB2.numX2Apps 2
+param *.eNodeB2.x2App[0].client.connectAddress "\"eNodeB1%x2ppp0\""
+param *.eNodeB2.x2App[1].client.connectAddress "\"eNodeB3%x2ppp0\""
+param *.eNodeB3.numX2Apps 1
+param *.eNodeB3.x2App[0].client.connectAddress "\"eNodeB2%x2ppp0\""
+param **.sctp.nagleEnabled false
+param **.sctp.enableHeartbeats false
+param **.car[*].masterId 1
+param **.car[*].macCellId 1
+param **.coreDebug false
+param **.routingRecorder.enabled false
+param *.playgroundSizeX 1000m
+param *.playgroundSizeY 4999m
+param *.playgroundSizeZ 50m
+param **.channelControl.pMax 10W
+param **.channelControl.alpha 1.0
+param **.channelControl.carrierFrequency 2100e+6Hz
+param **.lteNic.phy.channelModel "xmldoc(\"config_channel.xml\")"
+param **.feedbackComputation "xmldoc(\"config_channel.xml\")"
+param **.rbAllocationType "\"localized\""
+param **.feedbackType "\"ALLBANDS\""
+param **.feedbackGeneratorType "\"IDEAL\""
+param **.maxHarqRtx 3
+param **.cellInfo.ruRange 50
+param **.cellInfo.ruTxPower "\"50,50,50;\""
+param **.cellInfo.antennaCws "\"2;\""
+param **.cellInfo.numRbDl 25
+param **.cellInfo.numRbUl 25
+param **.numBands 25
+param **.fbDelay 1
+param *.car[*].lteNic.phy.enableHandover true
+param *.eNodeB*.lteNic.phy.enableHandover true
+param *.eNodeB*.lteNic.phy.broadcastMessageInterval 0.5s
+param **.msHarqInterrupt false
+param **.mobility.constraintAreaMinZ 0m
+param **.mobility.constraintAreaMaxZ 0m
+param *.car[*].mobility.initFromDisplayString false
+param *.car[*].mobilityType "\"LinearMobility\""
+param *.car[*].mobility.updateInterval 0.005s
+param **.numClusters 1
+param **.numRoads 1
+param **.numCars 5
+param **.car[0].mobility.initialX 150m
+param **.car[0].mobility.initialY 10m
+param **.car[0].mobility.angle 90deg
+param **.car[0].mobility.speed 20mps
+param **.car[0].mobility.acceleration 0
+param **.car[1].mobility.initialX 150m
+param **.car[1].mobility.initialY 100m
+param **.car[1].mobility.angle 90deg
+param **.car[1].mobility.speed 10mps
+param **.car[1].mobility.acceleration 0
+param **.car[2].mobility.initialX 150m
+param **.car[2].mobility.initialY 150m
+param **.car[2].mobility.angle 90deg
+param **.car[2].mobility.speed 5mps
+param **.car[2].mobility.acceleration 0
+param **.car[3].mobility.initialX 150m
+param **.car[3].mobility.initialY 400m
+param **.car[3].mobility.angle 90deg
+param **.car[3].mobility.speed 10mps
+param **.car[3].mobility.acceleration 0
+param **.car[4].mobility.initialX 150m
+param **.car[4].mobility.initialY 800m
+param **.car[4].mobility.angle 90deg
+param **.car[4].mobility.speed 15mps
+param **.car[4].mobility.acceleration 0
+param **.car[*].mobility.maxSpeed 28mps
+param *.eNodeB*.nicType "\"LteNicEnb\""
+param *.car[*].nicType "\"LteNicUe\""
+param **.amcMode "\"AUTO\""
+param *.car[*].numUdpApps 1
+param *.car[*].udpApp[0].typename "\"UEClusterizeApp\""
+param *.car[*].udpApp[0].startTime 0s
+param *.car[*].udpApp[0].period 0.01s
+param *.car[*].udpApp[0].stopTime 500s
+param *.car[*].udpApp[0].meHostAddress "\"meHost.virtualisationInfrastructure\""
+param *.car[*].udpApp[0].getMethod true
+param *.meHost.maxMEApps 5
+param *.meHost.maxRam 32GB
+param *.meHost.maxDisk 100TB
+param *.meHost.maxCpu 1
+param *.meHost.mePlatform.numServices 1
+param *.meHost.mePlatform.udpService[0].typename "\"MEPlatooningService\""
+param *.meHost.mePlatform.udpService[0].startTime 0s
+param *.meHost.mePlatform.udpService[0].period 0.1s
+param *.meHost.mePlatform.udpService[0].getPeriod 0.01s
+param *.meHost.mePlatform.udpService[0].speed true
+param *.meHost.mePlatform.udpService[0].preconfiguredTxMode "\"DOWNLINK_UNICAST\""
+param *.meHost.mePlatform.udpService[0].connectAddress "\"127.0.0.1\""
+param *.meHost.mePlatform.udpService[0].connectPort 10020
+param *.meHost.mePlatform.udpService[0].dataTransferMode "\"bytestream\""
+param *.meHost.mePlatform.udpService[0].shape "\"rectangle\""
+param *.meHost.mePlatform.udpService[0].directionDelimiterThreshold 0.09817rad
+param *.meHost.mePlatform.udpService[0].proximityThreshold 500m
+param *.meHost.mePlatform.udpService[0].roadLaneSize 2.75m
+param *.meHost.mePlatform.udpService[0].triangleAngle 0.18rad
+param *.meHost.mePlatform.udpService[0].desiredVelocity 20mps
+param *.meHost.mePlatform.udpService[0].criticalDistance 0.05m
+param *.meHost.mePlatform.udpService[0].minAcceleration -5
+param *.meHost.mePlatform.udpService[0].maxAcceleration 1.5
+param *.meHost.mePlatform.numTcpApps 2
+param *.meHost.mePlatform.tcpApp[0].typename "\"LocationService_test\""
+param *.meHost.mePlatform.tcpApp[0].active true
+param *.meHost.mePlatform.tcpApp[0].localAddress "\"127.0.0.1\""
+param *.meHost.mePlatform.tcpApp[0].localPort 10020
+param *.meHost.mePlatform.tcpApp[0].requestServiceTime 10
+param *.meHost.mePlatform.tcpApp[1].typename "\"MeApp_test\""
+param *.meHost.mePlatform.tcpApp[1].active true
+param *.meHost.mePlatform.tcpApp[1].connectAddress "\"127.0.0.1\""
+param *.meHost.mePlatform.tcpApp[1].connectPort 10020
+param *.meHost.mePlatform.tcpApp[1].localPort 10022
+param *.meHost.mePlatform.tcpApp[1].numberOfApplications 100
+param *.meHost.mePlatform.tcpApp[1].dataTransferMode "\"bytestream\""
+param **.eNodeB*.meHost "\"meHost\""
+
+vector 0 MecInetThreeCell.pgw.ppp[0].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 1 MecInetThreeCell.pgw.ppp[0].ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 2 MecInetThreeCell.pgw.ppp[1].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 3 MecInetThreeCell.pgw.ppp[1].ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 4 MecInetThreeCell.pgw.ppp[2].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 5 MecInetThreeCell.pgw.ppp[2].ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 6 MecInetThreeCell.pgw.pppInterface.queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 7 MecInetThreeCell.pgw.pppInterface.ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 8 MecInetThreeCell.meHost.virtualisationInfrastructure.pppIf[0].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 9 MecInetThreeCell.meHost.virtualisationInfrastructure.pppIf[0].ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 10 MecInetThreeCell.meHost.gtpEndpoint.ppp[0].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 11 MecInetThreeCell.meHost.gtpEndpoint.ppp[0].ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 12 MecInetThreeCell.meHost.gtpEndpoint.ppp[1].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 13 MecInetThreeCell.meHost.gtpEndpoint.ppp[1].ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 14 MecInetThreeCell.meHost.gtpEndpoint.ppp[2].queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 15 MecInetThreeCell.meHost.gtpEndpoint.ppp[2].ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 16 MecInetThreeCell.meHost.gtpEndpoint.pppInterface.queue queueLength:vector ETV
+attr interpolationmode sample-hold
+attr title "queue length, vector"
+vector 17 MecInetThreeCell.meHost.gtpEndpoint.pppInterface.ppp txState:vector ETV
+attr interpolationmode sample-hold
+attr title "tx state, vector"
+vector 18 MecInetThreeCell.car[0].udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 19 MecInetThreeCell.car[1].udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 20 MecInetThreeCell.car[2].udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 21 MecInetThreeCell.car[3].udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 22 MecInetThreeCell.car[4].udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 23 MecInetThreeCell.meHost.mePlatform.tcp tcpRcvQueueBytes ETV
+vector 24 MecInetThreeCell.meHost.mePlatform.tcp "advertised window" ETV
+vector 25 MecInetThreeCell.meHost.mePlatform.tcp "receive window" ETV
+vector 26 MecInetThreeCell.meHost.mePlatform.tcp "sent ack" ETV
+vector 27 MecInetThreeCell.meHost.mePlatform.lo0.lo rcvdPkFromHL:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 28 MecInetThreeCell.meHost.mePlatform.lo0.lo passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 29 MecInetThreeCell.meHost.mePlatform.tcp "rcvd seq" ETV
+vector 30 MecInetThreeCell.meHost.mePlatform.tcp "rcvd ack" ETV
+vector 31 MecInetThreeCell.meHost.mePlatform.tcp "advertised window" ETV
+vector 32 MecInetThreeCell.meHost.mePlatform.tcp "send window" ETV
+vector 33 MecInetThreeCell.meHost.mePlatform.tcp tcpRcvQueueBytes ETV
+vector 34 MecInetThreeCell.meHost.mePlatform.tcp "receive window" ETV
+vector 35 MecInetThreeCell.meHost.mePlatform.tcp "sent ack" ETV
+vector 36 MecInetThreeCell.meHost.mePlatform.tcp "rcvd seq" ETV
+vector 37 MecInetThreeCell.meHost.mePlatform.tcp "rcvd ack" ETV
+vector 38 MecInetThreeCell.meHost.mePlatform.tcp "send window" ETV
+vector 39 MecInetThreeCell.meHost.mePlatform.tcp "unacked bytes" ETV
+vector 40 MecInetThreeCell.meHost.gtpEndpoint.ppp[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 41 MecInetThreeCell.meHost.gtpEndpoint.ppp[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 42 MecInetThreeCell.meHost.gtpEndpoint.udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 43 MecInetThreeCell.meHost.gtpEndpoint.udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 44 MecInetThreeCell.meHost.gtpEndpoint.pppInterface.queue rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 45 MecInetThreeCell.meHost.gtpEndpoint.pppInterface.queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 46 MecInetThreeCell.meHost.gtpEndpoint.pppInterface.ppp rcvdPkFromHL:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 47 MecInetThreeCell.meHost.gtpEndpoint.pppInterface.ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 48 MecInetThreeCell.meHost.virtualisationInfrastructure.pppIf[0].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 49 MecInetThreeCell.meHost.virtualisationInfrastructure.pppIf[0].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 50 MecInetThreeCell.meHost.virtualisationInfrastructure.udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 51 MecInetThreeCell.meHost.virtualisationInfrastructure.udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 52 MecInetThreeCell.meHost.virtualisationInfrastructure.udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 53 MecInetThreeCell.meHost.virtualisationInfrastructure.pppIf[0].queue rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 54 MecInetThreeCell.meHost.virtualisationInfrastructure.pppIf[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 55 MecInetThreeCell.meHost.virtualisationInfrastructure.pppIf[0].ppp rcvdPkFromHL:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 56 MecInetThreeCell.meHost.virtualisationInfrastructure.pppIf[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 57 MecInetThreeCell.meHost.gtpEndpoint.pppInterface.ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 58 MecInetThreeCell.meHost.gtpEndpoint.pppInterface.ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 59 MecInetThreeCell.meHost.gtpEndpoint.udp sentPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source sentPk
+attr title "packets sent, vector(packetBytes)"
+vector 60 MecInetThreeCell.meHost.gtpEndpoint.ppp[0].queue rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 61 MecInetThreeCell.meHost.gtpEndpoint.ppp[0].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 62 MecInetThreeCell.meHost.gtpEndpoint.ppp[0].ppp rcvdPkFromHL:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 63 MecInetThreeCell.meHost.gtpEndpoint.ppp[0].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 64 MecInetThreeCell.car[1].udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 65 MecInetThreeCell.car[1].udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 66 MecInetThreeCell.car[2].udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 67 MecInetThreeCell.car[2].udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 68 MecInetThreeCell.meHost.mePlatform.tcp "sent seq" ETV
+vector 69 MecInetThreeCell.meHost.mePlatform.tcp "unacked bytes" ETV
+vector 70 MecInetThreeCell.meHost.mePlatform.tcp "rcvd dupAcks" ETV
+vector 71 MecInetThreeCell.meHost.mePlatform.tcpApp[0] requestQueueSizeStat:vector ETV
+attr source requestQueueSize
+attr title "Request queue size, vector"
+vector 72 MecInetThreeCell.meHost.mePlatform.tcp "measured RTT" ETV
+vector 73 MecInetThreeCell.meHost.mePlatform.tcp "smoothed RTT" ETV
+vector 74 MecInetThreeCell.meHost.mePlatform.tcp RTTVAR ETV
+vector 75 MecInetThreeCell.meHost.mePlatform.tcp RTO ETV
+vector 76 MecInetThreeCell.meHost.mePlatform.tcp cwnd ETV
+vector 77 MecInetThreeCell.meHost.mePlatform.tcp "rcvd dupAcks" ETV
+vector 78 MecInetThreeCell.meHost.mePlatform.tcp "sent seq" ETV
+vector 79 MecInetThreeCell.meHost.mePlatform.tcp "measured RTT" ETV
+vector 80 MecInetThreeCell.meHost.mePlatform.tcp "smoothed RTT" ETV
+vector 81 MecInetThreeCell.meHost.mePlatform.tcp RTTVAR ETV
+vector 82 MecInetThreeCell.meHost.mePlatform.tcp RTO ETV
+vector 83 MecInetThreeCell.meHost.mePlatform.tcp cwnd ETV
+vector 84 MecInetThreeCell.meHost.mePlatform.tcp tcpRcvQueueBytes ETV
+vector 85 MecInetThreeCell.meHost.mePlatform.tcp "advertised window" ETV
+vector 86 MecInetThreeCell.meHost.mePlatform.tcp "receive window" ETV
+vector 87 MecInetThreeCell.meHost.mePlatform.tcp "sent ack" ETV
+vector 88 MecInetThreeCell.meHost.mePlatform.tcp "rcvd seq" ETV
+vector 89 MecInetThreeCell.meHost.mePlatform.tcp "rcvd ack" ETV
+vector 90 MecInetThreeCell.meHost.mePlatform.tcp "advertised window" ETV
+vector 91 MecInetThreeCell.meHost.mePlatform.tcp "send window" ETV
+vector 92 MecInetThreeCell.meHost.mePlatform.tcp tcpRcvQueueBytes ETV
+vector 93 MecInetThreeCell.meHost.mePlatform.tcp "receive window" ETV
+vector 94 MecInetThreeCell.meHost.mePlatform.tcp "sent ack" ETV
+vector 95 MecInetThreeCell.meHost.mePlatform.tcp "rcvd seq" ETV
+vector 96 MecInetThreeCell.meHost.mePlatform.tcp "rcvd ack" ETV
+vector 97 MecInetThreeCell.meHost.mePlatform.tcp "send window" ETV
+vector 98 MecInetThreeCell.meHost.mePlatform.tcp "sent seq" ETV
+vector 99 MecInetThreeCell.meHost.mePlatform.tcp "unacked bytes" ETV
+vector 100 MecInetThreeCell.meHost.mePlatform.tcp "unacked bytes" ETV
+vector 101 MecInetThreeCell.meHost.mePlatform.tcp "rcvd dupAcks" ETV
+vector 102 MecInetThreeCell.meHost.mePlatform.tcp "measured RTT" ETV
+vector 103 MecInetThreeCell.meHost.mePlatform.tcp "smoothed RTT" ETV
+vector 104 MecInetThreeCell.meHost.mePlatform.tcp RTTVAR ETV
+vector 105 MecInetThreeCell.meHost.mePlatform.tcp RTO ETV
+vector 106 MecInetThreeCell.meHost.mePlatform.tcp cwnd ETV
+vector 107 MecInetThreeCell.meHost.mePlatform.tcp "rcvd dupAcks" ETV
+vector 108 MecInetThreeCell.meHost.mePlatform.tcp "sent seq" ETV
+vector 109 MecInetThreeCell.meHost.mePlatform.tcp "measured RTT" ETV
+vector 110 MecInetThreeCell.meHost.mePlatform.tcp "smoothed RTT" ETV
+vector 111 MecInetThreeCell.meHost.mePlatform.tcp RTTVAR ETV
+vector 112 MecInetThreeCell.meHost.mePlatform.tcp RTO ETV
+vector 113 MecInetThreeCell.meHost.mePlatform.tcp cwnd ETV
+vector 114 MecInetThreeCell.car[3].udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 115 MecInetThreeCell.car[3].udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 116 MecInetThreeCell.meHost.gtpEndpoint.ppp[1].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 117 MecInetThreeCell.meHost.gtpEndpoint.ppp[1].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 118 MecInetThreeCell.meHost.gtpEndpoint.ppp[2].ppp rxPkOk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rxPkOk
+attr title "packets received OK, vector(packetBytes)"
+vector 119 MecInetThreeCell.meHost.gtpEndpoint.ppp[2].ppp passedUpPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToUpper
+attr title "packets passed to higher layer, vector(packetBytes)"
+vector 120 MecInetThreeCell.meHost.gtpEndpoint.ppp[1].queue rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 121 MecInetThreeCell.meHost.gtpEndpoint.ppp[1].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 122 MecInetThreeCell.meHost.gtpEndpoint.ppp[1].ppp rcvdPkFromHL:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 123 MecInetThreeCell.meHost.gtpEndpoint.ppp[1].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 124 MecInetThreeCell.meHost.gtpEndpoint.ppp[2].queue rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr title "received packets, vector(packetBytes)"
+vector 125 MecInetThreeCell.meHost.gtpEndpoint.ppp[2].queue queueingTime:vector ETV
+attr interpolationmode none
+attr title "queueing time, vector"
+vector 126 MecInetThreeCell.meHost.gtpEndpoint.ppp[2].ppp rcvdPkFromHL:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetReceivedFromUpper
+attr title "packets received from higher layer, vector(packetBytes)"
+vector 127 MecInetThreeCell.meHost.gtpEndpoint.ppp[2].ppp txPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source packetSentToLower
+attr title "packets transmitted, vector(packetBytes)"
+vector 128 MecInetThreeCell.car[4].udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 129 MecInetThreeCell.car[4].udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 130 MecInetThreeCell.meHost.MEClusterizeApp[car[4]] clusterizeConfigSentMsg:vector ETV
+attr source clusterizeConfigSentMsg
+attr title "ClusterizeConfig messages sent, vector"
+attr unit ""
+vector 131 MecInetThreeCell.meHost.MEClusterizeApp[car[3]] clusterizeConfigSentMsg:vector ETV
+attr source clusterizeConfigSentMsg
+attr title "ClusterizeConfig messages sent, vector"
+attr unit ""
+vector 132 MecInetThreeCell.meHost.MEClusterizeApp[car[2]] clusterizeConfigSentMsg:vector ETV
+attr source clusterizeConfigSentMsg
+attr title "ClusterizeConfig messages sent, vector"
+attr unit ""
+vector 133 MecInetThreeCell.meHost.MEClusterizeApp[car[1]] clusterizeConfigSentMsg:vector ETV
+attr source clusterizeConfigSentMsg
+attr title "ClusterizeConfig messages sent, vector"
+attr unit ""
+vector 134 MecInetThreeCell.car[1].udpApp[0] clusterizeConfigRcvdMsg:vector ETV
+attr source clusterizeConfigRcvdMsg
+attr title "ClusterizeConfig Messages Received, vector"
+attr unit s
+vector 135 MecInetThreeCell.car[1].udpApp[0] clusterizeConfigDelay:vector ETV
+attr source clusterizeConfigDelay
+attr title "ClusterizeConfig Delay, vector"
+attr unit s
+vector 136 MecInetThreeCell.car[1].udpApp[0] clusterizeInfoDelay:vector ETV
+attr source clusterizeInfoDelay
+attr title "ClusterizeConfig Info Delay, vector"
+attr unit s
+vector 137 MecInetThreeCell.car[1].udpApp[0] clusterizeDistancies:vector ETV
+attr "" "Clusterize Distancies"
+attr source clusterizeDistancies
+attr unit m
+vector 138 MecInetThreeCell.car[1].udpApp[0] clusterizeAccelerations:vector ETV
+attr "" "Clusterize Accelerations"
+attr source clusterizeAccelerations
+attr unit ""
+vector 139 MecInetThreeCell.car[1].udpApp[0] clusterizeVelocities:vector ETV
+attr "" "Clusterize Velocities"
+attr source clusterizeVelocities
+attr unit mps
+vector 140 MecInetThreeCell.car[2].udpApp[0] clusterizeConfigRcvdMsg:vector ETV
+attr source clusterizeConfigRcvdMsg
+attr title "ClusterizeConfig Messages Received, vector"
+attr unit s
+vector 141 MecInetThreeCell.car[2].udpApp[0] clusterizeConfigDelay:vector ETV
+attr source clusterizeConfigDelay
+attr title "ClusterizeConfig Delay, vector"
+attr unit s
+vector 142 MecInetThreeCell.car[2].udpApp[0] clusterizeInfoDelay:vector ETV
+attr source clusterizeInfoDelay
+attr title "ClusterizeConfig Info Delay, vector"
+attr unit s
+vector 143 MecInetThreeCell.car[2].udpApp[0] clusterizeDistancies:vector ETV
+attr "" "Clusterize Distancies"
+attr source clusterizeDistancies
+attr unit m
+vector 144 MecInetThreeCell.car[2].udpApp[0] clusterizeAccelerations:vector ETV
+attr "" "Clusterize Accelerations"
+attr source clusterizeAccelerations
+attr unit ""
+vector 145 MecInetThreeCell.car[2].udpApp[0] clusterizeVelocities:vector ETV
+attr "" "Clusterize Velocities"
+attr source clusterizeVelocities
+attr unit mps
+vector 146 MecInetThreeCell.car[3].udpApp[0] clusterizeConfigRcvdMsg:vector ETV
+attr source clusterizeConfigRcvdMsg
+attr title "ClusterizeConfig Messages Received, vector"
+attr unit s
+vector 147 MecInetThreeCell.car[3].udpApp[0] clusterizeConfigDelay:vector ETV
+attr source clusterizeConfigDelay
+attr title "ClusterizeConfig Delay, vector"
+attr unit s
+vector 148 MecInetThreeCell.car[3].udpApp[0] clusterizeInfoDelay:vector ETV
+attr source clusterizeInfoDelay
+attr title "ClusterizeConfig Info Delay, vector"
+attr unit s
+vector 149 MecInetThreeCell.car[3].udpApp[0] clusterizeDistancies:vector ETV
+attr "" "Clusterize Distancies"
+attr source clusterizeDistancies
+attr unit m
+vector 150 MecInetThreeCell.car[3].udpApp[0] clusterizeAccelerations:vector ETV
+attr "" "Clusterize Accelerations"
+attr source clusterizeAccelerations
+attr unit ""
+vector 151 MecInetThreeCell.car[3].udpApp[0] clusterizeVelocities:vector ETV
+attr "" "Clusterize Velocities"
+attr source clusterizeVelocities
+attr unit mps
+vector 152 MecInetThreeCell.car[4].udpApp[0] clusterizeConfigRcvdMsg:vector ETV
+attr source clusterizeConfigRcvdMsg
+attr title "ClusterizeConfig Messages Received, vector"
+attr unit s
+vector 153 MecInetThreeCell.car[4].udpApp[0] clusterizeConfigDelay:vector ETV
+attr source clusterizeConfigDelay
+attr title "ClusterizeConfig Delay, vector"
+attr unit s
+vector 154 MecInetThreeCell.car[4].udpApp[0] clusterizeInfoDelay:vector ETV
+attr source clusterizeInfoDelay
+attr title "ClusterizeConfig Info Delay, vector"
+attr unit s
+vector 155 MecInetThreeCell.car[4].udpApp[0] clusterizeDistancies:vector ETV
+attr "" "Clusterize Distancies"
+attr source clusterizeDistancies
+attr unit m
+vector 156 MecInetThreeCell.car[4].udpApp[0] clusterizeAccelerations:vector ETV
+attr "" "Clusterize Accelerations"
+attr source clusterizeAccelerations
+attr unit ""
+vector 157 MecInetThreeCell.car[4].udpApp[0] clusterizeVelocities:vector ETV
+attr "" "Clusterize Velocities"
+attr source clusterizeVelocities
+attr unit mps
+vector 158 MecInetThreeCell.car[0].udp rcvdPk:vector(packetBytes) ETV
+attr interpolationmode none
+attr source rcvdPk
+attr title "packets received, vector(packetBytes)"
+vector 159 MecInetThreeCell.car[0].udp passedUpPk:vector(count) ETV
+attr interpolationmode none
+attr title "packets passed up, vector(count)"
+vector 160 MecInetThreeCell.meHost.MEClusterizeApp[car[0]] clusterizeConfigSentMsg:vector ETV
+attr source clusterizeConfigSentMsg
+attr title "ClusterizeConfig messages sent, vector"
+attr unit ""
+vector 161 MecInetThreeCell.car[0].udpApp[0] clusterizeConfigRcvdMsg:vector ETV
+attr source clusterizeConfigRcvdMsg
+attr title "ClusterizeConfig Messages Received, vector"
+attr unit s
+vector 162 MecInetThreeCell.car[0].udpApp[0] clusterizeConfigDelay:vector ETV
+attr source clusterizeConfigDelay
+attr title "ClusterizeConfig Delay, vector"
+attr unit s
+vector 163 MecInetThreeCell.car[0].udpApp[0] clusterizeInfoDelay:vector ETV
+attr source clusterizeInfoDelay
+attr title "ClusterizeConfig Info Delay, vector"
+attr unit s
+vector 164 MecInetThreeCell.car[0].udpApp[0] clusterizeDistancies:vector ETV
+attr "" "Clusterize Distancies"
+attr source clusterizeDistancies
+attr unit m
+vector 165 MecInetThreeCell.car[0].udpApp[0] clusterizeAccelerations:vector ETV
+attr "" "Clusterize Accelerations"
+attr source clusterizeAccelerations
+attr unit ""
+vector 166 MecInetThreeCell.car[0].udpApp[0] clusterizeVelocities:vector ETV
+attr "" "Clusterize Velocities"
+attr source clusterizeVelocities
+attr unit mps
+0	28826 8 0 0 0 0 1 0 0 0 0
+1	28834 8 0 0 0 0 1 0 0 0 0
+2	28842 8 0 0 0 0 1 0 0 0 0
+3	28850 8 0 0 0 0 1 0 0 0 0
+4	28858 8 0 0 0 0 1 0 0 0 0
+5	28866 8 0 0 0 0 1 0 0 0 0
+6	28874 8 0 0 0 0 1 0 0 0 0
+7	28882 8 0 0 0 0 1 0 0 0 0
+8	28890 255 0 26384 0 0.2000004 15 0 4 25 63
+9	29145 1806 0 26403 0 0.2000005 83 0 1 41 41
+10	30951 148 0 26419 0 0.2000005948 7 0 1 3 3
+11	31099 1141 0 26430 0 0.2000007172 49 0 1 24 24
+12	32240 9 0 0 0 0 1 0 0 0 0
+13	32249 379 0 26383 0 0.2000003724 17 0 1 8 8
+14	32628 238 0 5179 0 0.0700012564 11 0 1 5 5
+15	32866 423 0 26364 0 0.2000002724 19 0 1 9 9
+16	33289 789 0 9751 0 0.0950003964 35 0 3 33 61
+17	34078 2807 0 32592 0 0.2400002884 121 0 1 60 60
+18	36885 502 118 23719 0 0.183 28 108 108 3024 326592
+19	37387 65 119 1340 0 0.025 4 108 108 432 46656
+20	37452 65 120 1357 0 0.025 4 108 108 432 46656
+21	37517 238 121 7206 0 0.08 14 108 108 1512 163296
+22	37755 256 122 7232 0 0.08 15 108 108 1620 174960
+23	38011 3625 123 32964 0 0.242189 181 0 0 0 0
+24	41636 2450 123 32964 0 0.242189 103 7504 42293 2476191 70755647275
+25	44086 2344 123 32964 0 0.242189 102 7504 7504 765408 5743621632
+26	46430 2401 123 32964 0 0.242189 102 0 34789 1703278 39392904394
+27	48831 20355 143 33709 0 0.247125 976 40 576 83903 23643589
+28	69186 20355 143 33709 0 0.247125 976 40 576 83903 23643589
+29	89541 2316 159 32989 0 0.242189 102 0 3900 216086 589226606
+30	91857 2401 159 32989 0 0.242189 102 0 34789 1703278 39392904394
+31	94258 2385 159 32944 0 0.242189 102 7505 11404 985394 9649608126
+32	96643 1852 159 32989 0 0.242189 81 7504 7504 607824 4561111296
+33	98495 2456 159 32944 0 0.242189 122 0 0 0 0
+34	100951 2330 159 32944 0 0.242189 101 7504 7504 757904 5687311616
+35	103281 2308 159 32944 0 0.242189 101 1 3900 219985 604436605
+36	105589 2386 173 32964 0 0.242189 101 0 34739 1668489 38182629873
+37	107975 2308 173 32964 0 0.242189 101 1 3900 219985 604436605
+38	110283 506 173 32918 0 0.242136 22 7504 7504 165088 1238820352
+39	110789 2235 178 32989 0 0.242189 102 0 2194 75939 106371261
+40	113024 845 812 32586 0.0140001804 0.2400001804 33 163 163 5379 876777
+41	113869 845 812 32586 0.0140001804 0.2400001804 33 156 156 5148 803088
+42	114714 1518 814 32588 0.0140001804 0.2400001804 60 136 136 8160 1109760
+43	116232 1449 814 32588 0.0140001804 0.2400001804 60 1 60 1830 73810
+44	117681 1518 816 32590 0.0140001804 0.2400001804 60 128 128 7680 983040
+45	119199 1524 816 32590 0.0140001804 0.2400001804 60 0 2.792e-07 2.14e-06 3.5925952e-13
+46	120723 1520 817 32591 0.0140001804 0.2400001804 60 128 128 7680 983040
+47	122243 1520 817 32591 0.0140001804 0.2400001804 60 135 135 8100 1093500
+48	123763 1518 826 32593 0.0140003384 0.2400003384 60 135 135 8100 1093500
+49	125281 1518 826 32593 0.0140003384 0.2400003384 60 128 128 7680 983040
+50	126799 1518 828 32595 0.0140003384 0.2400003384 60 108 108 6480 699840
+51	128317 1449 828 32595 0.0140003384 0.2400003384 60 1 60 1830 73810
+52	129766 954 832 26305 0.0140003384 0.2 41 86 108 4290 450852
+53	130720 963 834 26315 0.0140003384 0.2 41 106 128 5110 638852
+54	131683 971 834 26384 0.0140003384 0.2000004 41 0 4e-07 1.5424e-06 4.1441024e-13
+55	132654 1014 835 26385 0.0140003384 0.2000004 41 106 128 5110 638852
+56	133668 1014 835 26385 0.0140003384 0.2000004 41 113 135 5397 712401
+57	134682 1035 848 26413 0.0140004964 0.20000055 41 113 135 5397 712401
+58	135717 1035 848 26413 0.0140004964 0.20000055 41 106 128 5110 638852
+59	136752 1035 851 26416 0.0140004964 0.20000055 41 114 136 5438 723236
+60	137787 610 853 26418 0.0140004964 0.20000055 24 134 156 3670 562244
+61	138397 586 853 26419 0.0140004964 0.2000005948 24 0 4.48e-08 8.96e-08 3.01056e-15
+62	138983 613 854 26420 0.0140004964 0.2000005948 24 134 156 3670 562244
+63	139596 613 854 26420 0.0140004964 0.2000005948 24 141 163 3838 614800
+64	140209 72 1023 27249 0.019 0.205 4 86 108 400 40328
+65	140281 66 1023 27249 0.019 0.205 4 1 4 10 30
+66	140347 72 1039 27258 0.019 0.205 4 86 108 400 40328
+67	140419 66 1039 27258 0.019 0.205 4 1 4 10 30
+68	140485 483 1693 32909 0.0330004688 0.242136 21 1 3697 37191 92486891
+69	140968 900 1693 32918 0.0330004688 0.242136 42 0 203 3899 728973
+70	141868 2016 1697 32989 0.0330004688 0.242189 100 0 0 0 0
+71	143884 440 1698 32914 0.0330004688 0.242136 21 0 99 877 74883
+72	144324 429 1702 32918 0.0330004688 0.242136 21 0 0 0 0
+73	144753 429 1702 32918 0.0330004688 0.242136 21 0 0 0 0
+74	145182 689 1702 32918 0.0330004688 0.242136 21 0.045418247946 0.65625 4.932072264388 1.8307614636635
+75	145871 513 1702 32918 0.0330004688 0.242136 21 1 2.625 26.784212768084 38.92882764159
+76	146384 496 1702 32918 0.0330004688 0.242136 21 1072 11792 135072 1090001024
+77	146880 2016 1702 32964 0.0330004688 0.242189 100 0 0 0 0
+78	148896 1875 1704 32944 0.0330104688 0.242189 79 1 34739 1375827 31953889593
+79	150771 448 1713 32985 0.0330104688 0.242189 22 0 0 0 0
+80	151219 448 1713 32985 0.0330104688 0.242189 22 0 0 0 0
+81	151667 721 1713 32985 0.0330104688 0.242189 22 0.039740966953 0.65625 4.971813231341 1.8323408081179
+82	152388 532 1713 32985 0.0330104688 0.242189 22 1 2.625 27.784212768084 39.92882764159
+83	152920 1886 1713 32989 0.0330104688 0.242189 79 1072 42880 1736104 49954741184
+84	154806 11403 2544 33699 0.055 0.247125 579 0 0 0 0
+85	166209 9185 2544 33699 0.055 0.247125 388 7504 24327 8826085 201314666771
+86	175394 8779 2544 33699 0.055 0.247125 387 7504 7504 2904048 21791976192
+87	184173 9162 2544 33699 0.055 0.247125 387 0 16823 5900782 90511979298
+88	193335 9166 2548 33706 0.055 0.247125 387 13750 16823 5914532 90701041798
+89	202501 9162 2548 33706 0.055 0.247125 387 0 16823 5900782 90511979298
+90	211663 9166 2548 33706 0.055 0.247125 387 21255 24343 8821669 201399163379
+91	220829 4399 2548 33704 0.055 0.247125 194 7504 7504 1455776 10924143104
+92	225228 11403 2548 33706 0.055 0.247125 579 0 0 0 0
+93	236631 8760 2548 33706 0.055 0.247125 386 7504 7504 2896544 21735666176
+94	245391 9146 2548 33706 0.055 0.247125 386 13751 16839 5903870 90606441218
+95	254537 9146 2552 33711 0.055 0.247125 386 13750 16823 5897709 90418028469
+96	263683 9146 2552 33711 0.055 0.247125 386 13751 16839 5903870 90606441218
+97	272829 4399 2552 33711 0.055 0.247125 194 7504 7504 1455776 10924143104
+98	277228 4573 2556 33699 0.055 0.247125 193 13751 16823 2950391 45255989649
+99	281801 7795 2556 33711 0.055 0.247125 386 0 16 3088 49408
+100	289596 8163 2559 33704 0.055 0.247125 385 0 16 3072 49152
+101	297759 7971 2563 33706 0.055 0.247125 385 0 0 0 0
+102	305730 3994 2568 33711 0.055 0.247125 193 0 0 0 0
+103	309724 3994 2568 33711 0.055 0.247125 193 0 0 0 0
+104	313718 5930 2568 33711 0.055 0.247125 193 5e-12 0.65625 5.250000000085 1.8375000000024
+105	319648 4078 2568 33711 0.055 0.247125 193 1 2.625 198.78421276808 210.92882764159
+106	323726 4757 2568 33711 0.055 0.247125 193 1072 103984 10137904 704634810624
+107	328483 7971 2568 33711 0.055 0.247125 385 0 0 0 0
+108	336454 4745 2705 33692 0.056006 0.247125 192 13751 16807 2933568 44972976320
+109	341199 3977 2717 33704 0.056006 0.247125 192 0 0 0 0
+110	345176 3977 2717 33704 0.056006 0.247125 192 0 0 0 0
+111	349153 5909 2717 33704 0.056006 0.247125 192 6e-12 0.65625 5.25000000008 1.8375000000024
+112	355062 4061 2717 33704 0.056006 0.247125 192 1 2.625 197.78421276808 209.92882764159
+113	359123 4735 2717 33704 0.056006 0.247125 192 1072 103448 10033920 693822138368
+114	363858 169 3468 27267 0.061 0.205 9 86 108 940 98648
+115	364027 153 3468 27267 0.061 0.205 9 1 9 45 285
+116	364180 338 4958 9740 0.0700001804 0.0950003108 13 163 163 2119 345397
+117	364518 338 4958 9740 0.0700001804 0.0950003108 13 156 156 2028 316368
+118	364856 362 4959 9727 0.0700001804 0.0950001804 14 163 163 2282 371966
+119	365218 362 4959 9727 0.0700001804 0.0950001804 14 156 156 2184 340704
+120	365580 208 5011 26362 0.0700004964 0.20000025 8 134 156 1216 185288
+121	365788 192 5011 26362 0.0700004964 0.20000025 8 0 0 0 0
+122	365980 208 5012 26363 0.0700004964 0.20000025 8 134 156 1216 185288
+123	366188 208 5012 26363 0.0700004964 0.20000025 8 141 163 1272 202704
+124	366396 234 5036 26353 0.0700006044 0.20000015 9 134 156 1372 209624
+125	366630 250 5036 26353 0.0700006044 0.20000015 9 0 1.08e-07 3.32e-07 2.67168e-14
+126	366880 233 5037 26354 0.0700006044 0.20000015 9 134 156 1372 209624
+127	367113 233 5037 26354 0.0700006044 0.20000015 9 141 163 1435 229273
+128	367346 170 6207 27276 0.075 0.205 9 86 108 940 98648
+129	367516 154 6207 27276 0.075 0.205 9 1 9 45 285
+130	367670 32 10504 26291 0.1 0.2 2 1 1 2 2
+131	367702 32 10505 26292 0.1 0.2 2 1 1 2 2
+132	367734 32 10506 26293 0.1 0.2 2 1 1 2 2
+133	367766 32 10507 26294 0.1 0.2 2 1 1 2 2
+134	367798 36 11336 27250 0.105 0.205 2 1 1 2 2
+135	367834 44 11336 27250 0.105 0.205 2 0.005 0.005 0.01 5e-05
+136	367878 42 11336 27250 0.105 0.205 2 0.1 0.105 0.205 0.021025
+137	367920 40 11336 27250 0.105 0.205 2 49 49.5 98.5 4851.25
+138	367960 38 11336 27250 0.105 0.205 2 0 1.5 1.5 2.25
+139	367998 45 11336 27250 0.105 0.205 2 10 10.145269 20.145269 202.92648308236
+140	368043 36 11345 27259 0.105 0.205 2 1 1 2 2
+141	368079 44 11345 27259 0.105 0.205 2 0.005 0.005 0.01 5e-05
+142	368123 42 11345 27259 0.105 0.205 2 0.1 0.105 0.205 0.021025
+143	368165 42 11345 27259 0.105 0.205 2 250.5 251 501.5 125751.25
+144	368207 38 11345 27259 0.105 0.205 2 0 1.5 1.5 2.25
+145	368245 43 11345 27259 0.105 0.205 2 5 5.145269 10.145269 51.473793082361
+146	368288 36 11354 27268 0.105 0.205 2 1 1 2 2
+147	368324 44 11354 27268 0.105 0.205 2 0.005 0.005 0.01 5e-05
+148	368368 42 11354 27268 0.105 0.205 2 0.1 0.105 0.205 0.021025
+149	368410 54 11354 27268 0.105 0.205 2 400.5 400.99782420426 801.49782420426 321199.50501655
+150	368464 38 11354 27268 0.105 0.205 2 0 1.5 1.5 2.25
+151	368502 45 11354 27268 0.105 0.205 2 10 10.145269 20.145269 202.92648308236
+152	368547 36 11363 27277 0.105 0.205 2 1 1 2 2
+153	368583 44 11363 27277 0.105 0.205 2 0.005 0.005 0.01 5e-05
+154	368627 42 11363 27277 0.105 0.205 2 0.1 0.105 0.205 0.021025
+155	368669 36 11363 27277 0.105 0.205 2 0 0 0 0
+156	368705 36 11363 27277 0.105 0.205 2 0 1 1 1
+157	368741 45 11363 27277 0.105 0.205 2 15 15.096846 30.096846 452.91475914772
+158	368786 299 16087 27240 0.137 0.205 15 98 108 1610 172900
+159	369085 276 16087 27240 0.137 0.205 15 1 15 120 1240
+160	369361 16 26295 26295 0.2 0.2 1 1 1 1 1
+161	369377 18 27241 27241 0.205 0.205 1 1 1 1 1
+162	369395 22 27241 27241 0.205 0.205 1 0.005 0.005 0.005 2.5e-05
+163	369417 22 27241 27241 0.205 0.205 1 0.205 0.205 0.205 0.042025
+164	369439 32 27241 27241 0.205 0.205 1 88.006527387227 88.006527387227 88.006527387227 7745.1488627588
+165	369471 18 27241 27241 0.205 0.205 1 0 0 0 0
+166	369489 19 27241 27241 0.205 0.205 1 20 20 20 400
+

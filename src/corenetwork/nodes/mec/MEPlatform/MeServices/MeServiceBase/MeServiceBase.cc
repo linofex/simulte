@@ -31,6 +31,7 @@ void MeServiceBase::initialize(int stage)
     else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
+        EV << "Local Address: " << localAddress << " port: " << localPort << endl;
 
         requestServiceTime_ = par("requestServiceTime");
         requestService_ = new cMessage("serveRequest");
@@ -46,8 +47,7 @@ void MeServiceBase::initialize(int stage)
         serverSocket.bind(localAddress[0] ? inet::L3AddressResolver().resolve(localAddress) : inet::L3Address(), localPort);
         serverSocket.listen();
 
-
-        EV << "Local Address: " << localAddress << " port: " << localPort << endl;
+        requestQueueSizeSignal_ = registerSignal("requestQueueSize");
 
 
         binder_ = getBinder();
@@ -94,7 +94,8 @@ void MeServiceBase::handleMessage(cMessage *msg)
         if (!socket) // TCP_ESTABLISHED
         {
             socket = new inet::TCPSocket(msg);
-            socket->setOutputGate(gate("tcpOut"));
+            socket->setOutputGate(gate("tcpOut"));        requestQueueSizeSignal_ = registerSignal("requestQueueSize");
+
 
 
         //        std::cout <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << std::endl ;
@@ -335,6 +336,10 @@ MeServiceBase::~MeServiceBase(){
         delete msg;
 
     }
+}
+void MeServiceBase::emitRequestQueueLength()
+{
+    emit(requestQueueSizeSignal_, requests_.getLength());
 }
 
 

@@ -71,6 +71,7 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
         double subscriptionServiceTime_;
         cQueue subscriptions_;          // queue that holds events relative to subscriptions
 
+        simsignal_t requestQueueSizeSignal_;
 
 
         /*
@@ -192,7 +193,7 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
 
         virtual Http::DataType getDataType(std::string& packet_);
 
-        virtual int requestQueueSize() {return requests_.length();}
+        virtual void emitRequestQueueLength();
 
         virtual void removeSubscritions(inet::TCPSocket *socket){};
 };
