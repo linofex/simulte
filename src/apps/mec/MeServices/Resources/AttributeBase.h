@@ -23,7 +23,7 @@ class AttributeBase
         static int64_t toJson( int64_t value );
         static double toJson( double value );
         static bool toJson( bool value );
-        static nlohmann::ordered_json toJson(AttributeBase& content );
+        static nlohmann::ordered_json toJson(AttributeBase& content);
 };
 
 #endif // _ATTRIBUTEBASE_H_

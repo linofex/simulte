@@ -13,8 +13,11 @@
 #include "inet/common/INETDefs.h"
 #include "inet/networklayer/contract/ipv4/IPv4Address.h"
 #include <set>
-enum EnteringLeavingCriteria {Entering, Leaving};
+#include "apps/mec/MeServices/LocationService/resources/LocationApiDefs.h"
+#include "apps/mec/MeServices/LocationService/resources/TerminalLocation.h"
+#include "apps/mec/MeServices/LocationService/packets/subscriptionTimer_m.h"
 
+class LteBinder;
 class CircleNotificationSubscription : public SubscriptionBase
 {
     public:
@@ -22,7 +25,7 @@ class CircleNotificationSubscription : public SubscriptionBase
         CircleNotificationSubscription(unsigned int subId, inet::TCPSocket *socket , const std::string& baseResLocation,  std::vector<cModule*>& eNodeBs);
         virtual ~CircleNotificationSubscription();
 
-//       nlohmann::ordered_json toJson() const override;
+        nlohmann::ordered_json toJson() const override;
 //
 //
 //
@@ -34,17 +37,27 @@ class CircleNotificationSubscription : public SubscriptionBase
         virtual bool fromJson(const nlohmann::ordered_json& json);
         virtual void sendSubscriptionResponse();
         virtual void sendNotification();
-        virtual void foo(){EV << "YESSSS" << endl;}
-
+        virtual void handleSubscription();
+        virtual inet::Coord getCoords(const MacNodeId id) const;
+        virtual void setNotificationTrigger(subscriptionTimer *nt) { notificationTrigger = nt;}
+        virtual subscriptionTimer*  getNotificationTrigger() { return notificationTrigger;}
 
     protected:
-        std::set<MacNodeId> uesId; // optional: NO
-        std::set<inet::IPv4Address> uesAddress; // optional: NO
+
+        LteBinder* binder; //used to retreive NodeId - Ipv4Address mapping
+
+        std::map<MacNodeId, bool> users; // optional: NO the bool is the initial potition wrt the area
+        //NOT USED
+        std::map<inet::IPv4Address, MacNodeId> USE; // optional: NO
+
+        std::vector<TerminalLocation> terminalLocations; //it stores the user that entered or exited the are
 
         //callbackReference
         std::string callbackData;// optional: YES
         std::string notifyURL; // optional: NO
 
+
+        std::string resourceURL;
         bool checkImmediate; // optional: NO
         std::string clientCorrelator; // optional: YES
 
@@ -61,6 +74,10 @@ class CircleNotificationSubscription : public SubscriptionBase
 
         int trackingAccuracy; // optional: NO
         EnteringLeavingCriteria actionCriteria;// optional: NO
+
+        subscriptionTimer *notificationTrigger;
+
+
 };
 
 

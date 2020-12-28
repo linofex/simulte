@@ -6,24 +6,64 @@
  */
 
 #include "apps/mec/MeServices/LocationService/resources/CircleNotificationSubscription.h"
+#include "apps/mec/MeServices/LocationService/resources/CurrentLocation.h"
+#include "common/LteCommon.h"
+#include "corenetwork/binder/LteBinder.h"
+#include "inet/mobility/base/MovingMobilityBase.h"
 
+CircleNotificationSubscription::CircleNotificationSubscription()
+{
+ binder = getBinder();
+}
 
 CircleNotificationSubscription::CircleNotificationSubscription(unsigned int subId, inet::TCPSocket *socket , const std::string& baseResLocation,  std::vector<cModule*>& eNodeBs):
 SubscriptionBase(subId,socket,baseResLocation, eNodeBs){
+    binder = getBinder();
     baseResLocation_+= "area/circle";
-
 };
 
-CircleNotificationSubscription::~CircleNotificationSubscription(){}
+CircleNotificationSubscription::~CircleNotificationSubscription(){
+}
 
 
 void CircleNotificationSubscription::sendSubscriptionResponse(){}
-void CircleNotificationSubscription::sendNotification(){}
+
+nlohmann::ordered_json CircleNotificationSubscription::toJson() const {}
+
+void CircleNotificationSubscription::sendNotification()
+{
+    nlohmann::ordered_json val;
+    nlohmann::ordered_json terminalLocationArray;
+
+
+    val["enteringLeavingCriteria"] = actionCriteria == Entering? "Entering" : "Leaving";
+    val["isFinalNotification"] = "false";
+    val["link"]["href"] = resourceURL;
+    val["link"]["rel"] = subscriptionType_;
+
+    std::vector<TerminalLocation>::const_iterator it = terminalLocations.begin();
+    for(; it != terminalLocations.end() ; ++it)
+    {
+        terminalLocationArray.push_back(it->toJson());
+    }
+    if(terminalLocationArray.size() > 1)
+        val["terminalLocationList"] = terminalLocationArray;
+    else
+        val["terminalLocationList"] = terminalLocationArray[0];
+
+
+
+    nlohmann::ordered_json notification;
+    notification["subscriptionNotification"] = val;
+
+    Http::sendPostRequest(socket_, notification.dump(2).c_str(), clientHost_.c_str(), clientUri_.c_str());
+}
 
 
 
 bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body)
 {
+
     // ues; // optional: NO
     //
     ////callbackReference
@@ -58,7 +98,18 @@ bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body
         if(callbackReference.contains("callbackData"))
             callbackData = callbackReference["callbackData"];
         if(callbackReference.contains("notifyURL"))
+        {
             notifyURL = callbackReference["notifyURL"];
+            // parse it to retreive the resource uri and
+            // the host
+            std::size_t found = notifyURL.find("/");
+          if (found!=std::string::npos)
+          {
+              clientHost_ = notifyURL.substr(0, found);
+              clientUri_ = notifyURL.substr(found);
+          }
+
+        }
         else
         {
             EV << "2" << endl;
@@ -115,19 +166,19 @@ bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body
        return false;
    }
 
-    if(jsonBody.contains("coords") || (jsonBody.contains("latitude") && jsonBody.contains("longitude")))
+    if(jsonBody.contains("center") || (jsonBody.contains("latitude") && jsonBody.contains("longitude")))
     {
-        if(jsonBody.contains("coords"))
+        if(jsonBody.contains("center"))
         {
-            center.x = jsonBody["coords"]["x"];
-            center.y = jsonBody["coords"]["y"];
-            center.z = jsonBody["coords"]["z"];
+            center.x = jsonBody["center"]["x"];
+            center.y = jsonBody["center"]["y"];
+            center.z = jsonBody["center"]["z"];
         }
 
         else
         {
-            latitude = jsonBody["latitude"];
-            longitude = jsonBody["longitude"];
+            latitude = jsonBody["latitude"]; //  y in the simulator
+            longitude = jsonBody["longitude"]; // x in the simulator
         }
 
     }
@@ -135,7 +186,7 @@ bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body
    {
         EV << "6" << endl;
 
-       Http::send400Response(socket_); //postion is mandatory
+       Http::send400Response(socket_); //postion is mandatory#include "apps/mec/MeServices/LocationService/resources/CurrentLocation.h"
        return false;
    }
 
@@ -147,7 +198,7 @@ bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body
    {
         EV << "7" << endl;
 
-       Http::send400Response(socket_); //trackingAccuracy is mandatory
+       Http::send400Response(socket_); //trackingAccuracy is manda0, tory
        return false;
    }
 
@@ -163,14 +214,135 @@ bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body
             actionCriteria = Leaving;
         }
 
+        //get the current state of the ue
+
     }
     else
    {
         EV << "8" << endl;
 
-       Http::send400Response(socket_); //trackingAccuracy is mandatory
+       Http::send400Response(socket_); //enteringLeavingCriteria is mandatory
        return false;
    }
 
+    if(jsonBody.contains("address"))
+    {
+        if(jsonBody["address"].is_array())
+        {
+            nlohmann::json addressVector = jsonBody["address"];
+            for(int i = 0; i < addressVector.size(); ++i)
+            {
+                std::string add =  addressVector.at(i);
+                MacNodeId id = binder->getMacNodeId(IPv4Address(add.c_str()));
+                if(id == 0)
+                { EV << "IP NON ESISTE" << endl;
+                   //TODO cosa fare in caso in cui un address non esiste?
+                }
+                else
+                {
+                // set the initial state
+
+                inet::Coord coord = getCoords(id);
+                inet::Coord center = inet::Coord(latitude,longitude,0.);
+                EV << "center: [" << latitude << ";"<<longitude << "]"<<endl;
+                EV << "coord: [" << coord.x << ";"<<coord.y << "]"<<endl;
+                EV << "distance: " << coord.distance(center) <<endl;
+
+                users[id] = (coord.distance(center) <= radius) ? true : false;
+                }
+            }
+        }
+        else
+        {
+            std::string add =  jsonBody["address"];
+            MacNodeId id = binder->getMacNodeId(IPv4Address(add.c_str()));
+            if(id == 0)
+            { EV << "IP NON ESISTE" << endl;}
+            else
+            {
+            // set the initial state
+
+            inet::Coord coord = getCoords(id);
+            inet::Coord center = inet::Coord(latitude,longitude,0.);
+            EV << "center: [" << latitude << ";"<<longitude << "]"<<endl;
+            EV << "coord: [" << coord.x << ";"<<coord.y << "]"<<endl;
+            EV << "distance: " << coord.distance(center) <<endl;
+            users[id] = (coord.distance(center) <= radius) ? true : false;
+            }
+
+        }
+    }
+       else
+      {
+           EV << "8" << endl;
+          Http::send400Response(socket_); //address is mandatory
+          return false;
+      }
+
+
+    // add resource url and send back the response
+    nlohmann::ordered_json response = body;
+    resourceURL = baseResLocation_+ "/" + std::to_string(subscriptionId_);
+    response["circleNotificationSubscription"]["resourceURL"] = resourceURL;
+    std::pair<std::string, std::string> p("Location: ", resourceURL);
+    Http::send201Response(socket_, response.dump(2).c_str(), p );
+
+    //if checkImmediate is true, check it
+    if(checkImmediate)
+        handleSubscription();
+
 return true;
+}
+
+void CircleNotificationSubscription::handleSubscription()
+{
+
+    EV << "CircleNotificationSubscription::handleSubscription()" << endl;
+    terminalLocations.clear();
+    std::map<MacNodeId, bool>::iterator it = users.begin();
+    for(; it != users.end(); ++it)
+    {
+        bool found = false;
+        inet::Coord coord = getCoords(it->first);
+        inet::Coord center = inet::Coord(latitude,longitude,0.);
+        EV << "center: [" << latitude << ";"<<longitude << "]"<<endl;
+        EV << "coord: [" << coord.x << ";"<<coord.y << "]"<<endl;
+        EV << "distance: " << coord.distance(center) <<endl;
+
+        if(actionCriteria == Entering)
+        {
+            if(coord.distance(center) <= radius && it->second == false){
+                it->second = true;
+                EV << "dentro" << endl;
+                found = true;
+            }
+        }
+        else
+        {
+            if(coord.distance(center) >= radius && it->second == true){
+                it->second = false;
+                EV << "fuori" << endl;
+                found = true;
+            }
+        }
+
+        if(found)
+        {
+            std::string status = "Retrieved";
+            CurrentLocation location(100, coord);
+            TerminalLocation user(binder->getIPv4Address(it->first).str(), status, location);
+            terminalLocations.push_back(user);
+        }
+    }
+    if(!terminalLocations.empty())
+        sendNotification();
+}
+
+
+inet::Coord CircleNotificationSubscription::getCoords(const MacNodeId id) const
+{
+    OmnetId omnetId = binder->getOmnetId(id);
+    omnetpp::cModule* module = getSimulation()->getModule(omnetId);
+    inet::MovingMobilityBase *mobility_ = check_and_cast<inet::MovingMobilityBase *>(module->getSubmodule("mobility"));
+    return mobility_->getCurrentPosition();
 }

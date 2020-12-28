@@ -188,6 +188,8 @@ nlohmann::ordered_json LocationResource::toJson(std::vector<MacCellId>& cellsID,
 
 inet::Coord LocationResource::getSpeed(const MacNodeId id) const
 {
+    // binder già c'è nella risorsa...
+    // bineder_
     LteBinder* temp = getBinder();
     OmnetId omnetId = temp->getOmnetId(id);
     omnetpp::cModule* module = getSimulation()->getModule(omnetId);
