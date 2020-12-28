@@ -19,6 +19,7 @@
 //#include "apps/mec/MeServices/packets/HttpResponsePacket.h"
 #include "apps/mec/MeServices/httpUtils/httpUtils.h"
 #include "common/utils/utils.h"
+#include "apps/mec/MeServices/LocationService/packets/subscriptionTimer_m.h"
 
 
 
@@ -55,23 +56,57 @@ void LocationService::initialize(int stage)
         LocationResource_.setBaseUri(host_+baseUriQueries_);
         LocationSubscriptionEvent_ = new cMessage("LocationSubscriptionEvent");
         LocationSubscriptionPeriod_ = par("LocationSubscriptionPeriod");
+
+        cOvalFigure *circle = new cOvalFigure("circle");
+        circle->setBounds(cFigure::Rectangle(200,200,60,60));
+        circle->setLineWidth(2);
+        circle->setLineStyle(cFigure::LINE_DOTTED);
+
+        getSimulation()->getSystemModule()->getCanvas()->addFigure(circle);
+
     }
 }
 
+bool LocationService::manageSubscription()
+{
+    if(currentSubscriptionServed_->isName("subscriptionTimer"))
+    {
+        subscriptionTimer *subTimer = check_and_cast<subscriptionTimer*>(currentSubscriptionServed_);
+        if(subscriptions_.find(subTimer->getSubId()) != subscriptions_.end())
+        {
+            SubscriptionBase * sub = subscriptions_[subTimer->getSubId()]; //upcasting (getSubscriptionType is in Subscriptionbase)
+            if(sub->getSubscriptionType().compare("circleNotificationSubscription") == 0)
+            {
+                EV << "LocationService::handleMessage - handling subId: " << subTimer->getSubId() << endl;
+                CircleNotificationSubscription *cir = (CircleNotificationSubscription* ) subscriptions_[subTimer->getSubId()];
+                cir->handleSubscription();
+                if(currentSubscriptionServed_!= nullptr)
+                        delete currentSubscriptionServed_;
+                currentSubscriptionServed_ = nullptr;
+                return true;
+
+            }
+        }
+        else{
+            EV << "NO" << endl;
+            if(currentSubscriptionServed_!= nullptr)
+                    delete currentSubscriptionServed_;
+            currentSubscriptionServed_ = nullptr;
+            return true;
+        }
+    }
+}
 
 void LocationService::handleMessage(cMessage *msg)
 {
     if(msg->isSelfMessage())
     {
-        if(msg->isName("prova"))
+        if(msg->isName("subscriptionTimer"))
         {
-            SubscriptionBase * sub = subscriptions_[0]; //upcasting (getSubscriptionType is in Subscriptionbase)
-            if(sub->getSubscriptionType().compare("circleNotificationSubscription") == 0)
-            {
-                EV << "SI"<< endl;
-                CircleNotificationSubscription *cir = (CircleNotificationSubscription* ) subscriptions_[0];
-                cir->foo();
-            }
+            subscriptionTimer *subTimer = check_and_cast<subscriptionTimer*>(msg);
+            subscriptionTimer *subTimerDup = subTimer->dup();
+            newSubscriptionEvent(subTimerDup);
+            scheduleAt(simTime()+subTimer->getPeriod(), msg);
             return;
         }
 
@@ -140,6 +175,8 @@ void LocationService::handleGETRequest(const std::string& uri, inet::TCPSocket* 
                     }
                     else if(it->rfind("address", 0) == 0)
                     {
+
+                        //NON VA BENE!
                         params = lte::utils::splitString(*it, "=acr:");
                         if(params.size()!= 2) //must be param=acr:values
                         {
@@ -255,10 +292,13 @@ void LocationService::handlePOSTRequest(const std::string& uri,const std::string
             //correct subscription post
             if(res)
             {
-                subscriptions_[0] = newSubscription;
+                subscriptions_[subscriptionId_] = newSubscription;
                 //start timer
-                cMessage* msg = new cMessage("prova");
-                scheduleAt(simTime() + 0, msg);
+                subscriptionTimer* msg = new subscriptionTimer("subscriptionTimer");
+                newSubscription->setNotificationTrigger(msg);
+                msg->setSubId(subscriptionId_);
+                msg->setPeriod(0.5);
+                scheduleAt(simTime() + msg->getPeriod(), msg);
                 subscriptionId_ ++;
                 //circleSubscriptions_[subscriptionId_] = newSubscription;
                 //socketToSubId_[socket].insert(subscriptionId_);
@@ -307,60 +347,56 @@ void LocationService::handlePUTRequest(const std::string& uri,const std::string&
 
 void LocationService::handleDELETERequest(const std::string& uri, inet::TCPSocket* socket)
 {
-//    //get the subId from the uri
-//    // check the sender is the UE that created the resource
-//    std::size_t lastPart = uri.find_last_of("/");
-//    if(lastPart == std::string::npos)
-//    {
-//        throw cRuntimeError("1 - %s", uri.c_str());
-//
-//        Http::send404Response(socket); //it is not a correct uri
-//        return;
-//    }
-//
-//    // find_last_of does not take in to account if the uri has a last /
-//    // in this case subscriptionType would be empty and the baseUri == uri
-//    // by the way the next if statement solve this problem
-//    std::string subscriptionId =  uri.substr(lastPart+1);
-//    std::string uriAndSubType = uri.substr(0,lastPart);
-//    lastPart = uriAndSubType.find_last_of("/");
-//    if(lastPart == std::string::npos)
-//    {
-//        throw cRuntimeError("2 - %s", uriAndSubType.c_str());
-//        Http::send404Response(socket); //it is not a correct uri
-//        return;
-//    }
-//    std::string baseUri = uriAndSubType.substr(0,lastPart);
-//    std::string subscriptionType = uriAndSubType.substr(lastPart + 1);
-//
-////    if(baseUri.compare(baseUriSubscriptions_) == 0)
-////    {
-////        SubscriptionsStructure::iterator it = subscriptions_.find(subscriptionType);
-////        if(it == subscriptions_.end()){
-////            Http::send404Response(socket);
-////            return;
-////        }
-////        std::map<std::string, SubscriptionInfo >::iterator rit = it->second.find(subscriptionId);
-////        if(rit != it->second.end()){
-////            it->second.erase(rit);
-////            if(it->second.empty() && LocationSubscriptionEvent_->isScheduled()) // no more Location sub, stop timer
-////                cancelEvent(LocationSubscriptionEvent_);
-////
-////        }
-//        else
-//        {
-//            // manage?
-//        }
-//        Http::send204Response(socket);
-//
-//
-//    }
-//    else
-//    {
-//
-//        Http::send404Response(socket); //it is not a correct uri
-//        return;
-//    }
+//    DELETE /exampleAPI/location/v1/subscriptions/area/circle/sub123 HTTP/1.1
+//    Accept: application/xml
+//    Host: example.com
+
+    EV << "LocationService::handleDELETERequest" << endl;
+    // uri must be in form example/location/v2/subscriptions/sub_type
+    // or
+    // example/location/v2/subscriptions/type/sub_type
+    std::size_t lastPart = uri.find_last_of("/");
+    if(lastPart == std::string::npos)
+    {
+        EV << "1" << endl;
+        Http::send404Response(socket); //it is not a correct uri
+        return;
+    }
+
+    // find_last_of does not take in to account if the uri has a last /
+    // in this case subscriptionType would be empty and the baseUri == uri
+    // by the way the next if statement solve this problem
+    std::string baseUri = uri.substr(0,lastPart);
+    std::string ssubId =  uri.substr(lastPart+1);
+
+    EV << "baseuri: "<< baseUri << endl;
+
+    // it has to be managed the case when the sub is /area/circle (it has two slashes)
+    if(baseUri.compare(baseUriSubscriptions_+"/area/circle") == 0)
+    {
+        int subId = std::stoi(ssubId);
+        Subscriptions::iterator it = subscriptions_.find(subId);
+        if(it != subscriptions_.end())
+        {
+            CircleNotificationSubscription *sub = (CircleNotificationSubscription*) it->second;
+            subscriptionTimer* msg = sub->getNotificationTrigger();
+            if(msg->isScheduled())
+                cancelAndDelete(msg);
+            delete it->second;
+            subscriptions_.erase(it);
+
+            Http::send204Response(socket);
+        }
+        else
+        {
+            Http::send400Response(socket);
+        }
+    }
+    else
+    {
+        Http::send404Response(socket);
+    }
+
 }
 
 bool LocationService::handleSubscriptionType(cMessage *msg)

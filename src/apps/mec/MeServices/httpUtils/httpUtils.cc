@@ -154,6 +154,16 @@ namespace Http {
         sendPacket(req.getPayload(), socket);
     }
 
+    void sendDeleteRequest(inet::TCPSocket *socket, const char* host, const char* uri)
+    {
+        HTTPRequestPacket req = HTTPRequestPacket(DELETE);
+        req.setHost(host);
+        req.setUri(uri);
+        req.setLength(strlen(req.getPayload()));
+        //req.setBody(body);
+        sendPacket(req.getPayload(), socket);
+    }
+
 
 
     }

@@ -98,7 +98,10 @@ class LocationService: public MeServiceBase
     virtual void handleDELETERequest(const std::string& uri, inet::TCPSocket* socket);
     virtual bool handleSubscriptionType(cMessage *msg);
 
-
+    /*
+     * This method is called for every element in the subscriptions_ queue.
+     */
+    virtual bool manageSubscription();
     virtual ~LocationService();
 
 

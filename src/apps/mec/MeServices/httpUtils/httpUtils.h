@@ -33,6 +33,7 @@ void send505Response(inet::TCPSocket *socket);
 
 void sendPostRequest(inet::TCPSocket *socket, const char* body, const char* host, const char* uri);
 void sendGetRequest(inet::TCPSocket *socket, const char* body, const char* host, const char* uri);
+void sendDeleteRequest(inet::TCPSocket *socket, const char* host, const char* uri);
 
 
 
