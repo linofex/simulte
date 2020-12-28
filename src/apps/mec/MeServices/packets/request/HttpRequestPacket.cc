@@ -21,7 +21,7 @@ HTTPRequestPacket::HTTPRequestPacket(const char* method, const char *name, short
 {
     HTTPRequestPacket_Base::setMethod(method);
     setContentType("application/json");
-    setBody("\r\n");
+    setBody("");
     setPayload("");
 }
 

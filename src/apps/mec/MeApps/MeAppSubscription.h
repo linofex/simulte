@@ -14,7 +14,7 @@
 class MeAppSubscription : public MeAppBase
 {
     protected:
-
+    int i;
       inet::NodeStatus *nodeStatus = nullptr;
       bool earlySend = false;    // if true, don't wait with sendRequest() until established()
       int numRequestsToSend = 0;    // requests to send in this session
@@ -38,7 +38,7 @@ class MeAppSubscription : public MeAppBase
 //      virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
     public:
-      MeAppSubscription() {}
+      MeAppSubscription() {i = 0;}
       virtual ~MeAppSubscription();
 
  };

@@ -21,8 +21,17 @@ void MeAppSubscription::socketDataArrived(int connId, void *yourPtr, cPacket *ms
     std::string packet = lte::utils::getPacketPayload(msg);
     EV_INFO << "payload: " << packet << endl;
     delete msg;
+    i++;
 
-    Http::send204Response(&socket);
+    if(i == 2)
+    {
+        std::string uri = "/example/location/v2/subscriptions/area/circle/0";
+        std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
+        Http::sendDeleteRequest(&socket, host.c_str(), uri.c_str());
+    }
+        //delete subscription
+
+
 }
 
 void MeAppSubscription::socketEstablished(int connId, void *yourPtr)
@@ -31,15 +40,16 @@ void MeAppSubscription::socketEstablished(int connId, void *yourPtr)
     std::string body = "{  \"circleNotificationSubscription\": {"
                "\"callbackReference\" : {"
                 "\"callbackData\":\"1234\","
-                "\"notifyURL\":\"Ssss4\"},"
-               "\"checkImmediate\": \"true\","
+                "\"notifyURL\":\"example.com/notification/1234\"},"
+               "\"checkImmediate\": \"false\","
+            "\"address\": \"10.0.0.3\","
             "\"clientCorrelator\": \"ciao\","
             "\"enteringLeavingCriteria\": \"Entering\","
             "\"frequency\": 10,"
-            "\"radius\": 10,"
+            "\"radius\": 30,"
             "\"trackingAccuracy\": 10,"
-            "\"latitude\": 10,"
-            "\"longitude\": 10"
+            "\"latitude\": 230,"
+            "\"longitude\": 230"
             "}"
             "}\r\n";
     std::string uri = "/example/location/v2/subscriptions/area/circle";

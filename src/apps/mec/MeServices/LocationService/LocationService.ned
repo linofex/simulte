@@ -25,7 +25,7 @@ simple LocationService like MeServiceBase, ITCPApp
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytestream"); // bytestreamfor emulation
         double LocationSubscriptionPeriod @unit(s)= default(1s);
         double requestServiceTime  = default(5);
-        double subscriptionServiceTime @unit(s) = default(0.5us);
+        double subscriptionServiceTime = default(5);
         string serverThreadClass = default("SocketManager")
         @display("i=block/app");
 

@@ -47,6 +47,10 @@ class SubscriptionBase : public AttributeBase
 
         std::string baseResLocation_;
 
+        std::string clientHost_;
+        std::string clientUri_;
+
+
         std::map<MacCellId, EnodeBStatsCollector*> eNodeBs_;
         unsigned int subscriptionId_;
 
@@ -56,7 +60,6 @@ class SubscriptionBase : public AttributeBase
 
         std::string callbackReference_;
         TimeStamp expiryTime_;
-
 };
 
 

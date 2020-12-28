@@ -145,8 +145,8 @@ void MeServiceBase::scheduleNextEvent(bool now)
             scheduleAt(simTime() + 0 , subscriptionService_);
         else
         {
-            double time = poisson(subscriptionServiceTime_, REQUEST_RNG);
-            EV <<"time: "<< time*1e-6 << endl;
+            double time = poisson(subscriptionServiceTime_, SUBSCRIPTION_RNG);
+            EV <<"time: "<< time << "-> " <<time*1e-6 << endl;
             scheduleAt(simTime() + time*1e-6 , subscriptionService_);
         }
     }
@@ -169,7 +169,6 @@ void MeServiceBase::newRequest(cMessage *msg)
 {
     //EV << "Queue length: " << requests_.length() << endl;
     requests_.insert(msg);
-
     scheduleNextEvent();
 }
 
