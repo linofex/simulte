@@ -246,7 +246,6 @@ void RNIService::handlePOSTRequest(const std::string& uri,const std::string& bod
             if(res)
             {
                 std::cout << "ok" << std::endl;
-                subscriptionId_ ++;
                 measRepUeSubscriptions_[subscriptionId_] = newSubscription;
                 subscriptions_[subscriptionId_] = ee;
                 socketToSubId_[socket].insert(subscriptionId_);

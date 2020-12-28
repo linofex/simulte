@@ -24,7 +24,7 @@ class MeasRepUeSubscription : public SubscriptionBase
     }FilterCriteriaAssocTri;
 
     public:
-    MeasRepUeSubscription();
+        MeasRepUeSubscription();
         MeasRepUeSubscription(unsigned int subId, inet::TCPSocket *socket, const std::string& baseResLocation,  std::vector<cModule*>& eNodeBs);
         virtual ~MeasRepUeSubscription();
         virtual bool fromJson(const nlohmann::ordered_json& json);

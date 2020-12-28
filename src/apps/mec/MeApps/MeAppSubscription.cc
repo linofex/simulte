@@ -16,7 +16,8 @@ Define_Module(MeAppSubscription);
 MeAppSubscription::~MeAppSubscription(){}
 
 
-void MeAppSubscription::dataArrived(cPacket *msg){
+void MeAppSubscription::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
+{
     std::string packet = lte::utils::getPacketPayload(msg);
     EV_INFO << "payload: " << packet << endl;
     delete msg;
@@ -27,30 +28,21 @@ void MeAppSubscription::dataArrived(cPacket *msg){
 void MeAppSubscription::socketEstablished(int connId, void *yourPtr)
 {
 
-    std::string body = "{  \"L2MeasurementSubscription\": {"
-               "\"callbackReference\" : \"cia/rni/v1/\","
-               "\"filterCriteria\": {"
-                    "\"appInstanceId\": \"01\","
-                    "\"associateId\": {"
-                        "\"type\": \"UE_IPv4_ADDRESS\","
-                        "\"value\": \"192.168.10.1\""
-                    "},"
-                    "\"ecgi\":{"
-                        "\"plmn\": {"
-                            "\"mcc\": \"001\","
-                            "\"mnc\": \"01\""
-                        "},"
-                        "\"cellId\": \"0\""
-                   "},"
-                    "\"trigger\": \"L2_MEAS_PERIODICAL\""
-                "},"
-                "\"expiryDeadline\": {"
-                    "\"seconds\": 1577836800,"
-                    "\"nanoSeconds\": 0"
-                "}"
+    std::string body = "{  \"circleNotificationSubscription\": {"
+               "\"callbackReference\" : {"
+                "\"callbackData\":\"1234\","
+                "\"notifyURL\":\"Ssss4\"},"
+               "\"checkImmediate\": \"true\","
+            "\"clientCorrelator\": \"ciao\","
+            "\"enteringLeavingCriteria\": \"Entering\","
+            "\"frequency\": 10,"
+            "\"radius\": 10,"
+            "\"trackingAccuracy\": 10,"
+            "\"latitude\": 10,"
+            "\"longitude\": 10"
             "}"
             "}\r\n";
-    std::string uri = "/example/rni/v2/subscriptions/L2_meas";
+    std::string uri = "/example/location/v2/subscriptions/area/circle";
     std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
     Http::sendPostRequest(&socket, body.c_str(), host.c_str(), uri.c_str());
 

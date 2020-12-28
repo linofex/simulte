@@ -58,6 +58,8 @@ class RNIService: public MeServiceBase
     typedef std::map<unsigned int, MeasRepUeSubscription > MeasRepUeSubscriptions;
     MeasRepUeSubscriptions measRepUeSubscriptions_;
 
+
+    //change it from socket|* to connId or const socket* and move it to serviceBase
     std::map<const inet::TCPSocket*, std::set<unsigned int>> socketToSubId_;
 
     typedef std::map<unsigned int, SubscriptionBase*> Subscriptions;
@@ -68,9 +70,9 @@ class RNIService: public MeServiceBase
     cMessage *L2measSubscriptionEvent_;
 
     unsigned int subscriptionId_;
-    std::string baseUriQueries_;
-    std::string baseUriSubscriptions_;
-    std::string baseSubscriptionLocation_;
+    std::string baseUriQueries_;//move to servicebase
+    std::string baseUriSubscriptions_;//move to servicebase
+    std::string baseSubscriptionLocation_; //move to servicebase
     std::set<std::string>supportedQueryParams_;
     std::set<std::string>supportedSubscriptionParams_;
     

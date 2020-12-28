@@ -55,14 +55,12 @@ typedef struct{
 
 
 class Location;
-
+class SubscriptionBase;
 class LocationService: public MeServiceBase
 {
   private:
 
     LocationResource LocationResource_;
-    typedef std::map<std::string, std::map<std::string, SubscriptionInfo >> SubscriptionsStructure;
-    SubscriptionsStructure subscriptions_;
 
     double LocationSubscriptionPeriod_;
     cMessage *LocationSubscriptionEvent_;
@@ -70,6 +68,11 @@ class LocationService: public MeServiceBase
     unsigned int subscriptionId_;
     std::string baseUriQueries_;
     std::string baseUriSubscriptions_;
+    std::string baseSubscriptionLocation_; //move to servicebase
+    typedef std::map<unsigned int, SubscriptionBase*> Subscriptions;
+    Subscriptions subscriptions_;
+
+
     std::set<std::string>supportedQueryParams_;
     std::set<std::string>supportedSubscriptionParams_;
     
@@ -84,6 +87,8 @@ class LocationService: public MeServiceBase
 
     virtual void initialize(int stage) override;
     virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) override;
+
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 

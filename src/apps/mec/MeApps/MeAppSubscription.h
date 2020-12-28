@@ -24,7 +24,7 @@ class MeAppSubscription : public MeAppBase
 //      virtual void sendRequest();
 //      virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
 
-      virtual void dataArrived(cPacket *msg);
+      virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
       virtual void handleSelfMsg(cMessage *msg);
 
       virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
