@@ -58,6 +58,15 @@ void MEWarningAlertService::initialize(int stage)
     polygon->setLineColor(cFigure::RED);
     polygon->setLineWidth(2);
     getSimulation()->getSystemModule()->getCanvas()->addFigure(polygon);
+
+
+    cOvalFigure *circle = new cOvalFigure("circle");
+    circle->setBounds(cFigure::Rectangle(100,120,120,120));
+    circle->setLineWidth(2);
+    circle->setLineStyle(cFigure::LINE_DOTTED);
+    getSimulation()->getSystemModule()->getCanvas()->addFigure(circle);
+
+
 }
 
 void MEWarningAlertService::handleMessage(cMessage *msg)
