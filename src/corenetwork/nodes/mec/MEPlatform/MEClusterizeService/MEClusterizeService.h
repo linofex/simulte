@@ -135,6 +135,7 @@ class MEClusterizeService : public cSimpleModule, public TCPSocket::CallbackInte
         virtual int numInitStages() const { return inet::NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
+        virtual void finish();
         //----------------------------------------------------------------------------------------------------------------------
         // executing periodically the clustering algorithm & updating the clusters map
         virtual void compute(){};

@@ -21,10 +21,12 @@
 #include "corenetwork/nodes/mec/MEPlatform/MEAppPacket_Types.h"
 #include "../warningAlert/packets/WarningAlertPacket_m.h"
 
+#include "apps/mec/MeApps/MeAppBase.h"
+
 /**
  * See MEWarningAlertApp.ned
  */
-class MEWarningAlertApp : public cSimpleModule
+class MEWarningAlertApp : public MeAppBase
 {
     char* ueSimbolicAddress;
     char* meHostSimbolicAddress;
@@ -40,6 +42,23 @@ class MEWarningAlertApp : public cSimpleModule
 
         void handleInfoUEWarningAlertApp(WarningAlertPacket* pkt);
         void handleInfoMEWarningAlertApp(WarningAlertPacket* pkt);
+
+        virtual void handleSelfMsg(cMessage *msg);
+        /* Utility functions */
+       virtual void connect();
+//        virtual void close();
+//        virtual void sendPacket(cPacket *pkt);
+//
+//        /* TCPSocket::CallbackInterface callback methods */
+//        virtual void socketEstablished(int connId, void *yourPtr) override;
+//        virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+//        virtual void socketPeerClosed(int connId, void *yourPtr) override;
+//        virtual void socketClosed(int connId, void *yourPtr) override;
+//        virtual void socketFailure(int connId, void *yourPtr, int code) override;
+//        virtual void socketStatusArrived(int connId, void *yourPtr, inet::TCPStatusInfo *status) override { delete status; }
+
+
+
 };
 
 #endif

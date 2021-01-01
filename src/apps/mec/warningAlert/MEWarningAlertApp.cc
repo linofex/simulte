@@ -33,12 +33,26 @@ void MEWarningAlertApp::initialize(int stage)
     //testing
     EV << "MEWarningAlertApp::initialize - MEWarningAlertApp Symbolic Address: " << meHostSimbolicAddress << endl;
     EV << "MEWarningAlertApp::initialize - UEWarningAlertApp Symbolic Address: " << ueSimbolicAddress <<  " [" << destAddress_.str() << "]" << endl;
+//    socket.readDataTransferModePar(*this);
+    socket.setDataTransferMode(inet::TCPDataTransferMode::TCP_TRANSFER_BYTESTREAM);
 
+//    socket.bind(*localAddress ? inet::L3AddressResolver().resolve(localAddress) : inet::L3Address(), localPort);
+
+    socket.setCallbackObject(this);
+    socket.setOutputGate(gate("mePlatformTcpOut"));
+    connect();
 }
 
 void MEWarningAlertApp::handleMessage(cMessage *msg)
 {
     EV << "MEWarningAlertApp::handleMessage - \n";
+    if(msg->getKind() == inet::TCP_I_DATA || msg->getKind() == inet::TCP_I_ESTABLISHED ||
+       msg->getKind() == inet::TCP_I_URGENT_DATA || msg->getKind() == inet::TCP_I_CLOSED ||
+       msg->getKind() == inet::TCP_I_PEER_CLOSED)
+    {
+        socket.processMessage(msg);
+        return;
+    }
 
     WarningAlertPacket* pkt = check_and_cast<WarningAlertPacket*>(msg);
     if (pkt == 0)
@@ -90,4 +104,29 @@ void MEWarningAlertApp::handleInfoMEWarningAlertApp(WarningAlertPacket* pkt){
     send(pkt, "virtualisationInfrastructureOut");
 }
 
+ void MEWarningAlertApp::handleSelfMsg(cMessage *msg){}
+
+void MEWarningAlertApp::connect()
+{
+    // we need a new connId if this is not the first connection
+    socket.renewSocket();
+
+    // connect
+    const char *connectAddress = "127.0.0.1";
+    int connectPort = 10020;
+
+    inet::L3Address destination;
+    inet::L3AddressResolver().tryResolve(connectAddress, destination);
+    if (destination.isUnspecified()) {
+        EV_ERROR << "Connecting to " << connectAddress << " port=" << connectPort << ": cannot resolve destination address\n";
+    }
+    else {
+        EV_INFO << "Connecting to " << connectAddress << "(" << destination << ") port=" << connectPort << endl;
+
+        socket.connect(destination, connectPort);
+
+        numSessions++;
+        //emit(connectSignal, 1L);
+    }
+}
 

@@ -47,23 +47,23 @@ void MEWarningAlertService::initialize(int stage)
     dangerEdgeC = inet::Coord(par("dangerEdgeCx").doubleValue(), par("dangerEdgeCy").doubleValue(), par("dangerEdgeCz").doubleValue());
     dangerEdgeD = inet::Coord(par("dangerEdgeDx").doubleValue(), par("dangerEdgeDy").doubleValue(), par("dangerEdgeDz").doubleValue());
 
-    //drawing the Danger Area
-    cPolygonFigure *polygon = new cPolygonFigure("polygon");
-    std::vector<cFigure::Point> points;
-    points.push_back(cFigure::Point(dangerEdgeA.x, dangerEdgeA.y));
-    points.push_back(cFigure::Point(dangerEdgeB.x, dangerEdgeB.y));
-    points.push_back(cFigure::Point(dangerEdgeC.x, dangerEdgeC.y));
-    points.push_back(cFigure::Point(dangerEdgeD.x, dangerEdgeD.y));
-    polygon->setPoints(points);
-    polygon->setLineColor(cFigure::RED);
-    polygon->setLineWidth(2);
-    getSimulation()->getSystemModule()->getCanvas()->addFigure(polygon);
+//    //drawing the Danger Area
+//    cPolygonFigure *polygon = new cPolygonFigure("polygon");
+//    std::vector<cFigure::Point> points;
+//    points.push_back(cFigure::Point(dangerEdgeA.x, dangerEdgeA.y));
+//    points.push_back(cFigure::Point(dangerEdgeB.x, dangerEdgeB.y));
+//    points.push_back(cFigure::Point(dangerEdgeC.x, dangerEdgeC.y));
+//    points.push_back(cFigure::Point(dangerEdgeD.x, dangerEdgeD.y));
+//    polygon->setPoints(points);
+//    polygon->setLineColor(cFigure::RED);
+//    polygon->setLineWidth(2);
+//    getSimulation()->getSystemModule()->getCanvas()->addFigure(polygon);
 
 
     cOvalFigure *circle = new cOvalFigure("circle");
-    circle->setBounds(cFigure::Rectangle(100,120,120,120));
+    circle->setBounds(cFigure::Rectangle(150,200,120,120));
     circle->setLineWidth(2);
-    circle->setLineStyle(cFigure::LINE_DOTTED);
+    circle->setLineColor(cFigure::RED);
     getSimulation()->getSystemModule()->getCanvas()->addFigure(circle);
 
 

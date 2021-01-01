@@ -80,6 +80,9 @@ class VirtualisationManager : public cSimpleModule
     //set of ME Services loaded into the ME Host & Platform
     int numServices;
     std::vector<cModule*> meServices;
+
+    cModule* TCPModule;
+
     //------------------------------------
     //set of free gates to use for connecting ME Apps and ME Services
     std::vector<int> freeGates;

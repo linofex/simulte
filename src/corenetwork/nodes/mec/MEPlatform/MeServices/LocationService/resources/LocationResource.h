@@ -35,10 +35,9 @@ class LocationResource : public AttributeBase
 		nlohmann::ordered_json toJson(std::vector<MacNodeId>& cellsID, std::vector<IPv4Address>& uesID) const;
 		
 		inet::Coord getSpeed(const MacNodeId id) const ;
-		inet::Coord getCoords(const MacNodeId id) const ;
 
 	protected:
-		//better mappa <cellID, Cellingo>
+		//better mappa <cellID, Cellinfo>
 		LteBinder *binder_;
 		TimeStamp timestamp_;
 		std::map<MacCellId, LteCellInfo*> eNodeBs_;

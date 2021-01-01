@@ -57,6 +57,11 @@ module MEPlatform2
         inout ppp[];				// connection with GtpEndpoint and local/externa networks
         output meAppOut[];			// connection to the ME App input gate
         input meAppIn[];			// connection to the ME App output gate
+        
+        output meAppTcpOut[];			// connection to the ME App input gate
+        input meAppTcpIn[];			// connection to the ME App output gate
+        
+        
 
     submodules:
 
@@ -124,7 +129,6 @@ module MEPlatform2
             udpService[i].tcpOut --> tcp.appIn++;
             udpService[i].tcpIn <-- tcp.appOut++;
         }
-        
         
 
         //#

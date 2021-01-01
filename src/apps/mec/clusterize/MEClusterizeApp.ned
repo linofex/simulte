@@ -59,4 +59,7 @@ simple MEClusterizeApp like IMEApp
         
         input mePlatformIn;
         output mePlatformOut;
+        
+        input mePlatformTcpIn;
+        output mePlatformTcpOut;
 }

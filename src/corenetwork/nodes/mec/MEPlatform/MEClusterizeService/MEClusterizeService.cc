@@ -100,9 +100,6 @@ void MEClusterizeService::initialize(int stage)
     selfGet_ = new cMessage("GetRequest");
     getPeriod_ = par("getPeriod");
 
-    cMessage *msg = new cMessage("connect");
-    scheduleAt(simTime() +0 , msg);
-
     //txMode information for sending INFO_MEAPP
     preconfiguredTxMode = par("preconfiguredTxMode").stringValue();
     //----------------------------------
@@ -144,6 +141,8 @@ void MEClusterizeService::requestUserPositions()
     std::string uri;
     if(!parameters.empty())
         uri = "/example/location/v2/queries/users?address="+parameters;
+    else
+        uri = "/example/location/v2/queries/users";
     std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
     Http::sendGetRequest(&socket, body.c_str(), host.c_str(), uri.c_str());
 }
@@ -155,13 +154,6 @@ void MEClusterizeService::handleMessage(cMessage *msg)
 {
     EV << "MEClusterizeService::handleMessage" << endl;
     if (msg->isSelfMessage()){
-        if(msg->isName("connect"))
-        {
-            connect();
-            delete msg;
-            return;
-
-        }
         if(msg->isName("GetRequest"))
         {
             requestUserPositions();
@@ -364,13 +356,19 @@ void MEClusterizeService::handleClusterizeNewCar(ClusterizePacket* pkt){
         cars[key].ipAddress = inet::L3AddressResolver().resolve(cars[key].symbolicAddress.c_str()).str();
         cars[key].macID = binder_->getMacNodeIdFromOmnetId(cars[key].id);
         cars[key].hasInitialInfo = false;
-        cars[key].angularPosition.alpha = 1.5708;
 
         EV << "MEClusterizeService::handleClusterizeNewCar - car["<< cars[key].id << "] successfully added!" << endl;
         if(cars.size() >= 2 && !selfGet_->isScheduled() && socket.getState() == inet::TCPSocket::CONNECTED)
         {
+            EV << "MEClusterizeService::handleClusterizeNewCar - start sending GET" << endl;
+
             // a cluster could be made, start requesting the user positions if not already scheduled
             scheduleAt(simTime() + 0, selfGet_);
+        }
+        else if(cars.size() >= 2 && !selfGet_->isScheduled() && !(socket.getState() == inet::TCPSocket::CONNECTED))
+        {
+            EV << "MEClusterizeService::handleClusterizeNewCar - connecting to the service" << endl;
+            connect();
         }
 }
 
@@ -474,16 +472,37 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
                     }
                     else{
 
-                        double deltaTime = (timestamp-it->second.timestamp.dbl());
-                        double speedX = (positionX - it->second.position.x)/deltaTime;
-                        double speedY = (positionY - it->second.position.y)/deltaTime;
-                        double speedZ = (positionZ - it->second.position.z)/deltaTime;
 
-                        it->second.speed.x = speedX;
-                        it->second.speed.y = speedY;
-                        it->second.speed.z = speedZ;
-                        //testing
+
+                        double deltaTime = (timestamp-it->second.timestamp.dbl());
+
+                        inet::Coord deltaPosition;
+                        deltaPosition.x = (positionX - it->second.position.x);
+                        deltaPosition.y = (positionY - it->second.position.y);
+                        deltaPosition.z = (positionZ - it->second.position.z);
+
+                        inet::Coord newSpeed;
+                        newSpeed.x = deltaPosition.x/deltaTime;
+                        newSpeed.y = deltaPosition.y/deltaTime;
+                        newSpeed.z = deltaPosition.z/deltaTime;
+
                         EV << "delta time: " << deltaTime << endl;
+                        EV << "delta Position: "<< deltaPosition << endl;
+                        EV << "calculated speed: " << newSpeed << endl;
+
+                        it->second.speed = newSpeed;
+
+                        inet::Coord direction = it->second.speed;
+                        direction.normalize();
+                        it->second.angularPosition.alpha = -1* atan2(-direction.y, direction.x);
+                        it->second.angularPosition.beta = asin(direction.z);
+                        it->second.angularPosition.gamma = 0;
+
+//                        it->second.speed.x = speedX;
+//                        it->second.speed.y = speedY;
+//                        it->second.speed.z = speedZ;
+                        //testing
+
                         it->second.hasInitialInfo = true;
                     }
                 }
@@ -491,23 +510,26 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
                 it->second.position.x = positionX;
                 it->second.position.y = positionY;
                 it->second.position.z = positionZ;
+
                 it->second.timestamp  = timestamp;
-                it->second.angularPosition.alpha = 1.5708;
+//                it->second.angularPosition.alpha = 1.5708;
                 it->second.isFollower = false;
 
-//                EV << "Position: [" << it->second.position.x << "; " << it->second.position.y << "; " << it->second.position.z << "]" << endl;
-//                EV << "Speed: [" << it->second.speed.x << ", " << it->second.speed.y << ", " << ", " << it->second.speed.z << "]" << endl;
+//              EV << "Position: [" << it->second.position.x << "; " << it->second.position.y << "; " << it->second.position.z << "]" << endl;
+//              EV << "Speed: [" << it->second.speed.x << ", " << it->second.speed.y << ", " << ", " << it->second.speed.z << "]" << endl;
 
                 //testing
-                EV << "MEClusterizeService::handleClusterizeInfo - Updating cars[" << it->first <<"] --> " << it->second.symbolicAddress << " (carID: "<< it->second.id << ") " << endl;
-                EV << "MEClusterizeService::handleClusterizeInfo - cars[" << it->first << "].position = " << "[" << it->second.position.x << " ; "<< it->second.position.y << " ; " << it->second.position.z  << "]" << endl;
-                EV << "MEClusterizeService::handleClusterizeInfo - cars[" << it->first << "].speed = " << "[" << it->second.speed.x << " ; "<< it->second.speed.y << " ; " << it->second.speed.z  << "]" << endl;
-                EV << "MEClusterizeService::handleClusterizeInfo - cars[" << it->first << "].acceleration = " << it->second.acceleration << endl;
-//                EV << "MEClusterizeService::handleClusterizeInfo - cars[" << it->first << "].angularPostion = " << "[" << it->second.angularPosition.alpha << " ; "<< it->second.angularPosition.beta << " ; " << it->second.angularPosition.gamma  << "]" << endl;
-//                EV << "MEClusterizeService::handleClusterizeInfo - cars[" << it->first << "].angularSpeed = " << "[" << it->second.angularSpeed.alpha << " ; "<< it->second.angularSpeed.beta << " ; " << cars[key].angularSpeed.gamma  << "]" << endl;
+                EV << "MEClusterizeService::updateCarInfo - Updating cars[" << it->first <<"] --> " << it->second.symbolicAddress << " (carID: "<< it->second.id << ") " << endl;
+                EV << "MEClusterizeService::updateCarInfo - cars[" << it->first << "].position = " << "[" << it->second.position.x << " ; "<< it->second.position.y << " ; " << it->second.position.z  << "]" << endl;
+                EV << "MEClusterizeService::updateCarInfo - cars[" << it->first << "].speed = " << "[" << it->second.speed.x << " ; "<< it->second.speed.y << " ; " << it->second.speed.z  << "]" << endl;
+                EV << "MEClusterizeService::updateCarInfo - cars[" << it->first << "].acceleration = " << it->second.acceleration << endl;
+                EV << "MEClusterizeService::updateCarInfo - cars[" << it->first << "].angularPostion = " << "[" << it->second.angularPosition.alpha << " ; "<< it->second.angularPosition.beta << " ; " << it->second.angularPosition.gamma  << "]" << endl;
+//              EV << "MEClusterizeService::updateCarInfo - cars[" << it->first << "].angularSpeed = " << "[" << it->second.angularSpeed.alpha << " ; "<< it->second.angularSpeed.beta << " ; " << cars[key].angularSpeed.gamma  << "]" << endl;
 
-
-
+           }
+           else
+           {
+               EV << "EClusterizeService::updateCarInfo - Information is too old! - Discarded" << endl;
            }
            break; //next user
        }
@@ -628,6 +650,9 @@ std::string MEClusterizeService::getCarsAddressesParameters()
 void MEClusterizeService::socketEstablished(int, void *)
 {
     EV << "Socket Established" << endl;
+    // a cluster could be made, start requesting the user positions if not already scheduled
+    if(!selfGet_->isScheduled())
+        scheduleAt(simTime() + 0, selfGet_);
 }
 
 void MEClusterizeService::socketPeerClosed(int, void *)
@@ -646,4 +671,9 @@ void MEClusterizeService::socketFailure(int, void *, int code)
     std::cout <<"Socket of: "  << endl;//<< sock->getRemoteAddress() << " failed. Code: " << code << std::endl;
 }
 
-
+void MEClusterizeService::finish()
+{
+    cancelAndDelete(selfGet_);
+    if(socket.getState() == TCPSocket::CONNECTED)
+        socket.close();
+}

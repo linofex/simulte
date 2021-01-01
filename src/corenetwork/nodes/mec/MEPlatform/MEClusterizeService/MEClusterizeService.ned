@@ -25,7 +25,7 @@ import inet.applications.contract.ITCPApp;
 //	The task of this module is:
 //								1)
 
-simple MEClusterizeService like IMEService, ITCPApp
+simple MEClusterizeService like IMEService
 {
     parameters:
         //auto-scheduling informations
@@ -47,9 +47,7 @@ simple MEClusterizeService like IMEService, ITCPApp
        	string dataTransferMode @enum("bytecount","object","bytestream") = default("bytestream");
        	string serverThreadClass = default("SocketManager");
        	
-       	
-       	
-       	
+	
     gates:
         
         input meAppIn[];

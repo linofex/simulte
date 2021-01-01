@@ -10,7 +10,6 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/common/INETDefs.h"
 
 /**
  * Base class for clients app for TCP-based request-reply protocols or apps.

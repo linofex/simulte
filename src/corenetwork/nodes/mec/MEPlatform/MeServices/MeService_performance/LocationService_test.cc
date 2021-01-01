@@ -89,9 +89,25 @@ void LocationService_test::handleMessage(cMessage *msg)
        }
 }
 
+
+double LocationService_test::calculateRequestServiceTime()
+{
+    EV << "LocationService_test::calculateRequestServiceTime()" << endl;
+    if(strcmp(currentRequestServed_->getName(), "lastFakeRequest") == 0){
+        double time = poisson(requestServiceTime_, REQUEST_RNG);
+        return time;
+    }
+    else if(strcmp(currentRequestServed_->getName(), "fakeRequest") == 0){
+        double time = poisson(requestServiceTime_, REQUEST_RNG);
+        return time;
+    }
+    MeServiceBase::calculateRequestServiceTime();
+}
+
+
 bool LocationService_test::manageRequest()
 {
-    EV << "start manageRequest" << endl;
+    EV << "LocationService_test::manageRequest()" << endl;
     bool result;
     //check if facke request
     if(strcmp(currentRequestServed_->getName(), "fakeRequest") == 0)
@@ -107,12 +123,12 @@ bool LocationService_test::manageRequest()
             {
                 currentRequestServed_->removeControlInfo();
                 socket->send(currentRequestServed_);
-                //do not delete the message!!
+                currentRequestServed_ = nullptr;
                 return true;
             }
             else
             {
-                EV_INFO <<" dataArrived - handleRequest" << endl;
+                EV_INFO <<"LocationService_test::manageRequest() - dataArrived" << endl;
                 handleRequest(currentRequestServed_, socket);
                 result = true;
             }

@@ -3,7 +3,7 @@
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/LocationService/resources/UserInfo.h"
 #include "corenetwork/lteCellInfo/LteCellInfo.h"
 #include "inet/mobility/base/MovingMobilityBase.h"
-
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/LocationService/resources/LocationApiDefs.h"
 #include "corenetwork/binder/LteBinder.h"
 LocationResource::LocationResource() {
     binder_ = nullptr;
@@ -67,7 +67,7 @@ nlohmann::ordered_json LocationResource::toJson() const {
 	        std::string refUrl = baseUri_ + "?address=acr:" + ipAddress;
 	        inet::Coord  speed = getSpeed(pit->first);
 //	        UserInfo ueInfo = UserInfo(pit->second, speed , ipAddress, it->first, refUrl);
-	        UserInfo ueInfo = UserInfo(getCoords(pit->first), speed , ipAddress, it->first, refUrl);
+	        UserInfo ueInfo = UserInfo(LocationUtils::getCoordinates(pit->first), speed , ipAddress, it->first, refUrl);
 
 	        ueArray.push_back(ueInfo.toJson());
 	    }
@@ -107,7 +107,7 @@ nlohmann::ordered_json LocationResource::toJsonUe(std::vector<IPv4Address>& uesI
 	            std::string refUrl = baseUri_ + "?address=acr:" + (*uit).str();
 	            inet::Coord  speed = this->getSpeed(nodeId);
 //                UserInfo ueInfo = UserInfo(pit->second, speed, (*uit).str(), eit->first, refUrl);
-                UserInfo ueInfo = UserInfo(getCoords(pit->first), speed, (*uit).str(), eit->first, refUrl);
+                UserInfo ueInfo = UserInfo(LocationUtils::getCoordinates(pit->first), speed, (*uit).str(), eit->first, refUrl);
 
                 ueArray.push_back(ueInfo.toJson());
                 found = true;
@@ -151,9 +151,9 @@ nlohmann::ordered_json LocationResource::toJsonCell(std::vector<MacCellId>& cell
             {
                 std::string ipAddress = binder_->getIPv4Address(pit->first).str();
                 std::string refUrl = baseUri_ + "?address=acr:" + ipAddress;
-                inet::Coord  speed = getSpeed(pit->first);
+                inet::Coord  speed = getSpeed(pit->first) ;
 //                UserInfo ueInfo = UserInfo(pit->second, speed , ipAddress, it->first, refUrl);
-                UserInfo ueInfo = UserInfo(getCoords(pit->first), speed , ipAddress, it->first, refUrl);
+                UserInfo ueInfo = UserInfo(LocationUtils::getCoordinates(pit->first), speed , ipAddress, it->first, refUrl);
 
                 ueArray.push_back(ueInfo.toJson());
             }
@@ -192,22 +192,12 @@ nlohmann::ordered_json LocationResource::toJson(std::vector<MacCellId>& cellsID,
 
 inet::Coord LocationResource::getSpeed(const MacNodeId id) const
 {
-    LteBinder* temp = getBinder();
-    OmnetId omnetId = temp->getOmnetId(id);
+    OmnetId omnetId = binder_->getOmnetId(id);
     omnetpp::cModule* module = getSimulation()->getModule(omnetId);
     inet::MovingMobilityBase *mobility_ = check_and_cast<inet::MovingMobilityBase *>(module->getSubmodule("mobility"));
     return mobility_->getCurrentSpeed();
 }
 
-
-inet::Coord LocationResource::getCoords(const MacNodeId id) const
-{
-    LteBinder* temp = getBinder();
-    OmnetId omnetId = temp->getOmnetId(id);
-    omnetpp::cModule* module = getSimulation()->getModule(omnetId);
-    inet::MovingMobilityBase *mobility_ = check_and_cast<inet::MovingMobilityBase *>(module->getSubmodule("mobility"));
-    return mobility_->getCurrentPosition();
-}
 
 
 

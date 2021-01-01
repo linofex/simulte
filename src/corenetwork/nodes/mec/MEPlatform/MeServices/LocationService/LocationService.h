@@ -39,30 +39,14 @@
  *
  */
 
-typedef struct{
-    inet::TCPSocket *socket;
-    std::vector<MacNodeId> cellIds;
-    std::vector<MacNodeId> ues;
-    std::vector<Trigger> trigger;
-    std::string consumerUri;
-    std::string appInstanceId;
-    std::string subscriptionType;
-    std::string subscriptionId;
-
-    double expiretaionTime;
-} SubscriptionInfo;
-
-
 
 class Location;
-
+class SubscriptionBase;
 class LocationService: public MeServiceBase
 {
   private:
 
     LocationResource LocationResource_;
-    typedef std::map<std::string, std::map<std::string, SubscriptionInfo >> SubscriptionsStructure;
-    SubscriptionsStructure subscriptions_;
 
     double LocationSubscriptionPeriod_;
     cMessage *LocationSubscriptionEvent_;
@@ -70,6 +54,11 @@ class LocationService: public MeServiceBase
     unsigned int subscriptionId_;
     std::string baseUriQueries_;
     std::string baseUriSubscriptions_;
+    std::string baseSubscriptionLocation_; //move to servicebase
+    typedef std::map<unsigned int, SubscriptionBase*> Subscriptions;
+    Subscriptions subscriptions_;
+
+
     std::set<std::string>supportedQueryParams_;
     std::set<std::string>supportedSubscriptionParams_;
     
@@ -86,6 +75,7 @@ class LocationService: public MeServiceBase
     virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
     virtual void finish() override;
     virtual void refreshDisplay() const override;
+    virtual void handleMessage(cMessage *msg) override;
 
     virtual void handleGETRequest(const std::string& uri, inet::TCPSocket* socket);
     virtual void handlePOSTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
@@ -93,7 +83,10 @@ class LocationService: public MeServiceBase
     virtual void handleDELETERequest(const std::string& uri, inet::TCPSocket* socket);
     virtual bool handleSubscriptionType(cMessage *msg);
 
-
+    /*
+     * This method is called for every element in the subscriptions_ queue.
+     */
+    virtual bool manageSubscription();
     virtual ~LocationService();
 
 

@@ -97,7 +97,6 @@ void MeServiceBase::handleMessage(cMessage *msg)
             socket->setOutputGate(gate("tcpOut"));        requestQueueSizeSignal_ = registerSignal("requestQueueSize");
 
 
-
         //        std::cout <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << std::endl ;
             EV <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << endl ;
 
@@ -122,10 +121,12 @@ bool MeServiceBase::manageRequest()
     if(socket)
     {
         EV_INFO <<" dataArrived - handleRequest" << endl;
-        handleRequest(currentRequestServed_, socket);
+        handleCurrentRequest(socket);
         if(currentRequestServed_!= nullptr)
             delete currentRequestServed_;
         currentRequestServed_ = nullptr;
+        currentRequestServedmap_.clear();
+        currentRequestState_= UNDEFINED;
         return true;
     }
     else // socket has been closed or some error occurs, discard request
@@ -155,15 +156,19 @@ void MeServiceBase::scheduleNextEvent(bool now)
     else if (requests_.getLength() != 0 && !requestService_->isScheduled() )
     {
         currentRequestServed_ = check_and_cast<cMessage *>(requests_.pop());
+
+        //calculate the serviceTime base on the type | parameters
+        double serviceTime = calculateRequestServiceTime(); //must be >0
+        scheduleAt(simTime() + serviceTime*1e-6 , requestService_);
        // EV << "scheduleNextEvent - Request execution started" << endl;
-        if(now)
-            scheduleAt(simTime() + 0 , requestService_);
-        else
-        {
-            double time = poisson(requestServiceTime_, REQUEST_RNG);
-         //   EV <<"time: "<< time << "-> " <<time*1e-6 << endl;
-            scheduleAt(simTime() + time*1e-6 , requestService_);
-        }
+//        if(now)
+//            scheduleAt(simTime() + 0 , requestService_);
+//        else
+//        {
+//            double time = poisson(requestServiceTime_, REQUEST_RNG);
+//         //   EV <<"time: "<< time << "-> " <<time*1e-6 << endl;
+//            scheduleAt(simTime() + time*1e-6 , requestService_);
+//        }
     }
 }
 
@@ -171,7 +176,6 @@ void MeServiceBase::newRequest(cMessage *msg)
 {
     //EV << "Queue length: " << requests_.length() << endl;
     requests_.insert(msg);
-
     scheduleNextEvent();
 }
 
@@ -194,20 +198,140 @@ void MeServiceBase::triggeredEvent(short int event)
     newSubscriptionEvent(msg);
 }
 
+double MeServiceBase::calculateRequestServiceTime()
+{
+    EV << "MeServiceBase::calculateRequestServiceTime()" << endl;
+    parseCurrentRequest();
+    if(currentRequestState_ == CORRECT)
+    {
+        if(currentRequestServedmap_.at("method").compare("GET") == 0)
+        {
+            //parse the uri and calculate the service time as:
+            // numPar * random if numPar >= 1
+            // max * random if numPar == 0 (all info)
+            //int numPar = getNumberOfParameters(currentRequestServedmap_.at(uri));
+            double time = poisson(requestServiceTime_, REQUEST_RNG);
+            return time;
+        }
+    }
+    else
+    {
+        return 0.00001; //example
+    }
+}
+
+
+void MeServiceBase::handleCurrentRequest(inet::TCPSocket *socket){
+    if(currentRequestState_ == CORRECT){ // request-line is well formatted
+         if(currentRequestServedmap_.at("method").compare("GET") == 0)
+             handleGETRequest(currentRequestServedmap_.at("uri"), socket); // pass URI
+         else if(currentRequestServedmap_.at("method").compare("POST") == 0) //subscription
+             handlePOSTRequest(currentRequestServedmap_.at("uri"), currentRequestServedmap_.at("body"),  socket); // pass URI
+         else if(currentRequestServedmap_.at("method").compare("PUT") == 0)
+             handlePUTRequest(currentRequestServedmap_.at("uri"), currentRequestServedmap_.at("body"),  socket); // pass URI
+         else if(currentRequestServedmap_.at("method").compare("DELETE") == 0)
+             handleDELETERequest(currentRequestServedmap_.at("uri"),  socket); // pass URI
+         else if(currentRequestServedmap_.at("method").compare("HEAD") == 0)
+             Http::send405Response(socket);
+
+         else if(currentRequestServedmap_.at("method").compare("CONNECT") == 0)
+             Http::send405Response(socket);
+
+         else if(currentRequestServedmap_.at("method").compare("TRACE") == 0)
+             Http::send405Response(socket);
+
+         else if(currentRequestServedmap_.at("method").compare("PATCH") == 0)
+             Http::send405Response(socket);
+
+         else if(currentRequestServedmap_.at("method").compare("OPTIONS") == 0)
+             Http::send405Response(socket);
+         else
+             throw cRuntimeError ("MeServiceBase::HTTP verb %s non recognised", currentRequestServedmap_.at("method"));
+     }
+    else
+    {
+        Http::send405Response(socket);
+    }
+ }
+
+
+void MeServiceBase::parseCurrentRequest(){
+
+    EV_INFO << "MeServiceBase::parseCurrentRequest() - Start parseRequest" << endl;
+    std::string packet = lte::utils::getPacketPayload(currentRequestServed_);
+    std::vector<std::string> splitting = lte::utils::splitString(packet, "\r\n\r\n"); // bound between header and body
+    std::string header;
+    std::string body;
+
+    if(splitting.size() == 2)
+    {
+        header = splitting[0];
+        body   = splitting[1];
+        currentRequestServedmap_.insert( std::pair<std::string, std::string>("body", body) );
+
+    }
+    else if(splitting.size() == 1) // no body
+    {
+        header = splitting[0];
+    }
+    else //incorrect request
+    {
+      currentRequestState_ = BAD_REQUEST;
+      return;
+    }
+
+    std::vector<std::string> line;
+    std::vector<std::string> lines = lte::utils::splitString(header, "\r\n");
+    std::vector<std::string>::iterator it = lines.begin();
+    line = lte::utils::splitString(*it, " ");  // Request-Line GET / HTTP/1.1
+    if(line.size() != 3 ){
+        currentRequestState_ =  BAD_REQ_LINE;
+    return;
+    }
+    if(!Http::ceckHttpVersion(line[2])){
+        currentRequestState_ =  BAD_HTTP;//send 505Response
+        return;
+    }
+
+    currentRequestServedmap_.insert( std::pair<std::string, std::string>("method", line[0]) );
+    currentRequestServedmap_.insert( std::pair<std::string, std::string>("uri", line[1]) );
+    currentRequestServedmap_.insert( std::pair<std::string, std::string>("http", line[2]) );
+
+    for(++it; it != lines.end(); ++it) {
+        line = lte::utils::splitString(*it, ": ");
+        if(line.size() == 2)
+            currentRequestServedmap_.insert( std::pair<std::string, std::string>(line[0], line[1]) );
+        else
+        {
+            currentRequestState_ =  BAD_HEADER;
+            return;
+        }
+    }
+    if(currentRequestServedmap_.at("Host").compare(host_) != 0)
+    {
+        currentRequestState_ =  DIFF_HOST;
+        return;
+    }
+
+    EV << "MeServiceBase::parseCurrentRequest - URI" << currentRequestServedmap_.at("uri") << endl;
+        currentRequestState_ =  CORRECT;
+        return;
+}
+
+
 void MeServiceBase::handleRequest(cMessage* msg, inet::TCPSocket *socket){
+    EV << "MeServiceBase::handleRequest" << endl;
      reqMap *request = new reqMap;
      std::string packet = lte::utils::getPacketPayload(msg);
      bool res = parseRequest(packet, socket, request); // e.g. [0] GET [1] URI
 
      if(res){ // request-line is well formatted
-
          if(request->at("method").compare("GET") == 0)
              handleGETRequest(request->at("uri"), socket); // pass URI
          else if(request->at("method").compare("POST") == 0) //subscription
              handlePOSTRequest(request->at("uri"), request->at("body"),  socket); // pass URI
          else if(request->at("method").compare("PUT") == 0)
              handlePUTRequest(request->at("uri"), request->at("body"),  socket); // pass URI
-
          else if(request->at("method").compare("DELETE") == 0)
              handleDELETERequest(request->at("uri"),  socket); // pass URI
          else if(request->at("method").compare("HEAD") == 0)
@@ -227,11 +351,16 @@ void MeServiceBase::handleRequest(cMessage* msg, inet::TCPSocket *socket){
          else
              throw cRuntimeError ("MeServiceBase::HTTP verb %s non recognised", request->at("method"));
      }
+     else
+     {
+         EV << "NNO" << endl;
+     }
      delete request;
  }
 
+
 bool MeServiceBase::parseRequest(std::string& packet_, inet::TCPSocket *socket, reqMap* request){
-    EV_INFO << "parseRequest - Start parseRequest" << endl;
+    EV_INFO << "MeServiceBase::parseRequest - Start parseRequest" << endl;
 //    std::string packet(packet_);
     std::vector<std::string> splitting = lte::utils::splitString(packet_, "\r\n\r\n"); // bound between header and body
     std::string header;

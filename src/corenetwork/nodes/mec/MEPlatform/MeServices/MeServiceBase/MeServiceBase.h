@@ -41,6 +41,8 @@
 #define SUBSCRIPTION_RNG 0
 
 typedef std::map<std::string, std::string> reqMap;
+enum RequestState {CORRECT, BAD_REQ_LINE, BAD_HEADER, BAD_HTTP, BAD_REQUEST, DIFF_HOST, UNDEFINED};
+
 
 class SocketManager;
 
@@ -60,6 +62,11 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
         // maybe it is better to add a variable that holds the current served message
         // and pop it from the queue length
         cMessage *currentRequestServed_;
+        reqMap currentRequestServedmap_;
+        std::string currentRequestServedPayload_;
+        RequestState currentRequestState_;
+
+
         cMessage *currentSubscriptionServed_;
 
 
@@ -93,10 +100,20 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
          * Subscriptions have precedence wrt requests
          *
          * if parameter is true -> scheduleAt(NOW)
+         * This is
+         *
          *
          * @param now when to send the next event
          */
         virtual void scheduleNextEvent(bool now = false);
+
+        /*
+         * This method calculate the service time of the request based on:
+         *  - the method (e.g. GET POST)
+         *  - the number of parameters
+         *
+         */
+        virtual double calculateRequestServiceTime();
 
         virtual void initialize(int stage) override;
         virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
@@ -117,6 +134,10 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
          * @request pointer to the structure where to save the the parse result
          */
         virtual bool parseRequest(std::string& packet_, inet::TCPSocket *socket, reqMap* request);
+
+
+        virtual void parseCurrentRequest();
+        virtual void handleCurrentRequest(inet::TCPSocket *socket);
 
         /*
          * Abstract methods

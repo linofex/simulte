@@ -13,7 +13,6 @@
 
 
 package lte.corenetwork.nodes.mec.MEPlatform;
-
 //
 // Template for ME Services.
 //

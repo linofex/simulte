@@ -1,7 +1,8 @@
 //TODO intro
 
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/LocationService/LocationService.h"
-
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/LocationService/resources/CircleNotificationSubscription.h"
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/Resources/SubscriptionBase.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -25,6 +26,7 @@ Define_Module(LocationService);
 LocationService::LocationService(){
     baseUriQueries_ = "/example/location/v2/queries";
     baseUriSubscriptions_ = "/example/location/v2/subscriptions";
+    baseSubscriptionLocation_ = host_+ baseUriSubscriptions_ + "/";
     subscriptionId_ = 0;
     subscriptions_.clear();
     supportedQueryParams_.insert("address");
@@ -50,8 +52,65 @@ void LocationService::initialize(int stage)
         LocationResource_.setBaseUri(host_+baseUriQueries_);
         LocationSubscriptionEvent_ = new cMessage("LocationSubscriptionEvent");
         LocationSubscriptionPeriod_ = par("LocationSubscriptionPeriod");
+        
     }
 }
+
+
+bool LocationService::manageSubscription()
+{
+    if(currentSubscriptionServed_->isName("subscriptionTimer"))
+    {
+        subscriptionTimer *subTimer = check_and_cast<subscriptionTimer*>(currentSubscriptionServed_);
+        if(subscriptions_.find(subTimer->getSubId()) != subscriptions_.end())
+        {
+            SubscriptionBase * sub = subscriptions_[subTimer->getSubId()]; //upcasting (getSubscriptionType is in Subscriptionbase)
+            if(sub->getSubscriptionType().compare("circleNotificationSubscription") == 0)
+            {
+                EV << "LocationService::handleMessage - handling subId: " << subTimer->getSubId() << endl;
+                CircleNotificationSubscription *cir = (CircleNotificationSubscription* ) subscriptions_[subTimer->getSubId()];
+                cir->handleSubscription();
+                if(currentSubscriptionServed_!= nullptr)
+                        delete currentSubscriptionServed_;
+                currentSubscriptionServed_ = nullptr;
+                return true;
+
+            }
+        }
+        else{
+            EV << "NO" << endl;
+            if(currentSubscriptionServed_!= nullptr)
+                    delete currentSubscriptionServed_;
+            currentSubscriptionServed_ = nullptr;
+            return true;
+        }
+    }
+}
+
+void LocationService::handleMessage(cMessage *msg)
+{
+    if(msg->isSelfMessage())
+    {
+        if(msg->isName("subscriptionTimer"))
+        {
+            subscriptionTimer *subTimer = check_and_cast<subscriptionTimer*>(msg);
+            subscriptionTimer *subTimerDup = subTimer->dup();
+            newSubscriptionEvent(subTimerDup);
+            scheduleAt(simTime()+subTimer->getPeriod(), msg);
+            return;
+        }
+
+    }
+        MeServiceBase::handleMessage(msg);
+}
+
+
+
+
+
+
+
+
 
 void LocationService::handleGETRequest(const std::string& uri, inet::TCPSocket* socket)
 {
@@ -185,10 +244,14 @@ void LocationService::handleGETRequest(const std::string& uri, inet::TCPSocket* 
 
 void LocationService::handlePOSTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket)
 {
-    // uri must be in form example/v1/rni/subscriptions/sub_type
+    EV << "LocationService::handlePOSTRequest" << endl;
+    // uri must be in form example/location/v2/subscriptions/sub_type
+    // or
+    // example/location/v2/subscriptions/type/sub_type
     std::size_t lastPart = uri.find_last_of("/");
     if(lastPart == std::string::npos)
     {
+        EV << "1" << endl;
         Http::send404Response(socket); //it is not a correct uri
         return;
     }
@@ -199,195 +262,59 @@ void LocationService::handlePOSTRequest(const std::string& uri,const std::string
     std::string baseUri = uri.substr(0,lastPart);
     std::string subscriptionType =  uri.substr(lastPart+1);
 
-    if(baseUri.compare(baseUriSubscriptions_) == 0)
+    EV << "baseuri: "<< baseUri << endl;
+
+    // it has to be managed the case when the sub is /area/circle (it has two slashes)
+    if(baseUri.compare(baseUriSubscriptions_+"/area") == 0)
     {
-        nlohmann::json jsonBody;
-        try
-        {
-            jsonBody = nlohmann::json::parse(body); // get the JSON structure
-        }
-        catch(nlohmann::detail::parse_error e)
-        {
-            throw cRuntimeError("%s", body.c_str());
-            // body is not correctly formatted in JSON, manage it
-            Http::send400Response(socket); // bad body JSON
-            return;
-        }
-        // check if the notification type
-        // allowed:
-        //  - LocationurementNotification
+        EV << "subscriptionType: "<< subscriptionType << endl;
 
-        SubscriptionInfo newSubscription;
-
-        if(subscriptionType.compare("L2_meas") == 0)
+        if(subscriptionType.compare("circle") == 0)
         {
-            // should check if the mecApp already make the subscription?
-            // how? TODO
-            if(jsonBody.contains("LocationurementSubscription")) // mandatory attribute
+            nlohmann::json jsonBody;
+            try
             {
-                jsonBody = jsonBody["LocationurementSubscription"];// entering the structure for convenience
-                if(!jsonBody.contains("callbackReference") || jsonBody["callbackReference"].is_array())
-                {
-                    Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-                    return;
-                }
-
-                if(std::string(jsonBody["callbackReference"]).find('/') == -1) //bad uri
-                {
-                    Http::send400Response(socket); // must be ipv4
-                    return;
-                }
-
-                if(!jsonBody.contains("filterCriteria")) // mandatory attribute
-                {
-                    Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-                    return;
-                }
-
-                if(jsonBody.contains("appInstanceId") && jsonBody["appInstanceId"].is_array())
-                {
-                    Http::send400Response(socket); // callbackReference is mandatory and takes exactly 1 att
-                    return;
-                }
-
-                if(!jsonBody.contains("filterCriteria") || jsonBody["filterCriteria"].is_array())
-                {
-                   Http::send400Response(socket); // filterCriteria is mandatory and takes exactly 1 att
-                   return;
-                }
-
-
-                nlohmann::json filterCriteria = jsonBody["filterCriteria"];
-                std::vector<MacNodeId> ues;
-                std::vector<MacNodeId> cellids;
-                std::vector<Trigger> triggers;
-
-                //check for appInstanceId filter
-                if(filterCriteria.contains("appInstanceId")  )
-                {
-                    if(filterCriteria["appInstanceId"].is_array())
-                    {
-                        Http::send400Response(socket); // appInstanceId, if present, takes exactly 1 att
-                        return;
-                    }
-                }
-
-                //check ues filter
-                if(filterCriteria.contains("associateId"))
-                {
-                    if(filterCriteria["associateId"].is_array())
-                    {
-                        nlohmann::json ueVector = filterCriteria["associateId"];
-                        for(int i = 0; i < ueVector.size(); ++i)
-                        {
-                            if(ueVector.at(i)["associateId"]["type"] == "UE_IPv4_ADDRESS")
-                            {
-                                std::string address = ueVector.at(i)["associateId"]["value"];
-                                ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
-                            }
-                            else
-                            {
-                                Http::send400Response(socket); // must be ipv4
-                                return;
-                             }
-                         }
-                    }
-                    else
-                    {
-                        if(filterCriteria["associateId"]["type"] == "UE_IPv4_ADDRESS")
-                        {
-                            std::string address = filterCriteria["associateId"]["value"];
-                            ues.push_back(binder_->getMacNodeId(IPv4Address(address.c_str())));
-                        }
-                    }
-                }
-
-                //check cellIds filter
-                if(filterCriteria.contains("ecgi"))
-                {
-                    if(filterCriteria["ecgi"].is_array())
-                    {
-                        nlohmann::json cellVector = filterCriteria["cellId"];
-                        for(int i = 0; i < cellVector.size(); ++i)
-                        {
-                            std::string cellId = cellVector.at(i)["cellId"];
-                            cellids.push_back((MacNodeId)std::stoi(cellId));
-                         }
-                    }
-                    else
-                    {
-                        std::string cellId = filterCriteria["ecgi"]["cellId"];
-                        cellids.push_back((MacNodeId)std::stoi(cellId));
-                    }
-                }
-
-
-                //check trigger filter
-                if(filterCriteria.contains("trigger"))
-                {
-                    if(filterCriteria["trigger"].is_array())
-                    {
-                        nlohmann::json triggerVector = filterCriteria["trigger"];
-                        for(int i = 0; i < triggerVector.size(); ++i)
-                        {
-                            std::string trigger = triggerVector.at(i);
-                            triggers.push_back(getTrigger(trigger));
-                         }
-                    }
-                    else
-                    {
-                        std::string trigger = filterCriteria["trigger"];
-                        triggers.push_back(getTrigger(trigger));
-                    }
-                }
-
-                //chek expiration time
-                if(jsonBody.contains("expiryDeadline") && !jsonBody["expiryDeadline"].is_array())
-                {
-                    newSubscription.expiretaionTime = jsonBody["expiryDeadline"]["seconds"]; //TO DO add nanoseconds
-                }
-
-                newSubscription.cellIds = cellids;
-                newSubscription.ues = ues;
-                newSubscription.trigger = triggers;
-                newSubscription.appInstanceId = filterCriteria["appInstanceId"];
-
-                newSubscription.consumerUri = jsonBody["callbackReference"];
-                newSubscription.consumerUri += "notifications/L2_meas/"+ std::to_string(subscriptionId_);
-                newSubscription.socket = socket;
-
-                std::stringstream idStream;
-                idStream << "sub"<< subscriptionId_;
-                newSubscription.subscriptionId = idStream.str();
-                newSubscription.subscriptionType = "L2_meas";
-
-                subscriptions_["L2_meas"][newSubscription.subscriptionId] = newSubscription;
-
-                subscriptionId_++;
-                std::string links =  host_ + baseUriSubscriptions_ + "/" + newSubscription.subscriptionId;
-                nlohmann::json response;
-                response["LocationSubscription"]["_links"]["self"] =links;
-                response["LocationSubscription"] = jsonBody;
-
-                std::pair<std::string, std::string> location("Location: ", links);
-                //send 201 response
-                Http::send201Response(socket, response.dump(2).c_str(), location);
-
-                if(scheduledSubscription == false)
-                {
-                    cMessage *msg = new cMessage("subscriptionEvent", L2_MEAS_PERIODICAL);
-                    scheduleAt(simTime() + LocationSubscriptionPeriod_ , msg);
-                }
-
+                jsonBody = nlohmann::json::parse(body); // get the JSON structure
+            }
+            catch(nlohmann::detail::parse_error e)
+            {
+                std::cout <<  e.what() << std::endl;
+                // body is not correctly formatted in JSON, manage it
+                Http::send400Response(socket); // bad body JSON
                 return;
+            }
+
+            CircleNotificationSubscription* newSubscription  = new CircleNotificationSubscription(subscriptionId_, socket , baseSubscriptionLocation_,  eNodeB_);
+            bool res = newSubscription->fromJson(jsonBody);
+            //correct subscription post
+            if(res)
+            {
+                subscriptions_[subscriptionId_] = newSubscription;
+                //start timer
+                subscriptionTimer* msg = new subscriptionTimer("subscriptionTimer");
+                newSubscription->setNotificationTrigger(msg);
+                msg->setSubId(subscriptionId_);
+                msg->setPeriod(0.5);
+                scheduleAt(simTime() + msg->getPeriod(), msg);
+                subscriptionId_ ++;
+                //circleSubscriptions_[subscriptionId_] = newSubscription;
+                //socketToSubId_[socket].insert(subscriptionId_); // ad it to link close() socket to remove sub
             }
             else
             {
-                Http::send400Response(socket); // filterCriteria is mandatory and takes exactly 1 att
+                delete newSubscription;
                 return;
             }
+
+        }
+        else
+        {
+            Http::send404Response(socket); //resource not found
+            return;
         }
     }
+
+
     else
     {
         Http::send404Response(socket); //resource not found
@@ -398,13 +325,18 @@ void LocationService::handlePUTRequest(const std::string& uri,const std::string&
 
 void LocationService::handleDELETERequest(const std::string& uri, inet::TCPSocket* socket)
 {
-    //get the subId from the uri
-    // check the sender is the UE that created the resource
+    //    DELETE /exampleAPI/location/v1/subscriptions/area/circle/sub123 HTTP/1.1
+//    Accept: application/xml
+//    Host: example.com
+
+    EV << "LocationService::handleDELETERequest" << endl;
+    // uri must be in form example/location/v2/subscriptions/sub_type
+    // or
+    // example/location/v2/subscriptions/type/sub_type
     std::size_t lastPart = uri.find_last_of("/");
     if(lastPart == std::string::npos)
     {
-        throw cRuntimeError("1 - %s", uri.c_str());
-
+        EV << "1" << endl;
         Http::send404Response(socket); //it is not a correct uri
         return;
     }
@@ -412,45 +344,35 @@ void LocationService::handleDELETERequest(const std::string& uri, inet::TCPSocke
     // find_last_of does not take in to account if the uri has a last /
     // in this case subscriptionType would be empty and the baseUri == uri
     // by the way the next if statement solve this problem
-    std::string subscriptionId =  uri.substr(lastPart+1);
-    std::string uriAndSubType = uri.substr(0,lastPart);
-    lastPart = uriAndSubType.find_last_of("/");
-    if(lastPart == std::string::npos)
-    {
-        throw cRuntimeError("2 - %s", uriAndSubType.c_str());
-        Http::send404Response(socket); //it is not a correct uri
-        return;
-    }
-    std::string baseUri = uriAndSubType.substr(0,lastPart);
-    std::string subscriptionType = uriAndSubType.substr(lastPart + 1);
+    std::string baseUri = uri.substr(0,lastPart);
+    std::string ssubId =  uri.substr(lastPart+1);
 
-    if(baseUri.compare(baseUriSubscriptions_) == 0)
-    {
-        SubscriptionsStructure::iterator it = subscriptions_.find(subscriptionType);
-        if(it == subscriptions_.end()){
-            Http::send404Response(socket);
-            return;
-        }
-        std::map<std::string, SubscriptionInfo >::iterator rit = it->second.find(subscriptionId);
-        if(rit != it->second.end()){
-            it->second.erase(rit);
-            if(it->second.empty() && LocationSubscriptionEvent_->isScheduled()) // no more Location sub, stop timer
-                cancelEvent(LocationSubscriptionEvent_);
+    EV << "baseuri: "<< baseUri << endl;
 
+    // it has to be managed the case when the sub is /area/circle (it has two slashes)
+    if(baseUri.compare(baseUriSubscriptions_+"/area/circle") == 0)
+    {
+        int subId = std::stoi(ssubId);
+        Subscriptions::iterator it = subscriptions_.find(subId);
+        if(it != subscriptions_.end())
+        {
+            CircleNotificationSubscription *sub = (CircleNotificationSubscription*) it->second;
+            subscriptionTimer* msg = sub->getNotificationTrigger();
+            if(msg->isScheduled())
+                cancelAndDelete(msg);
+            delete it->second;
+            subscriptions_.erase(it);
+
+            Http::send204Response(socket);
         }
         else
         {
-            // manage?
+            Http::send400Response(socket);
         }
-        Http::send204Response(socket);
-
-
     }
     else
     {
-
-        Http::send404Response(socket); //it is not a correct uri
-        return;
+        Http::send404Response(socket);
     }
 }
 

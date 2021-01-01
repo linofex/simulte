@@ -33,6 +33,11 @@ moduleinterface IMEApp
         
         input mePlatformIn;
         output mePlatformOut;
+        
+        input mePlatformTcpIn;
+        output mePlatformTcpOut;
+        
+      
 }
 
 

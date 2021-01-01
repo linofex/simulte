@@ -23,6 +23,7 @@ void MeAppBase::initialize(int stage)
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
         socket.readDataTransferModePar(*this);
+
         socket.bind(*localAddress ? inet::L3AddressResolver().resolve(localAddress) : inet::L3Address(), localPort);
 
         socket.setCallbackObject(this);
@@ -120,11 +121,6 @@ void MeAppBase::socketFailure(int, void *, int code)
 
 void MeAppBase::finish()
 {
-    std::string modulePath = getFullPath();
-
-//    EV_INFO << modulePath << ": opened " << numSessions << " sessions\n";
-//    EV_INFO << modulePath << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-//    EV_INFO << modulePath << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 }
 
 

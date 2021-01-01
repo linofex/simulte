@@ -60,6 +60,7 @@ class LocationService_test: public LocationService
 //    virtual void refreshDisplay() const override;
     virtual void handleMessage(cMessage *msg) override;
     virtual bool manageRequest() override;
+    virtual double calculateRequestServiceTime();
 //    virtual void handleGETRequest(const std::string& uri, inet::TCPSocket* socket);
 //    virtual void handlePOSTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);
 //    virtual void handlePUTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket);

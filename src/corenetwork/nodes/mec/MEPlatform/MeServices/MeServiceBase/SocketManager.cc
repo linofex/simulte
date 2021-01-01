@@ -49,7 +49,7 @@ void SocketManager::dataArrived(cMessage *msg, bool urgent){
               {
                   cMessage *request = new cMessage("fakeRequest");
                   service->newRequest(request);
-
+                  
               }
             }
             return;
