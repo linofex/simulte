@@ -122,9 +122,9 @@ bool LocationService_test::manageRequest()
             if(strcmp(currentRequestServed_->getName(), "lastFakeRequest") == 0)
             {
                 currentRequestServed_->removeControlInfo();
-                socket->send(currentRequestServed_);
+                Http::send200Response(socket, "{Done}");
                 currentRequestServed_ = nullptr;
-                return true;
+                //return true;
             }
             else
             {

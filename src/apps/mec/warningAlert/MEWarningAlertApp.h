@@ -12,7 +12,8 @@
 //
 
 #ifndef __SIMULTE_MEWARNINGALERTAPP_H_
-#define __SIMULTE_MEWARNINGALERTAPP_H_
+#define __SIMULTE_MEWARNINGALERTAPP_H_      virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+
 
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -32,6 +33,7 @@ class MEWarningAlertApp : public MeAppBase
     char* meHostSimbolicAddress;
     inet::L3Address destAddress_;
     int size_;
+    std::string subId;
 
     protected:
 
@@ -43,6 +45,11 @@ class MEWarningAlertApp : public MeAppBase
         void handleInfoUEWarningAlertApp(WarningAlertPacket* pkt);
         void handleInfoMEWarningAlertApp(WarningAlertPacket* pkt);
 
+        void handleServicePacket();
+
+
+        virtual void modifySubscription();
+
         virtual void handleSelfMsg(cMessage *msg);
         /* Utility functions */
        virtual void connect();
@@ -50,8 +57,10 @@ class MEWarningAlertApp : public MeAppBase
 //        virtual void sendPacket(cPacket *pkt);
 //
 //        /* TCPSocket::CallbackInterface callback methods */
-//        virtual void socketEstablished(int connId, void *yourPtr) override;
-//        virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+       virtual void established(int connId);
+       virtual void handleTcpMsg();
+
+
 //        virtual void socketPeerClosed(int connId, void *yourPtr) override;
 //        virtual void socketClosed(int connId, void *yourPtr) override;
 //        virtual void socketFailure(int connId, void *yourPtr, int code) override;

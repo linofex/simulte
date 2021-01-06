@@ -12,6 +12,9 @@
 //
 
 #include "MEWarningAlertApp.h"
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/httpUtils/httpUtils.h"
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/httpUtils/json.hpp"
+#include "common/utils/utils.h"
 
 Define_Module(MEWarningAlertApp);
 
@@ -41,11 +44,16 @@ void MEWarningAlertApp::initialize(int stage)
     socket.setCallbackObject(this);
     socket.setOutputGate(gate("mePlatformTcpOut"));
     connect();
+
+    responseMessageLength = 0;
+    receivingMessage = false;
+
+
 }
 
 void MEWarningAlertApp::handleMessage(cMessage *msg)
 {
-    EV << "MEWarningAlertApp::handleMessage - \n";
+//   / EV << "MEWarningAlertApp::handleMessage - \n";
     if(msg->getKind() == inet::TCP_I_DATA || msg->getKind() == inet::TCP_I_ESTABLISHED ||
        msg->getKind() == inet::TCP_I_URGENT_DATA || msg->getKind() == inet::TCP_I_CLOSED ||
        msg->getKind() == inet::TCP_I_PEER_CLOSED)
@@ -58,9 +66,9 @@ void MEWarningAlertApp::handleMessage(cMessage *msg)
     if (pkt == 0)
         throw cRuntimeError("MEWarningAlertApp::handleMessage - \tFATAL! Error when casting to WarningAlertPacket");
 
-    if(!strcmp(pkt->getType(), INFO_UEAPP))         handleInfoUEWarningAlertApp(pkt);
+    //if(!strcmp(pkt->getType(), INFO_UEAPP))         handleInfoUEWarningAlertApp(pkt);
 
-    else if(!strcmp(pkt->getType(), INFO_MEAPP))    handleInfoMEWarningAlertApp(pkt);
+    //else if(!strcmp(pkt->getType(), INFO_MEAPP))    handleInfoMEWarningAlertApp(pkt);
 }
 
 void MEWarningAlertApp::finish(){
@@ -104,7 +112,85 @@ void MEWarningAlertApp::handleInfoMEWarningAlertApp(WarningAlertPacket* pkt){
     send(pkt, "virtualisationInfrastructureOut");
 }
 
- void MEWarningAlertApp::handleSelfMsg(cMessage *msg){}
+void MEWarningAlertApp::handleTcpMsg(){
+
+    if(receivedMessage.at("type").compare("request") == 0)
+    {
+        nlohmann::json jsonBody;
+        EV << "MEClusterizeService::handleTcpMsg - OK " << receivedMessage.at("body")<< endl;
+        try
+        {
+
+           jsonBody = nlohmann::json::parse(receivedMessage.at("body")); // get the JSON structure
+        }
+        catch(nlohmann::detail::parse_error e)
+        {
+           EV <<  e.what() << endl;
+           // body is not correctly formatted in JSON, manage it
+           return;
+        }
+
+        if(jsonBody.contains("subscriptionNotification"))
+        {
+            if(jsonBody["subscriptionNotification"].contains("enteringLeavingCriteria"))
+            {
+                nlohmann::json criteria = jsonBody["subscriptionNotification"]["enteringLeavingCriteria"] ;
+                if(criteria == "Entering")
+                {
+                    //send subscription for leaving..
+                    WarningAlertPacket* packet = new WarningAlertPacket();
+                    packet->setType(INFO_MEAPP);
+                    packet->setDanger(true);
+                    send(packet, "virtualisationInfrastructureOut");
+                    modifySubscription();
+
+                }
+                else if (criteria == "Leaving")
+                {
+                    WarningAlertPacket* packet = new WarningAlertPacket();
+                    packet->setType(INFO_MEAPP);
+                    packet->setDanger(false);
+                    send(packet, "virtualisationInfrastructureOut");
+                }
+            }
+        }
+    }
+    else
+    {
+        if(receivedMessage.at("code").compare("201") == 0)
+        {
+            nlohmann::json jsonBody;
+            EV << "MEClusterizeService::handleTcpMsg - OK " << receivedMessage.at("body")<< endl;
+            try
+            {
+
+               jsonBody = nlohmann::json::parse(receivedMessage.at("body")); // get the JSON structure
+            }
+            catch(nlohmann::detail::parse_error e)
+            {
+               EV <<  e.what() << endl;
+               // body is not correctly formatted in JSON, manage it
+               return;
+            }
+            std::string resourceUri = jsonBody["circleNotificationSubscription"]["resourceURL"];
+            std::size_t lastPart = resourceUri.find_last_of("/");
+            if(lastPart == std::string::npos)
+            {
+                EV << "1" << endl;
+                return;
+            }
+            // find_last_of does not take in to account if the uri has a last /
+            // in this case subscriptionType would be empty and the baseUri == uri
+            // by the way the next if statement solve this problem
+            std::string baseUri = resourceUri.substr(0,lastPart);
+            //save the id
+            subId = resourceUri.substr(lastPart+1);
+            EV << "subId: " << subId << endl;
+        }
+    }
+
+
+}
 
 void MEWarningAlertApp::connect()
 {
@@ -130,3 +216,53 @@ void MEWarningAlertApp::connect()
     }
 }
 
+void MEWarningAlertApp::modifySubscription()
+{
+    //    sendSubscription("Entering");
+        std::string body = "{  \"circleNotificationSubscription\": {"
+                           "\"callbackReference\" : {"
+                            "\"callbackData\":\"1234\","
+                            "\"notifyURL\":\"example.com/notification/1234\"},"
+                           "\"checkImmediate\": \"false\","
+                            "\"address\": \"" + destAddress_.str()+ "\","
+                            "\"clientCorrelator\": \"ciao\","
+                            "\"enteringLeavingCriteria\": \"Leaving\","
+                            "\"frequency\": 10,"
+                            "\"radius\": 60,"
+                            "\"trackingAccuracy\": 10,"
+                            "\"latitude\": 210,"
+                            "\"longitude\": 260"
+                            "}"
+                            "}\r\n";
+                std::string uri = "/example/location/v2/subscriptions/area/circle/" + subId;
+                std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
+                Http::sendPutRequest(&socket, body.c_str(), host.c_str(), uri.c_str());
+
+
+}
+void MEWarningAlertApp::established(int connId)
+{
+//    sendSubscription("Entering");
+    std::string body = "{  \"circleNotificationSubscription\": {"
+                       "\"callbackReference\" : {"
+                        "\"callbackData\":\"1234\","
+                        "\"notifyURL\":\"example.com/notification/1234\"},"
+                       "\"checkImmediate\": \"false\","
+                        "\"address\": \"" + destAddress_.str()+ "\","
+                        "\"clientCorrelator\": \"ciao\","
+                        "\"enteringLeavingCriteria\": \"Entering\","
+                        "\"frequency\": 10,"
+                        "\"radius\": 60,"
+                        "\"trackingAccuracy\": 10,"
+                        "\"latitude\": 210,"
+                        "\"longitude\": 260"
+                        "}"
+                        "}\r\n";
+            std::string uri = "/example/location/v2/subscriptions/area/circle";
+            std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
+            Http::sendPostRequest(&socket, body.c_str(), host.c_str(), uri.c_str());
+}
+
+
+
+void MEWarningAlertApp::handleSelfMsg(cMessage *msg){}

@@ -53,7 +53,6 @@ void CircleNotificationSubscription::sendNotification()
         val["terminalLocationList"] = terminalLocationArray[0];
 
 
-
     nlohmann::ordered_json notification;
     notification["subscriptionNotification"] = val;
 
@@ -185,8 +184,7 @@ bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body
     }
     else
    {
-        EV << "6" << endl;
-
+       EV << "6" << endl;
        Http::send400Response(socket_); //postion is mandatory#include "apps/mec/MeServices/LocationService/resources/CurrentLocation.h"
        return false;
    }
@@ -197,8 +195,7 @@ bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body
     }
     else
    {
-        EV << "7" << endl;
-
+       EV << "7" << endl;
        Http::send400Response(socket_); //trackingAccuracy is manda0, tory
        return false;
    }
@@ -220,7 +217,7 @@ bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body
     }
     else
    {
-        EV << "8" << endl;
+       EV << "8" << endl;
 
        Http::send400Response(socket_); //enteringLeavingCriteria is mandatory
        return false;
@@ -239,7 +236,10 @@ bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body
                 //check if the address
 
                 if(id == 0 || !findUe(id))
-                { EV << "IP NON ESISTE" << endl;
+                {
+                    EV << "IP NON ESISTE" << endl;
+                    Http::send400Response(socket_); //address is mandatory
+                    return false;
                    //TODO cosa fare in caso in cui un address non esiste?
                 }
                 else

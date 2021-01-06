@@ -238,9 +238,9 @@ void UEWarningAlertApp::handleAckStartMEWarningAlertApp(MEAppPacket* pkt)
     //scheduling sendInfoUEInceAlertApp()
     if(!selfSender_->isScheduled()){
 
-        simtime_t startTime = par("startTime");
-        scheduleAt( simTime() + period_, selfSender_);
-        EV << "UEWarningAlertApp::handleAckStartMEWarningAlertApp - Starting traffic in " << period_ << " seconds " << endl;
+//        simtime_t startTime = par("startTime");
+//        scheduleAt( simTime() + period_, selfSender_);
+//        EV << "UEWarningAlertApp::handleAckStartMEWarningAlertApp - Starting traffic in " << period_ << " seconds " << endl;
     }
 
     //scheduling sendStopMEWarningAlertApp()

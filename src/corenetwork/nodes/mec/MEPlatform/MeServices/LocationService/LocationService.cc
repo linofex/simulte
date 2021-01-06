@@ -82,7 +82,7 @@ bool LocationService::manageSubscription()
             if(currentSubscriptionServed_!= nullptr)
                     delete currentSubscriptionServed_;
             currentSubscriptionServed_ = nullptr;
-            return true;
+            return false;
         }
     }
 }
@@ -103,12 +103,6 @@ void LocationService::handleMessage(cMessage *msg)
     }
         MeServiceBase::handleMessage(msg);
 }
-
-
-
-
-
-
 
 
 
@@ -255,7 +249,6 @@ void LocationService::handlePOSTRequest(const std::string& uri,const std::string
         Http::send404Response(socket); //it is not a correct uri
         return;
     }
-
     // find_last_of does not take in to account if the uri has a last /
     // in this case subscriptionType would be empty and the baseUri == uri
     // by the way the next if statement solve this problem
@@ -321,7 +314,62 @@ void LocationService::handlePOSTRequest(const std::string& uri,const std::string
     }
 }
 
-void LocationService::handlePUTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){}
+void LocationService::handlePUTRequest(const std::string& uri,const std::string& body, inet::TCPSocket* socket){
+    EV << "LocationService::handlePUTRequest" << endl;
+    // uri must be in form example/location/v2/subscriptions/sub_type/subId
+    // or
+    // example/location/v2/subscriptions/type/sub_type
+    std::size_t lastPart = uri.find_last_of("/");
+    if(lastPart == std::string::npos)
+    {
+        EV << "1" << endl;
+        Http::send404Response(socket); //it is not a correct uri
+        return;
+    }
+    // find_last_of does not take in to account if the uri has a last /
+    // in this case subscriptionType would be empty and the baseUri == uri
+    // by the way the next if statement solve this problem
+    std::string baseUri = uri.substr(0,lastPart);
+    int subId =  std::stoi(uri.substr(lastPart+1));
+
+    EV << "baseuri: "<< baseUri << endl;
+
+    // it has to be managed the case when the sub is /area/circle (it has two slashes)
+    if(baseUri.compare(baseUriSubscriptions_+"/area/circle") == 0)
+    {
+       Subscriptions::iterator it = subscriptions_.find(subId);
+       if(it != subscriptions_.end())
+       {
+           nlohmann::json jsonBody;
+           try
+           {
+               jsonBody = nlohmann::json::parse(body); // get the JSON structure
+           }
+           catch(nlohmann::detail::parse_error e)
+           {
+               std::cout <<  e.what() << std::endl;
+               // body is not correctly formatted in JSON, manage it
+               Http::send400Response(socket); // bad body JSON
+               return;
+           }
+
+           CircleNotificationSubscription *sub = (CircleNotificationSubscription*) it->second;
+           int id = sub->getSubscriptionId();
+           CircleNotificationSubscription* newSubscription  = new CircleNotificationSubscription(id, socket , baseSubscriptionLocation_,  eNodeB_);
+           bool res = newSubscription->fromJson(jsonBody);
+           if(res == true)
+           {
+               delete it->second;
+               subscriptions_[id] = newSubscription;
+           }
+           else
+           {
+               delete newSubscription;
+           }
+       }
+    }
+
+}
 
 void LocationService::handleDELETERequest(const std::string& uri, inet::TCPSocket* socket)
 {
@@ -378,12 +426,8 @@ void LocationService::handleDELETERequest(const std::string& uri, inet::TCPSocke
 
 bool LocationService::handleSubscriptionType(cMessage *msg)
 {
-    if(msg->getKind() == L2_MEAS_PERIODICAL)
-    {
-        return manageLocationSubscriptions(L2_MEAS_PERIODICAL);
-    }
     delete msg;
-     return false;
+    return false;
 }
 
 bool LocationService::manageLocationSubscriptions(Trigger trigger){
