@@ -385,7 +385,6 @@ void VirtualisationManager::instantiateMEApp(MEAppPacket* pkt)
                mePlatform->gate("meAppTcpOut", index)->connectTo(module->gate("mePlatformTcpIn"));
                module->gate("mePlatformTcpOut")->connectTo(mePlatform->gate("meAppTcpIn", index));
 
-
                cGate* newAppInGate = TCPModule->getOrCreateFirstUnconnectedGate("appIn", 0, false, true);
                cGate* newAppOutGate = TCPModule->getOrCreateFirstUnconnectedGate("appOut", 0, false, true);
 
@@ -451,6 +450,15 @@ void VirtualisationManager::terminateMEApp(MEAppPacket* pkt)
         //disconnecting MEPlatform gates to the MEApp gates
         mePlatform->gate("meAppOut", index)->disconnect();
         mePlatform->gate("meAppIn", index)->disconnect();
+
+        //disconnect tcp gates
+
+        mePlatform->gate("meAppTcpOut", index)->getPreviousGate()->disconnect();
+        mePlatform->gate("meAppTcpIn", index)->getNextGate()->disconnect();
+
+        mePlatform->gate("meAppTcpOut", index)->disconnect();
+        mePlatform->gate("meAppTcpIn", index)->disconnect();
+
 
         //update maps
         ueAppIdToMeAppMapKey.erase(ueAppIdToMeAppMapKey.find(ueAppID));

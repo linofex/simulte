@@ -36,6 +36,7 @@
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/httpUtils/json.hpp"
 
 
+#include "apps/mec/MeApps/MeAppBase.h"
 //################################################################################################
 //DATA STRUCTURE TYPES
 struct cluster{
@@ -57,7 +58,12 @@ struct car{
     //local-info                        //updated in handleClusterizeInfo()
     simtime_t timestamp;
     inet::Coord position;
+    inet::Coord oldPosition;
+
     inet::Coord speed;
+    inet::Coord oldSpeed;
+
+
     inet::EulerAngles angularPosition;
     inet::EulerAngles angularSpeed;
     double acceleration = 0;
@@ -85,7 +91,7 @@ struct car{
  * MEClusterizeService See MEClusterizeService.ned
  *
  */
-class MEClusterizeService : public cSimpleModule, public TCPSocket::CallbackInterface
+class MEClusterizeService : public MeAppBase
 {
     protected:
 
@@ -154,17 +160,9 @@ class MEClusterizeService : public cSimpleModule, public TCPSocket::CallbackInte
         virtual void updateCarInfo(nlohmann::json& userInfo);
         virtual std::string getCarsAddressesParameters();
 
+        virtual void handleTcpMsg();
+        virtual void established(int connId);
 
-
-        // internal: TCPSocket::CallbackInterface methods
-        virtual void socketDataArrived(int, void *, cPacket *msg, bool urgent) override;
-        virtual void socketEstablished(int, void *);
-        virtual void socketPeerClosed(int, void *);
-        virtual void socketClosed(int, void *) override;
-        virtual void socketFailure(int, void *, int code) override;
-//        virtual void socketStatusArrived(int, void *, inet::TCPStatusInfo *status) override { statusArrived(status); }
-
-        bool parseResponse(std::string& packet, std::map<std::string, std::string>* req);
         virtual void connect();
         virtual void requestUserPositions();
 };

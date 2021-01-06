@@ -49,9 +49,7 @@ MEClusterizeService::MEClusterizeService(){
     receivingMessage = false;
 }
 
-MEClusterizeService::~MEClusterizeService(){
-
-}
+MEClusterizeService::~MEClusterizeService(){}
 
 void MEClusterizeService::initialize(int stage)
 {
@@ -114,7 +112,6 @@ void MEClusterizeService::initialize(int stage)
     scheduleAt(simTime() + startTime, selfSender_);
     EV << "MEClusterizeService::initialize - \t starting compute() in " << startTime << " seconds " << endl;
 }
-
 
 void MEClusterizeService::connect()
 {
@@ -372,67 +369,82 @@ void MEClusterizeService::handleClusterizeNewCar(ClusterizePacket* pkt){
         }
 }
 
-void MEClusterizeService::socketDataArrived(int, void *, cPacket *msg, bool urgent)
+void MEClusterizeService::handleTcpMsg()
 {
-        EV << "MEClusterizeService::socketDataArrived" << endl;
-        std::string packet = lte::utils::getPacketPayload(msg);
-        std::map<std::string, std::string>* res = new std::map<std::string, std::string>;
+    updateClusterInfo();
+    if(selfGet_->isScheduled())
+        cancelEvent(selfGet_);
+    scheduleAt(simTime() + getPeriod_, selfGet_);
 
-        bool resp = parseResponse(packet, res);
-//        EV << "resp: " << resp << endl;
-
-        // TODO organize code.
-        // it works correctly only with 200 response COdes
-
-        if(res->find("code") != res->end()) //header plus body(maybe)
-        {
-            // response with
-            if(res->at("code").compare("200") == 0)
-            {
-                if(res->find("Content-Length") != res->end())
-                {
-                    responseMessageLength = std::stoi(res->at("Content-Length"));
-                    EV << responseMessageLength << endl;
-                }
-                if(responseMessageLength > 0)
-                {
-                    responseMessage += res->at("body");
-                    responseMessageLength -= res->at("body").length();
-                    receivingMessage = true;
-                }
-            }
-            else{
-                EV << "NO" << endl;
-            }
-        }
-        else // is only body
-        {
-            responseMessage += res->at("body");
-            responseMessageLength -= res->at("body").length();
-        }
-
-        if(responseMessageLength == 0 && receivingMessage == true)
-        {
-            EV << "MEClusterizeService::socketDataArrived - Completed packet arrived." << endl;
-            updateClusterInfo();
-            responseMessage.clear();
-            receivingMessage = false;
-//            //close socket
-//            socket.close();
-            //reschedule the request
-            if(selfGet_->isScheduled())
-                cancelEvent(selfGet_);
-            scheduleAt(simTime() + getPeriod_, selfGet_);
-        }
-        else if(responseMessageLength < 0)
-            throw cRuntimeError("MEClusterizeService::socketDataArrived - read payload more than Content=Length header");
-
-        delete res;
-        delete msg;
 }
+
+//bool MEClusterizeService::parseResponse(std::string& packet, std::map<std::string, std::string>* request)
+//{
+//    EV_INFO << "MEClusterizeService::parseResponse" << endl;
+//    //    std::string packet(packet_);
+//        std::vector<std::string> splitting = lte::utils::splitString(packet, "\r\n\r\n"); // bound between header and body
+//        std::string header;
+//        std::string body;
+//
+//        if(splitting.size() == 2) //header and body
+//        {
+//            EV <<"header and body" << endl;
+//            header = splitting[0];
+//            body   = splitting[1];
+//            request->insert( std::pair<std::string, std::string>("body", body) );
+//            std::vector<std::string> line;
+//            std::vector<std::string> lines = lte::utils::splitString(header, "\r\n");
+//            std::vector<std::string>::iterator it = lines.begin();
+//
+//            line = lte::utils::splitString(*it, " ");  // Response-Line e.g HTTP/1.1 200 OK
+//            if(line.size() < 3 ){
+//               // Http::send400Response(socket);
+//                return false;
+//            }
+//            if(!Http::ceckHttpVersion(line[0])){
+//               // Http::send505Response(socket);
+//                return false;
+//            }
+//
+//            if(line.size() == 3)
+//            {
+//                request->insert( std::pair<std::string, std::string>("http", line[0]) );
+//                request->insert( std::pair<std::string, std::string>("code", line[1]) );
+//                request->insert( std::pair<std::string, std::string>("reason", line[2]) );
+//            }
+//
+//            else if (line.size() == 4)
+//            {
+//                request->insert( std::pair<std::string, std::string>("http", line[0]) );
+//                request->insert( std::pair<std::string, std::string>("code", line[1]) );
+//                request->insert( std::pair<std::string, std::string>("reason", line[2]+line[3]) );
+//
+//            }
+//            for(++it; it != lines.end(); ++it) {
+//                line = lte::utils::splitString(*it, ": ");
+//                if(line.size() == 2)
+//                    request->insert( std::pair<std::string, std::string>(line[0], line[1]) );
+//                else
+//                {
+//                    //Http::send400Response(socket); // bad request
+//                    return false;
+//                }
+//            }
+//        }
+//        else if(splitting.size() == 1) // only header or only body
+//        {
+//            body   = splitting[0];
+//            request->insert( std::pair<std::string, std::string>("body", body) );
+//        }
+//
+//        return true;
+//}
+
 
 void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
 {
+//    if(simTime() > 32)
+//        return;
     EV << "MEClusterizeService::updateCarInfo" << endl;
     std::map<int, car>::iterator it;
     //
@@ -454,12 +466,22 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
                 double positionY = userInfo["locationInfo"]["y"];
                 double positionZ = userInfo["locationInfo"]["z"];
 
+                EV << "New Position: [" << positionX << "; " << positionY << "; " << positionZ << "]" << endl;
+                EV << "Old Position" << it->second.position << endl;
+
                 bool speed  = par("speed").boolValue();
                 if(speed == true)
                 {
                     it->second.speed.x = userInfo["locationInfo"]["speed"]["x"];
                     it->second.speed.y = userInfo["locationInfo"]["speed"]["y"];
                     it->second.speed.z = userInfo["locationInfo"]["speed"]["z"];
+
+                    inet::Coord direction = it->second.speed;
+                    direction.normalize();
+                    it->second.angularPosition.alpha = -1* atan2(-direction.y, direction.x);
+                    it->second.angularPosition.beta = asin(direction.z);
+                    it->second.angularPosition.gamma = 0;
+
                     it->second.hasInitialInfo = true;
                 }
 
@@ -471,20 +493,25 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
 
                     }
                     else{
-
-
-
                         double deltaTime = (timestamp-it->second.timestamp.dbl());
 
                         inet::Coord deltaPosition;
-                        deltaPosition.x = (positionX - it->second.position.x);
-                        deltaPosition.y = (positionY - it->second.position.y);
-                        deltaPosition.z = (positionZ - it->second.position.z);
+                        deltaPosition.x = (positionX - it->second.oldPosition.x);
+                        deltaPosition.y = (positionY - it->second.oldPosition.y);
+                        deltaPosition.z = (positionZ - it->second.oldPosition.z);
 
                         inet::Coord newSpeed;
                         newSpeed.x = deltaPosition.x/deltaTime;
                         newSpeed.y = deltaPosition.y/deltaTime;
                         newSpeed.z = deltaPosition.z/deltaTime;
+
+                        inet::Coord newAcc;
+                        newAcc.x = (newSpeed.x - it->second.oldSpeed.x)/deltaTime;
+                        newAcc.y = (newSpeed.y - it->second.oldSpeed.y)/deltaTime;
+                        newAcc.z = (newSpeed.z - it->second.oldSpeed.z)/deltaTime;
+
+                        //it->second.acceleration = newAcc.length();
+
 
                         EV << "delta time: " << deltaTime << endl;
                         EV << "delta Position: "<< deltaPosition << endl;
@@ -498,6 +525,12 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
                         it->second.angularPosition.beta = asin(direction.z);
                         it->second.angularPosition.gamma = 0;
 
+
+                        it->second.oldPosition. x = positionX;
+                        it->second.oldPosition. y = positionY;
+                        it->second.oldPosition. z = positionZ;
+                        it->second.oldSpeed = newSpeed;
+
 //                        it->second.speed.x = speedX;
 //                        it->second.speed.y = speedY;
 //                        it->second.speed.z = speedZ;
@@ -510,9 +543,7 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
                 it->second.position.x = positionX;
                 it->second.position.y = positionY;
                 it->second.position.z = positionZ;
-
                 it->second.timestamp  = timestamp;
-//                it->second.angularPosition.alpha = 1.5708;
                 it->second.isFollower = false;
 
 //              EV << "Position: [" << it->second.position.x << "; " << it->second.position.y << "; " << it->second.position.z << "]" << endl;
@@ -542,8 +573,8 @@ void MEClusterizeService::updateClusterInfo(){
     nlohmann::json jsonBody;
     try
     {
-        EV << "MEClusterizeService::updateClusterInfo - message response message "<< responseMessage << endl;
-        jsonBody = nlohmann::json::parse(responseMessage); // get the JSON structure
+        EV << "MEClusterizeService::updateClusterInfo"<< endl;// - message response message "<< receivedMessage.at("body") << endl;
+        jsonBody = nlohmann::json::parse(receivedMessage.at("body")); // get the JSON structure
     }
     catch(nlohmann::detail::parse_error e)
     {
@@ -568,68 +599,6 @@ void MEClusterizeService::updateClusterInfo(){
     }
 }
 
-bool MEClusterizeService::parseResponse(std::string& packet, std::map<std::string, std::string>* request)
-{
-    EV_INFO << "MEClusterizeService::parseResponse" << endl;
-    //    std::string packet(packet_);
-        std::vector<std::string> splitting = lte::utils::splitString(packet, "\r\n\r\n"); // bound between header and body
-        std::string header;
-        std::string body;
-
-        if(splitting.size() == 2) //header and body
-        {
-            EV <<"header and body" << endl;
-            header = splitting[0];
-            body   = splitting[1];
-            request->insert( std::pair<std::string, std::string>("body", body) );
-            std::vector<std::string> line;
-            std::vector<std::string> lines = lte::utils::splitString(header, "\r\n");
-            std::vector<std::string>::iterator it = lines.begin();
-
-            line = lte::utils::splitString(*it, " ");  // Response-Line e.g HTTP/1.1 200 OK
-            if(line.size() < 3 ){
-               // Http::send400Response(socket);
-                return false;
-            }
-            if(!Http::ceckHttpVersion(line[0])){
-               // Http::send505Response(socket);
-                return false;
-            }
-
-            if(line.size() == 3)
-            {
-                request->insert( std::pair<std::string, std::string>("http", line[0]) );
-                request->insert( std::pair<std::string, std::string>("code", line[1]) );
-                request->insert( std::pair<std::string, std::string>("reason", line[2]) );
-            }
-
-            else if (line.size() == 4)
-            {
-                request->insert( std::pair<std::string, std::string>("http", line[0]) );
-                request->insert( std::pair<std::string, std::string>("code", line[1]) );
-                request->insert( std::pair<std::string, std::string>("reason", line[2]+line[3]) );
-
-            }
-            for(++it; it != lines.end(); ++it) {
-                line = lte::utils::splitString(*it, ": ");
-                if(line.size() == 2)
-                    request->insert( std::pair<std::string, std::string>(line[0], line[1]) );
-                else
-                {
-                    //Http::send400Response(socket); // bad request
-                    return false;
-                }
-            }
-        }
-        else if(splitting.size() == 1) // only header or only body
-        {
-            body   = splitting[0];
-            request->insert( std::pair<std::string, std::string>("body", body) );
-        }
-
-        return true;
-}
-
 std::string MEClusterizeService::getCarsAddressesParameters()
 {
     std::string parameters;
@@ -647,7 +616,7 @@ std::string MEClusterizeService::getCarsAddressesParameters()
 
 }
 
-void MEClusterizeService::socketEstablished(int, void *)
+void MEClusterizeService::established(int connId)
 {
     EV << "Socket Established" << endl;
     // a cluster could be made, start requesting the user positions if not already scheduled
@@ -655,21 +624,6 @@ void MEClusterizeService::socketEstablished(int, void *)
         scheduleAt(simTime() + 0, selfGet_);
 }
 
-void MEClusterizeService::socketPeerClosed(int, void *)
-{
-    std::cout<<"Closed connection from: "  << endl;//<< sock->getRemoteAddress()<< std::endl;
-    socket.close();
-}
-
-void MEClusterizeService::socketClosed(int, void *)
-{
-    std::cout <<"Removed socket of: " << endl;// << sock->getRemoteAddress() << " from map" << std::endl;
-}
-
-void MEClusterizeService::socketFailure(int, void *, int code)
-{
-    std::cout <<"Socket of: "  << endl;//<< sock->getRemoteAddress() << " failed. Code: " << code << std::endl;
-}
 
 void MEClusterizeService::finish()
 {

@@ -49,6 +49,8 @@ void MEPlatooningService::initialize(int stage)
     //controller initialization
     followerController = SafePlatooningController(period_.dbl(), MIN_ACCELERATION, MAX_ACCELERATION, criticalDistance);
     leaderController = GeneralSpeedController(period_.dbl(), MIN_ACCELERATION, MAX_ACCELERATION);
+
+    vel = registerSignal("speed");
 }
 
 /*
@@ -302,6 +304,8 @@ void MEPlatooningService::updatePositionsAndSpeeds(){
             it->second.speed.x += it->second.acceleration*cos(it->second.angularPosition.alpha)*time_gap;
             it->second.speed.y += it->second.acceleration*sin(it->second.angularPosition.alpha)*time_gap;
 
+            emit(vel, it->second.speed.y);
+//            it->second.timestamp = simTime();
             //testing
             //EV << "MEPlatooningService::updatePositionsAndSpeeds - " << it->second.symbolicAddress << " position: " << it->second.position << " speed: " << it->second.speed << " time-stamp: " << now << endl ;
         }

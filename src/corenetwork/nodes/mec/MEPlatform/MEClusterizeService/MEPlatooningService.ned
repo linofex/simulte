@@ -37,4 +37,7 @@ simple MEPlatooningService extends MEClusterizeService
         double criticalDistance @unit("m");
         double maxAcceleration;
         double minAcceleration;
+        
+        @signal[speed]; 
+        @statistic[speed](title="speed"; source="speed"; record=mean,vector);
 }

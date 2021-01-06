@@ -45,8 +45,7 @@ simple MEClusterizeService like IMEService
 		// HYBRID_TX_MODE:						"HYBRID"						not yet implemented in MEClusterizeService.cpp
        	string preconfiguredTxMode = default("DOWNLINK_UNICAST");
        	string dataTransferMode @enum("bytecount","object","bytestream") = default("bytestream");
-       	string serverThreadClass = default("SocketManager");
-       	
+       	string serverThreadClass = default("SocketManager");      	
 	
     gates:
         

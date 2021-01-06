@@ -59,16 +59,13 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
         cModule* meHost_;
         std::vector<cModule*> eNodeB_;     //eNodeBs connected to the ME Host
 
+
         // maybe it is better to add a variable that holds the current served message
-        // and pop it from the queue length
+        // and pop it from the queue length, done below
         cMessage *currentRequestServed_;
         reqMap currentRequestServedmap_;
         std::string currentRequestServedPayload_;
         RequestState currentRequestState_;
-
-
-        cMessage *currentSubscriptionServed_;
-
 
         cMessage *requestService_;
         double requestServiceTime_;
@@ -77,6 +74,7 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
         cMessage *subscriptionService_;
         double subscriptionServiceTime_;
         cQueue subscriptions_;          // queue that holds events relative to subscriptions
+        cMessage *currentSubscriptionServed_;
 
         simsignal_t requestQueueSizeSignal_;
 
