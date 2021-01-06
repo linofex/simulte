@@ -6,9 +6,10 @@
 
 
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include <string>
-#include "corenetwork/nodes/mec/MEPlatform/MeServices/packets/request/HttpRequestPacket.h"
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/packets/response/HttpResponsePacket.h"
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/packets/request/HttpRequestPacket.h"
+
+#include <string>
 
 namespace Http {
 
@@ -24,14 +25,20 @@ void send201Response(inet::TCPSocket *socket, const char* body, std::pair<std::s
 void send201Response(inet::TCPSocket *socket, const char* body, std::map<std::string, std::string>& headers);
 void send204Response(inet::TCPSocket *socket);
 void send405Response(inet::TCPSocket *socket, const char *methods =  "" );
+void send400Response(inet::TCPSocket *socket, const char *reason);
 void send400Response(inet::TCPSocket *socket);
+
 void send404Response(inet::TCPSocket *socket);
 
 void send505Response(inet::TCPSocket *socket);
 
 
+//maybe use only one method with the code as argument
+
 void sendPostRequest(inet::TCPSocket *socket, const char* body, const char* host, const char* uri);
+void sendPutRequest(inet::TCPSocket *socket, const char* body, const char* host, const char* uri);
 void sendGetRequest(inet::TCPSocket *socket, const char* body, const char* host, const char* uri);
+void sendDeleteRequest(inet::TCPSocket *socket, const char* host, const char* uri);
 
 
 

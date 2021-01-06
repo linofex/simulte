@@ -212,3 +212,8 @@ std::string SubscriptionBase::getSubscriptionType() const
 {
     return subscriptionType_;
 }
+
+int SubscriptionBase::getSubscriptionId() const
+{
+    return subscriptionId_;
+}

@@ -42,13 +42,12 @@ class MeApp_test : public MeAppBase
 //      virtual void sendRequest();
 //      virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
 
-      virtual void socketDataArrived(int, void *, cPacket *msg, bool) override;
       virtual void handleSelfMsg(cMessage *msg);
 
       virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
       virtual void initialize(int stage) override;
 //      virtual void handleTimer(cMessage *msg) override;
-      virtual void socketEstablished(int connId, void *yourPtr) override;
+//      virtual void socketEstablished(int connId, void *yourPtr) override;
 //      virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
 //      virtual void socketClosed(int connId, void *yourPtr) override;
 //      virtual void socketFailure(int connId, void *yourPtr, int code) override;
@@ -60,7 +59,8 @@ class MeApp_test : public MeAppBase
     public:
       MeApp_test() {}
       virtual ~MeApp_test();
-
+      virtual void handleTcpMsg();
+      virtual void established(int connId);
  };
 
 

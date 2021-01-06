@@ -16,45 +16,10 @@ Define_Module(MeAppSubscription);
 MeAppSubscription::~MeAppSubscription(){}
 
 
-void MeAppSubscription::dataArrived(cPacket *msg){
-    std::string packet = lte::utils::getPacketPayload(msg);
-    EV_INFO << "payload: " << packet << endl;
-    delete msg;
-
-    Http::send204Response(&socket);
-}
-
-void MeAppSubscription::socketEstablished(int connId, void *yourPtr)
+void MeAppSubscription::established(int connId)
 {
-
-    std::string body = "{  \"L2MeasurementSubscription\": {"
-               "\"callbackReference\" : \"cia/rni/v1/\","
-               "\"filterCriteria\": {"
-                    "\"appInstanceId\": \"01\","
-                    "\"associateId\": {"
-                        "\"type\": \"UE_IPv4_ADDRESS\","
-                        "\"value\": \"192.168.10.1\""
-                    "},"
-                    "\"ecgi\":{"
-                        "\"plmn\": {"
-                            "\"mcc\": \"001\","
-                            "\"mnc\": \"01\""
-                        "},"
-                        "\"cellId\": \"0\""
-                   "},"
-                    "\"trigger\": \"L2_MEAS_PERIODICAL\""
-                "},"
-                "\"expiryDeadline\": {"
-                    "\"seconds\": 1577836800,"
-                    "\"nanoSeconds\": 0"
-                "}"
-            "}"
-            "}\r\n";
-    std::string uri = "/example/rni/v2/subscriptions/L2_meas";
-    std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
-    Http::sendPostRequest(&socket, body.c_str(), host.c_str(), uri.c_str());
-
-}
+    EV << "Estabolished"<< endl;
+    }
 
 
 void MeAppSubscription::handleSelfMsg(cMessage *msg){

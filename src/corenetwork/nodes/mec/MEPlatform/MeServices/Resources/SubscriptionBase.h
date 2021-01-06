@@ -39,6 +39,7 @@ class SubscriptionBase : public AttributeBase
 
 
         virtual std::string getSubscriptionType() const;
+        virtual int getSubscriptionId() const;
 
 
     protected:

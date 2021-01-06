@@ -16,23 +16,20 @@ Define_Module(MeAppGet);
 MeAppGet::~MeAppGet(){}
 
 
-void MeAppGet::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent){
-    std::string packet = lte::utils::getPacketPayload(msg);
-    EV_INFO << "payload: " << packet << endl;
-    delete msg;
-    close();
-}
-
-void MeAppGet::socketEstablished(int connId, void *yourPtr)
+void MeAppGet::handleTcpMsg()
 {
 
+    EV_INFO << "payload: " << receivedMessage.at("body") << endl;
+
+}
+
+void MeAppGet::established(int connId)
+{
     std::string body = "";
     std::string uri = "/example/location/v2/queries/users";
     std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
     Http::sendGetRequest(&socket, body.c_str(), host.c_str(), uri.c_str());
-
 }
-
 
 void MeAppGet::handleSelfMsg(cMessage *msg){
     if(strcmp(msg->getName(), "connect") == 0)

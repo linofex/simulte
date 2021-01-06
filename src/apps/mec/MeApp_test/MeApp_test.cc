@@ -17,15 +17,13 @@ Define_Module(MeApp_test);
 MeApp_test::~MeApp_test(){}
 
 
-void MeApp_test::socketDataArrived(int, void *, cPacket *msg, bool){
-
-    std::string packet = lte::utils::getPacketPayload(msg);
-       EV_INFO << "payload: " << packet << endl;
-       delete msg;
-      sendBulkRequest();
+void MeApp_test::handleTcpMsg()
+{
+    EV_INFO << "payload: " <<endl;//<< receivedMessage.at("body") << endl;
+    sendBulkRequest();
 }
 
-void MeApp_test::socketEstablished(int connId, void *yourPtr)
+void MeApp_test::established(int connId)
 {
     sendBulkRequest();
 }

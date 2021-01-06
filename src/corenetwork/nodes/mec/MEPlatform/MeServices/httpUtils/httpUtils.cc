@@ -56,7 +56,7 @@ namespace Http {
         res->setDataFromBuffer(payload , strlen(payload));
         res->setByteLength(strlen(payload));
         socket->send(res);
-//        EV <<"sent" << endl;
+        EV <<"sent" << endl;
     }
 
 
@@ -72,7 +72,6 @@ namespace Http {
         HTTPResponsePacket resp = HTTPResponsePacket(OK);
         resp.setBody(body);
         sendPacket(resp.getPayload(), socket);
-
     }
 
     void send201Response(inet::TCPSocket *socket, const char* body){
@@ -122,6 +121,14 @@ namespace Http {
         sendPacket(resp.getPayload(), socket);
     }
 
+    void send400Response(inet::TCPSocket *socket, const char *reason)
+    {
+        HTTPResponsePacket resp = HTTPResponsePacket(BAD_REQ);
+        resp.setBody(reason);
+        sendPacket(resp.getPayload(), socket);
+    }
+
+
     void send404Response(inet::TCPSocket *socket){
         HTTPResponsePacket resp = HTTPResponsePacket(NOT_FOUND);
         resp.setBody("{ \"send404Response\" : \"TODO implement ProblemDetails\"}");
@@ -143,14 +150,36 @@ namespace Http {
         req.setLength(strlen(body));
         req.setBody(body);
         sendPacket(req.getPayload(), socket);
+    }
+
+    void sendPutRequest(inet::TCPSocket *socket, const char* body, const char* host, const char* uri)
+    {
+        HTTPRequestPacket req = HTTPRequestPacket(PUT);
+        req.setHost(host);
+        req.setUri(uri);
+        req.setLength(strlen(body));
+        req.setBody(body);
+        sendPacket(req.getPayload(), socket);
 
     }
+
+
     void sendGetRequest(inet::TCPSocket *socket, const char* body, const char* host, const char* uri)
     {
         HTTPRequestPacket req = HTTPRequestPacket(GET);
         req.setHost(host);
         req.setUri(uri);
         req.setLength(strlen(body));
+        //req.setBody(body);
+        sendPacket(req.getPayload(), socket);
+    }
+
+    void sendDeleteRequest(inet::TCPSocket *socket, const char* host, const char* uri)
+    {
+        HTTPRequestPacket req = HTTPRequestPacket(DELETE);
+        req.setHost(host);
+        req.setUri(uri);
+        req.setLength(strlen(req.getPayload()));
         //req.setBody(body);
         sendPacket(req.getPayload(), socket);
     }
