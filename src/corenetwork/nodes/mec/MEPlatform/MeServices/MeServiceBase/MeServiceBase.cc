@@ -17,6 +17,8 @@
 
 #include "../MeServiceBase/MeServiceBase.h"
 
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/Resources/SubscriptionBase.h"
+
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/httpUtils/json.hpp"
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/MeServiceBase/SocketManager.h"
 MeServiceBase::MeServiceBase(){}
@@ -108,7 +110,7 @@ void MeServiceBase::handleMessage(cMessage *msg)
             proc->init(this, socket);
             socketMap.addSocket(socket);
         }
-        EV << "Socket Message" << endl;
+//        EV << "Socket Message" << endl;
         socket->processMessage(msg);
     }
 
@@ -141,9 +143,9 @@ bool MeServiceBase::manageRequest()
 void MeServiceBase::scheduleNextEvent(bool now)
 {
     // schedule next event
-    if(subscriptions_.getLength() != 0 && !subscriptionService_->isScheduled())
+    if(subscriptionEvents_.getLength() != 0 && !subscriptionService_->isScheduled())
     {
-        currentSubscriptionServed_ = check_and_cast<cMessage *>(subscriptions_.pop());
+        currentSubscriptionServed_ = check_and_cast<cMessage *>(subscriptionEvents_.pop());
         if(now)
             scheduleAt(simTime() + 0 , subscriptionService_);
         else
@@ -181,7 +183,7 @@ void MeServiceBase::newRequest(cMessage *msg)
 
 void MeServiceBase::newSubscriptionEvent(cMessage *msg)
 {
-    subscriptions_.insert(msg);
+    subscriptionEvents_.insert(msg);
     scheduleNextEvent();
 }
 
@@ -218,6 +220,7 @@ double MeServiceBase::calculateRequestServiceTime()
     {
         return 0.00001; //example
     }
+    return 0;
 }
 
 
@@ -246,7 +249,9 @@ void MeServiceBase::handleCurrentRequest(inet::TCPSocket *socket){
          else if(currentRequestServedmap_.at("method").compare("OPTIONS") == 0)
              Http::send405Response(socket);
          else
-             throw cRuntimeError ("MeServiceBase::HTTP verb %s non recognised", currentRequestServedmap_.at("method"));
+         {
+             throw cRuntimeError("MeServiceBase::HTTP verb %s non recognised", currentRequestServedmap_.at("method").c_str());
+         }
      }
     else
     {
@@ -349,7 +354,7 @@ void MeServiceBase::handleRequest(cMessage* msg, inet::TCPSocket *socket){
          else if(request->at("method").compare("OPTIONS") == 0)
              Http::send405Response(socket);
          else
-             throw cRuntimeError ("MeServiceBase::HTTP verb %s non recognised", request->at("method"));
+             throw cRuntimeError ("MeServiceBase::HTTP verb %s non recognised", request->at("method").c_str());
      }
      else
      {
@@ -436,6 +441,7 @@ void MeServiceBase::removeConnection(SocketManager *connection)
 {
     // remove socket
     socketMap.removeSocket(connection->getSocket());
+    delete connection->getSocket();
     // remove thread object
     delete connection;
 }
@@ -459,12 +465,24 @@ MeServiceBase::~MeServiceBase(){
         delete msg;
     }
 
-    while(!subscriptions_.isEmpty())
+    while(!subscriptionEvents_.isEmpty())
     {
-        msg = subscriptions_.pop();
+        msg = subscriptionEvents_.pop();
         delete msg;
 
     }
+    std::cout << "Subscriptions list length: " << subscriptions_.size() << std::endl;
+    Subscriptions::iterator it = subscriptions_.begin();
+    while (it != subscriptions_.end()) {
+        std::cout << "Deleting subscription with id: " << it->second->getSubscriptionId() << std::endl;
+        // stop periodic notification timer
+        cMessage *msg =it->second->getNotificationTrigger();
+        if(msg!= nullptr && msg->isScheduled())
+            cancelAndDelete(it->second->getNotificationTrigger());
+        delete it->second;
+        subscriptions_.erase(it++);
+    }
+    std::cout << "Subscriptions list length: " << subscriptions_.size() << std::endl;
 }
 void MeServiceBase::emitRequestQueueLength()
 {
@@ -490,6 +508,28 @@ Http::DataType MeServiceBase::getDataType(std::string& packet_){
     }
 
 }
+
+void MeServiceBase::removeSubscritions(int connId)
+{
+    Subscriptions::iterator it = subscriptions_.begin();
+    while (it != subscriptions_.end()) {
+        if (it->second->getSocketConnId() == connId) {
+            std::cout << "Remnove subscription with id = " << it->second->getSubscriptionId();
+            // stop periodic notification timer
+            cMessage *msg =it->second->getNotificationTrigger();
+            if(msg!= nullptr && msg->isScheduled())
+                cancelAndDelete(it->second->getNotificationTrigger());
+            else if(msg!= nullptr && !msg->isScheduled())
+                delete msg;                
+            delete it->second;
+            subscriptions_.erase(it++);
+            std::cout << " list length: " << subscriptions_.size() << std::endl;
+        } else {
+           ++it;
+        }
+    }
+}
+
 
 
 

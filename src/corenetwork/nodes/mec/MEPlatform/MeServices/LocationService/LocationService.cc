@@ -2,7 +2,6 @@
 
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/LocationService/LocationService.h"
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/LocationService/resources/CircleNotificationSubscription.h"
-#include "corenetwork/nodes/mec/MEPlatform/MeServices/Resources/SubscriptionBase.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/lifecycle/NodeStatus.h"
@@ -64,18 +63,24 @@ bool LocationService::manageSubscription()
         subscriptionTimer *subTimer = check_and_cast<subscriptionTimer*>(currentSubscriptionServed_);
         if(subscriptions_.find(subTimer->getSubId()) != subscriptions_.end())
         {
-            SubscriptionBase * sub = subscriptions_[subTimer->getSubId()]; //upcasting (getSubscriptionType is in Subscriptionbase)
-            if(sub->getSubscriptionType().compare("circleNotificationSubscription") == 0)
-            {
-                EV << "LocationService::handleMessage - handling subId: " << subTimer->getSubId() << endl;
-                CircleNotificationSubscription *cir = (CircleNotificationSubscription* ) subscriptions_[subTimer->getSubId()];
-                cir->handleSubscription();
+
+              SubscriptionBase * sub = subscriptions_[subTimer->getSubId()]; //upcasting (getSubscriptionType is in Subscriptionbase)
+//
+//            // maybe it is better to use handleSubscription for all subs and avoid dynamic cast
+//            if(sub->getSubscriptionType().compare("circleNotificationSubscription") == 0)
+//            {
+//                EV << "LocationService::handleMessage - handling subId: " << subTimer->getSubId() << endl;
+////                CircleNotificationSubscription *cir = (CircleNotificationSubscription* ) subscriptions_[subTimer->getSubId()];
+//                CircleNotificationSubscription *cir = dynamic_cast<CircleNotificationSubscription*>(sub);
+//
+//                cir->handleSubscription();
+                sub->handleSubscription();
                 if(currentSubscriptionServed_!= nullptr)
                         delete currentSubscriptionServed_;
                 currentSubscriptionServed_ = nullptr;
                 return true;
 
-            }
+//            }
         }
         else{
             EV << "NO" << endl;
@@ -93,6 +98,7 @@ void LocationService::handleMessage(cMessage *msg)
     {
         if(msg->isName("subscriptionTimer"))
         {
+            EV << "subscriptionTimer" << endl;
             subscriptionTimer *subTimer = check_and_cast<subscriptionTimer*>(msg);
             subscriptionTimer *subTimerDup = subTimer->dup();
             newSubscriptionEvent(subTimerDup);
@@ -359,6 +365,7 @@ void LocationService::handlePUTRequest(const std::string& uri,const std::string&
            bool res = newSubscription->fromJson(jsonBody);
            if(res == true)
            {
+               newSubscription->setNotificationTrigger(it->second->getNotificationTrigger());
                delete it->second;
                subscriptions_[id] = newSubscription;
            }

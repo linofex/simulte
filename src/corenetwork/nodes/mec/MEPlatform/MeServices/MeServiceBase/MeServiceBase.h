@@ -43,8 +43,8 @@
 typedef std::map<std::string, std::string> reqMap;
 enum RequestState {CORRECT, BAD_REQ_LINE, BAD_HEADER, BAD_HTTP, BAD_REQUEST, DIFF_HOST, UNDEFINED};
 
-
 class SocketManager;
+class SubscriptionBase;
 
 class MeServiceBase: public cSimpleModule, public ILifecycle
 {
@@ -57,8 +57,14 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
         std::string host_;
         LteBinder* binder_;
         cModule* meHost_;
-        std::vector<cModule*> eNodeB_;     //eNodeBs connected to the ME Host
 
+        std::string baseUriQueries_;
+        std::string baseUriSubscriptions_;
+        std::string baseSubscriptionLocation_;
+        typedef std::map<unsigned int, SubscriptionBase*> Subscriptions;
+        Subscriptions subscriptions_; //list of all active subscriptions
+
+        std::vector<cModule*> eNodeB_;     //eNodeBs connected to the ME Host
 
         // maybe it is better to add a variable that holds the current served message
         // and pop it from the queue length, done below
@@ -73,7 +79,7 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
 
         cMessage *subscriptionService_;
         double subscriptionServiceTime_;
-        cQueue subscriptions_;          // queue that holds events relative to subscriptions
+        cQueue subscriptionEvents_;          // queue that holds events relative to subscriptions
         cMessage *currentSubscriptionServed_;
 
         simsignal_t requestQueueSizeSignal_;
@@ -88,9 +94,6 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
          * This method is called for every element in the subscriptions_ queue.
          */
         virtual bool manageSubscription();
-
-        // This method adds the subscription event in the subscriptions_ queue
-        virtual void newSubscriptionEvent(cMessage *msg);
 
         /*
          * This method checks the queues length and in case it simulates a request/subscription
@@ -194,6 +197,9 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
          */
         virtual void newRequest(cMessage *msg);
 
+        // This method adds the subscription event in the subscriptions_ queue
+        virtual void newSubscriptionEvent(cMessage *msg);
+
         /*
          * This method handles a request. It parses the payload and in case
          * calls the correct method (e.g GET, POST)
@@ -214,7 +220,7 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
 
         virtual void emitRequestQueueLength();
 
-        virtual void removeSubscritions(inet::TCPSocket *socket){};
+        virtual void removeSubscritions(int connId);
 };
 
 

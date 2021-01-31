@@ -49,7 +49,6 @@ void SocketManager::dataArrived(cMessage *msg, bool urgent){
               {
                   cMessage *request = new cMessage("fakeRequest");
                   service->newRequest(request);
-                  
               }
             }
             return;
@@ -57,6 +56,7 @@ void SocketManager::dataArrived(cMessage *msg, bool urgent){
         else
         {
             EV << "packet: " << packet << endl;
+            delete msg;
         }
 
 }
@@ -75,13 +75,13 @@ void SocketManager::peerClosed()
 void SocketManager::closed()
 {
     std::cout <<"Removed socket of: " << sock->getRemoteAddress() << " from map" << std::endl;
+    service->removeSubscritions(sock->getConnectionId());
     service->removeConnection(this);
 }
 
 void SocketManager::failure(int code)
 {
     std::cout <<"Socket of: " << sock->getRemoteAddress() << " failed. Code: " << code << std::endl;
-
-//    service_->removeSubscription(sock);
+    service->removeSubscritions(sock->getConnectionId());
     service->removeConnection(this);
 }

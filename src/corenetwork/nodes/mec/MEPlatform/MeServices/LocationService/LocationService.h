@@ -41,7 +41,7 @@
 
 
 class Location;
-class SubscriptionBase;
+
 class LocationService: public MeServiceBase
 {
   private:
@@ -52,12 +52,6 @@ class LocationService: public MeServiceBase
     cMessage *LocationSubscriptionEvent_;
 
     unsigned int subscriptionId_;
-    std::string baseUriQueries_;
-    std::string baseUriSubscriptions_;
-    std::string baseSubscriptionLocation_; //move to servicebase
-    typedef std::map<unsigned int, SubscriptionBase*> Subscriptions;
-    Subscriptions subscriptions_;
-
 
     std::set<std::string>supportedQueryParams_;
     std::set<std::string>supportedSubscriptionParams_;
