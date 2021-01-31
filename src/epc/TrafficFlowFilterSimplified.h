@@ -14,7 +14,7 @@
 #include "epc/gtp/TftControlInfo.h"
 #include "epc/gtp_common.h"
 #include "corenetwork/binder/LteBinder.h"
-
+#include <vector>
 /**
  * Objective of the Traffic Flow Filter is mapping IP 4-Tuples to TFT identifiers. This commonly means identifying a bearer and
  * associating it to an ID that will be recognized by the first GTP-U entity
@@ -52,7 +52,7 @@ class TrafficFlowFilterSimplified : public cSimpleModule
     std::string meHost;
     inet::L3Address meHostAddress;
     //only if owner type is GTPENDPOINT
-    std::string eNodeB[];
+    std::vector<std::string> eNodeB;
     inet::L3Address eNodeBAddress;
     int eNodeBMacId;
     //end mec
