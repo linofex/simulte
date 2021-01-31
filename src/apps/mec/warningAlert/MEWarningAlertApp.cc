@@ -151,6 +151,7 @@ void MEWarningAlertApp::handleTcpMsg(){
                     packet->setType(INFO_MEAPP);
                     packet->setDanger(false);
                     send(packet, "virtualisationInfrastructureOut");
+                    socket.close();
                 }
             }
         }
