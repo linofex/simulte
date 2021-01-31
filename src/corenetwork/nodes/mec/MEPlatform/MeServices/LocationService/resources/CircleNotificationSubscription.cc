@@ -15,6 +15,8 @@
 CircleNotificationSubscription::CircleNotificationSubscription()
 {
  binder = getBinder();
+ firstNotificationSent = false;
+ lastNotification = 0;
 }
 
 CircleNotificationSubscription::CircleNotificationSubscription(unsigned int subId, inet::TCPSocket *socket , const std::string& baseResLocation,  std::vector<cModule*>& eNodeBs):
@@ -33,6 +35,8 @@ nlohmann::ordered_json CircleNotificationSubscription::toJson() const {}
 
 void CircleNotificationSubscription::sendNotification()
 {
+    if(firstNotificationSent && (simTime() - lastNotification) <= frequency)
+        return;
     nlohmann::ordered_json val;
     nlohmann::ordered_json terminalLocationArray;
 
@@ -57,6 +61,11 @@ void CircleNotificationSubscription::sendNotification()
     notification["subscriptionNotification"] = val;
 
     Http::sendPostRequest(socket_, notification.dump(2).c_str(), clientHost_.c_str(), clientUri_.c_str());
+
+    // update last notification sent
+    lastNotification = simTime();
+    if(firstNotificationSent == false)
+        firstNotificationSent = true;
 }
 
 

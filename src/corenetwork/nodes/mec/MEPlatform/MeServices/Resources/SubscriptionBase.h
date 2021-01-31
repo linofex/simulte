@@ -12,6 +12,7 @@
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/Resources/TimeStamp.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/httpUtils/httpUtils.h"
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/LocationService/packets/subscriptionTimer_m.h"
 
 class LteCellInfo;
 
@@ -36,13 +37,19 @@ class SubscriptionBase : public AttributeBase
         virtual bool fromJson(const nlohmann::ordered_json& json);
         virtual void sendSubscriptionResponse() = 0;
         virtual void sendNotification() = 0;
+        virtual void handleSubscription() = 0;
 
 
         virtual std::string getSubscriptionType() const;
         virtual int getSubscriptionId() const;
+        virtual int getSocketConnId() const;
+        virtual void setNotificationTrigger(subscriptionTimer *nt) { notificationTrigger = nt;}
+        virtual subscriptionTimer*  getNotificationTrigger() { return notificationTrigger;}
 
 
     protected:
+
+        subscriptionTimer *notificationTrigger;
         inet::TCPSocket *socket_;
         TimeStamp timestamp_;
 

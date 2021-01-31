@@ -15,7 +15,6 @@
 #include <set>
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/LocationService/resources/LocationApiDefs.h"
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/LocationService/resources/TerminalLocation.h"
-#include "corenetwork/nodes/mec/MEPlatform/MeServices/LocationService/packets/subscriptionTimer_m.h"
 
 class LteBinder;
 class CircleNotificationSubscription : public SubscriptionBase
@@ -37,19 +36,18 @@ class CircleNotificationSubscription : public SubscriptionBase
         virtual bool fromJson(const nlohmann::ordered_json& json);
         virtual void sendSubscriptionResponse();
         virtual void sendNotification();
-        virtual void handleSubscription();
-        virtual void setNotificationTrigger(subscriptionTimer *nt) { notificationTrigger = nt;}
-        virtual subscriptionTimer*  getNotificationTrigger() { return notificationTrigger;}
+        virtual void handleSubscription() override;
+
 
         bool findUe(MacNodeId nodeId);
 
     protected:
 
-        LteBinder* binder; //used to retreive NodeId - Ipv4Address mapping
+        LteBinder* binder; //used to retrieve NodeId - Ipv4Address mapping
+        simtime_t lastNotification;
+        bool firstNotificationSent;
 
         std::map<MacNodeId, bool> users; // optional: NO the bool is the initial potition wrt the area
-        //NOT USED
-        std::map<inet::IPv4Address, MacNodeId> USE; // optional: NO
 
         std::vector<TerminalLocation> terminalLocations; //it stores the user that entered or exited the are
 
@@ -75,9 +73,6 @@ class CircleNotificationSubscription : public SubscriptionBase
 
         int trackingAccuracy; // optional: NO
         LocationUtils::EnteringLeavingCriteria actionCriteria;// optional: NO
-
-        subscriptionTimer *notificationTrigger;
-
 
 };
 

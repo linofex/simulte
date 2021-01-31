@@ -13,6 +13,7 @@ SubscriptionBase::SubscriptionBase(unsigned int subId, inet::TCPSocket *socket, 
 	subscriptionId_ = subId;
 	socket_ = socket;
 	baseResLocation_ = baseResLocation;
+	notificationTrigger = nullptr;
 }
 
 void SubscriptionBase::addEnodeB(std::vector<cModule*>& eNodeBs) {
@@ -217,3 +218,9 @@ int SubscriptionBase::getSubscriptionId() const
 {
     return subscriptionId_;
 }
+
+int SubscriptionBase::getSocketConnId() const
+{
+    return socket_->getConnectionId();
+}
+
