@@ -57,6 +57,9 @@ class UmRxEntity : public cSimpleModule
     * calculate UL tput.
     */
     void handleBurst();
+
+    // returns true if the buffer is empty and the LteRlcSdu* buffer_ is null
+    bool isEmpty() const;
   protected:
 
     /**
@@ -156,6 +159,7 @@ class UmRxEntity : public cSimpleModule
     simtime_t t1_; // point in time last pkt sent during burst
     simtime_t ttiT2_; // point in time last pkt sent during this tti
     simtime_t ttiT1_;
+
 
 //debug
 

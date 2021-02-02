@@ -935,3 +935,7 @@ void UmRxEntity::rlcHandleD2DModeSwitch(bool oldConnection, bool oldMode, bool c
 //        lastSnoDelivered_ = 0;
     }
 }
+
+bool UmRxEntity::isEmpty() const {
+    return (buffered_ == nullptr && pduBuffer_.size() == 0);
+}

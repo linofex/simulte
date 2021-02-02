@@ -337,4 +337,15 @@ void LteRlcUm::deactiveUeLcid(MacCid cid)
     activeUsersUl_[MacCidToNodeId(cid)].erase(MacCidToLcid(cid));
 }
 
+void LteRlcUm::activeUeUL(std::set<LogicalCid>* ueSet)
+{
+    UmRxEntities::const_iterator it = rxEntities_.begin();
+    UmRxEntities::const_iterator end = rxEntities_.end();
+    for(; it != end; ++it)
+    {
+        LogicalCid lcid = MacCidToLcid(it->first);
+        if((ueSet->find(lcid) == ueSet->end()) && !it->second->isEmpty())
+            ueSet->insert(lcid);
+    }
+}
 

@@ -1088,13 +1088,20 @@ int LteMacEnb::getActiveUeSet(Direction dir)
         if(rlc->findSubmodule("um") != -1)
         {
             rlcUm = check_and_cast<LteRlcUm *>(getParentModule()->getSubmodule("rlc")->getSubmodule("um"));
-            std::map<MacNodeId, std::set<LogicalCid>>::iterator rit =  rlcUm->getActiveUeUL().begin();
-            std::map<MacNodeId, std::set<LogicalCid>>::iterator endrit =  rlcUm->getActiveUeUL().end();
-            for(; rit != endrit ; ++rit){
-                if(rit->second.empty()){
-                    activeUeSet.insert(rit->first); // active users in RLC
-                }
+            std::set<LogicalCid> activeRlcUe;
+            rlcUm->activeUeUL(&activeRlcUe);
+            std::set<LogicalCid>::iterator rit =  activeRlcUe.begin();
+            std::set<LogicalCid>::iterator endrit =  activeRlcUe.end();
+//            for(; rit != endrit ; ++rit){
+//                if(rit->second.empty()){
+//                    activeUeSet.insert(rit->first); // active users in RLC
+//                }
+//            }
+            for(; rit != endrit ; ++rit)
+            {
+                activeUeSet.insert(*rit); // active users in RLC
             }
+
         }
     }
 

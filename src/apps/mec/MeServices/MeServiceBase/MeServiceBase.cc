@@ -222,7 +222,7 @@ void MeServiceBase::handleRequest(cMessage* msg, inet::TCPSocket *socket){
          else if(request->at("method").compare("OPTIONS") == 0)
              Http::send405Response(socket);
          else
-             throw cRuntimeError ("MeServiceBase::HTTP verb %s non recognised", request->at("method"));
+             throw cRuntimeError ("MeServiceBase::HTTP verb %s non recognised", request->at("method").c_str());
      }
  }
 
