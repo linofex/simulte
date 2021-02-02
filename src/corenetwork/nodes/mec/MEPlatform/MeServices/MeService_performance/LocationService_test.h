@@ -58,7 +58,7 @@ class LocationService_test: public LocationService
 //    virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
 //    virtual void finish() override;
 //    virtual void refreshDisplay() const override;
-    virtual void handleMessage(cMessage *msg) override;
+//    virtual void handleMessage(cMessage *msg) override;
     virtual bool manageRequest() override;
     virtual double calculateRequestServiceTime();
 //    virtual void handleGETRequest(const std::string& uri, inet::TCPSocket* socket);

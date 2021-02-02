@@ -16,6 +16,7 @@ Register_Class(SocketManager);
 
 
 void SocketManager::dataArrived(cMessage *msg, bool urgent){
+        EV << "SocketManager::dataArrived" << endl;
 //        EV << "SocketManager::dataArrived";
         std::string packet = lte::utils::getPacketPayload(msg);
         Http::DataType type = service->getDataType(packet);
@@ -38,6 +39,11 @@ void SocketManager::dataArrived(cMessage *msg, bool urgent){
             if(requests < 0)
               throw cRuntimeError("Number of request must be non negative");
             EV << " of size "<< requests << endl;
+            if(requests == 0)
+            {
+                delete msg;
+                return;
+            }
             for(int i = 0 ; i < requests ; ++i)
             {
               if(i == requests -1)

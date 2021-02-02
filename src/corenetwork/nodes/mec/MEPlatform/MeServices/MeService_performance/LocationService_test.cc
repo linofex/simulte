@@ -38,70 +38,73 @@ void LocationService_test::initialize(int stage)
     }
 }
 
-void LocationService_test::handleMessage(cMessage *msg)
-{
-    if (msg->isSelfMessage()) {
-           EV << "isSelfMessage" << endl;
-           if(strcmp(msg->getName(), "subscriptionEvent") == 0)
-           {
-               newSubscriptionEvent(msg);
-              // delete msg;
-           }
-           else if(strcmp(msg->getName(), "serveSubscription") == 0)
-           {
-               bool res = manageSubscription();
-               scheduleNextEvent(!res);
-           }
-           else if(strcmp(msg->getName(), "serveRequest") == 0)
-           {
-               bool res = manageRequest();
-               scheduleNextEvent(!res);
-           }
-           else
-           {
-               delete msg;
-           }
-       }
-       else { // TCP msg arrived
-
-           inet::TCPSocket *socket = socketMap.findSocketFor(msg);
-           if (!socket) // TCP_ESTABLISHED
-           {
-               socket = new inet::TCPSocket(msg);
-               socket->setOutputGate(gate("tcpOut"));
-
-
-           //        std::cout <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << std::endl ;
-               EV <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << endl ;
-
-               const char *serverThreadClass = par("serverThreadClass");
-               SocketManager *proc =
-                   check_and_cast<SocketManager *>(inet::utils::createOne(serverThreadClass));
-
-               socket->setCallbackObject(proc);
-               proc->init(this, socket);
-               socketMap.addSocket(socket);
-               socket->processMessage(msg);
-               return;
-           }
-               EV << "TCP MESSAGE" << endl;
-               socket->processMessage(msg); // it is a normal TCP message request
-       }
-}
-
+//void LocationService_test::handleMessage(cMessage *msg)
+//{
+//    if (msg->isSelfMessage()) {
+//           EV << "isSelfMessage" << endl;
+//           if(strcmp(msg->getName(), "subscriptionEvent") == 0)
+//           {
+//               newSubscriptionEvent(msg);
+//              // delete msg;
+//           }
+//           else if(strcmp(msg->getName(), "serveSubscription") == 0)
+//           {
+//               bool res = manageSubscription();
+//               scheduleNextEvent(!res);
+//           }
+//           else if(strcmp(msg->getName(), "serveRequest") == 0)
+//           {
+//               bool res = manageRequest();
+//               scheduleNextEvent(!res);
+//           }
+//           else
+//           {
+//               delete msg;
+//           }
+//       }
+//       else { // TCP msg arrived
+//
+//           inet::TCPSocket *socket = socketMap.findSocketFor(msg);
+//           if (!socket) // TCP_ESTABLISHED
+//           {
+//               socket = new inet::TCPSocket(msg);
+//               socket->setOutputGate(gate("tcpOut"));
+//
+//
+//           //        std::cout <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << std::endl ;
+//               EV <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << endl ;
+//
+//               const char *serverThreadClass = par("serverThreadClass");
+//               SocketManager *proc =
+//                   check_and_cast<SocketManager *>(inet::utils::createOne(serverThreadClass));
+//
+//               socket->setCallbackObject(proc);
+//               proc->init(this, socket);
+//               socketMap.addSocket(socket);
+//               socket->processMessage(msg);
+//               return;
+//           }
+//               EV << "TCP MESSAGE" << endl;
+//               socket->processMessage(msg); // it is a normal TCP message request
+//       }
+//}
+//
 
 double LocationService_test::calculateRequestServiceTime()
 {
     EV << "LocationService_test::calculateRequestServiceTime()" << endl;
     if(strcmp(currentRequestServed_->getName(), "lastFakeRequest") == 0){
+        EV << "LocationService_test::calculateRequestServiceTime - lastFakeRequest" << endl;
         double time = poisson(requestServiceTime_, REQUEST_RNG);
         return time;
     }
     else if(strcmp(currentRequestServed_->getName(), "fakeRequest") == 0){
+        EV << "LocationService_test::calculateRequestServiceTime - fakeRequest" << endl;
+
         double time = poisson(requestServiceTime_, REQUEST_RNG);
         return time;
     }
-    MeServiceBase::calculateRequestServiceTime();
+    return MeServiceBase::calculateRequestServiceTime();
 }
 
 
@@ -121,9 +124,9 @@ bool LocationService_test::manageRequest()
         {
             if(strcmp(currentRequestServed_->getName(), "lastFakeRequest") == 0)
             {
-                currentRequestServed_->removeControlInfo();
+                //currentRequestServed_->removeControlInfo();
                 Http::send200Response(socket, "{Done}");
-                currentRequestServed_ = nullptr;
+                //currentRequestServed_ = nullptr;
                 //return true;
             }
             else
