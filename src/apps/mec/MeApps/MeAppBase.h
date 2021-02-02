@@ -23,6 +23,8 @@ class  MeAppBase : public cSimpleModule, public inet::TCPSocket::CallbackInterfa
     inet::TCPSocket socket;
 
     std::map<std::string, std::string> receivedMessage;
+    cMessage *sendTimer;
+
     int responseMessageLength;
     bool receivingMessage;
 
@@ -69,7 +71,7 @@ class  MeAppBase : public cSimpleModule, public inet::TCPSocket::CallbackInterfa
 
   public:
         MeAppBase();
-        virtual ~MeAppBase(){};
+        virtual ~MeAppBase();
 
 
 };

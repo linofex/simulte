@@ -21,14 +21,19 @@ void MeAppGet::handleTcpMsg()
 
     EV_INFO << "payload: " << receivedMessage.at("body") << endl;
 
+    scheduleAt(simTime()+0.1, sendTimer);
+
 }
 
-void MeAppGet::established(int connId)
-{
+void MeAppGet::sendMsg(){
     std::string body = "";
     std::string uri = "/example/location/v2/queries/users";
     std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
     Http::sendGetRequest(&socket, body.c_str(), host.c_str(), uri.c_str());
+}
+void MeAppGet::established(int connId)
+{
+    sendMsg();
 }
 
 void MeAppGet::handleSelfMsg(cMessage *msg){
@@ -37,6 +42,10 @@ void MeAppGet::handleSelfMsg(cMessage *msg){
         connect();
         delete msg;
         return;
+    }
+    else if(strcmp(msg->getName(), "send") == 0)
+    {
+        sendMsg();
     }
 }
 

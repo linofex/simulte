@@ -20,6 +20,12 @@ MeAppBase::MeAppBase()
     receivedMessage.clear();
     }
 
+MeAppBase::~MeAppBase()
+{
+    cancelAndDelete(sendTimer);
+}
+
+
 void MeAppBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
@@ -28,6 +34,7 @@ void MeAppBase::initialize(int stage)
 //        // parameters
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
+        sendTimer = new cMessage("send");
         socket.readDataTransferModePar(*this);
 
         socket.bind(*localAddress ? inet::L3AddressResolver().resolve(localAddress) : inet::L3Address(), localPort);
@@ -105,6 +112,7 @@ void MeAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
     EV << "MEClusterizeService::socketDataArrived" << endl;
 
     std::string packet = lte::utils::getPacketPayload(msg);
+    delete msg;
     bool resp = parseReceivedMsg(packet);
 //    EV << "message: " << packet << endl;
     // TODO organize code.
@@ -144,9 +152,7 @@ void MeAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
     }
     else if(responseMessageLength < 0)
         throw cRuntimeError("MEClusterizeService::socketDataArrived - read payload more than Content-Length header");
-    delete msg;
 }
-
 
 bool MeAppBase::parseReceivedMsg(std::string& packet)
 {

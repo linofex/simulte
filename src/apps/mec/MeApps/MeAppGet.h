@@ -21,7 +21,6 @@ class MeAppGet : public MeAppBase
       int numRequestsToSend = 0;    // requests to send in this session
       simtime_t startTime;
       simtime_t stopTime;
-
 //      virtual void sendRequest();
 //      virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
 
@@ -29,6 +28,7 @@ class MeAppGet : public MeAppBase
 
       virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
       virtual void initialize(int stage) override;
+      virtual void sendMsg();
 //      virtual void handleTimer(cMessage *msg) override;
 //      virtual void socketEstablished(int connId, void *yourPtr) override;
 //      virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;

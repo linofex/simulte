@@ -20,7 +20,7 @@ MeApp_test::~MeApp_test(){}
 void MeApp_test::handleTcpMsg()
 {
     EV_INFO << "payload: " <<endl;//<< receivedMessage.at("body") << endl;
-    sendBulkRequest();
+    scheduleAt(simTime()+0.1, sendTimer);
 }
 
 void MeApp_test::established(int connId)
@@ -36,10 +36,8 @@ void MeApp_test::handleSelfMsg(cMessage *msg){
         delete msg;
         return;
     }
-    if(strcmp(msg->getName(), "response") == 0)
+    if(strcmp(msg->getName(), "send") == 0)
     {
-        delete msg;
-        // maybe add a delay
         sendBulkRequest();
     }
 }
@@ -49,8 +47,12 @@ void MeApp_test::initialize(int stage){
     if(stage == inet::INITSTAGE_APPLICATION_LAYER)
     {
         numberOfApplications_ = par("numberOfApplications");
-        cMessage *m = new cMessage("connect");
-        scheduleAt(simTime() + 0.055, m);
+
+        if(numberOfApplications_ != 0)
+        {
+            cMessage *m = new cMessage("connect");
+            scheduleAt(simTime() + 0.055, m);
+        }
     }
 }
 
