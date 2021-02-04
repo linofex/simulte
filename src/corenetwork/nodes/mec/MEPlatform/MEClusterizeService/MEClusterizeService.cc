@@ -94,6 +94,7 @@ void MEClusterizeService::initialize(int stage)
     socket.setOutputGate(gate("tcpOut"));
 
     socket.setCallbackObject(this);
+    sendTimer = new cMessage("send");
 
     selfGet_ = new cMessage("GetRequest");
     getPeriod_ = par("getPeriod");
@@ -164,7 +165,8 @@ void MEClusterizeService::handleMessage(cMessage *msg)
     {
         if(msg->getKind() == inet::TCP_I_DATA || msg->getKind() == inet::TCP_I_ESTABLISHED ||
            msg->getKind() == inet::TCP_I_URGENT_DATA || msg->getKind() == inet::TCP_I_CLOSED ||
-           msg->getKind() == inet::TCP_I_PEER_CLOSED)
+           msg->getKind() == inet::TCP_I_PEER_CLOSED || msg->getKind() == inet::TCP_I_CONNECTION_RESET ||
+           msg->getKind() == inet::TCP_I_CONNECTION_REFUSED )
         {
             socket.processMessage(msg);
             return;
@@ -628,6 +630,6 @@ void MEClusterizeService::established(int connId)
 void MEClusterizeService::finish()
 {
     cancelAndDelete(selfGet_);
-    if(socket.getState() == TCPSocket::CONNECTED)
-        socket.close();
+//    if(socket.getState() == TCPSocket::CONNECTED)
+//        socket.close();
 }

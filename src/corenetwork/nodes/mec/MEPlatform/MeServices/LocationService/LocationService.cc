@@ -90,6 +90,7 @@ bool LocationService::manageSubscription()
             return false;
         }
     }
+    return false;
 }
 
 void LocationService::handleMessage(cMessage *msg)

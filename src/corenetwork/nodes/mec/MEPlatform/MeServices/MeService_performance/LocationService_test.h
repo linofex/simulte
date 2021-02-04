@@ -49,6 +49,8 @@ class LocationService_test: public LocationService
 //
 //    bool manageLocationSubscriptions(Trigger trigger);
 
+    simsignal_t queueLength;
+
   public:
     LocationService_test();
 //    virtual void emitRequestQueueLength();

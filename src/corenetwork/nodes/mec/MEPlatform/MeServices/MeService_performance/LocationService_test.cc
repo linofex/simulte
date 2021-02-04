@@ -35,6 +35,7 @@ void LocationService_test::initialize(int stage)
     }
     else if (stage == inet::INITSTAGE_APPLICATION_LAYER) {
         LocationService::initialize(stage);
+        queueLength = registerSignal("queueLength");
     }
 }
 
@@ -110,6 +111,7 @@ double LocationService_test::calculateRequestServiceTime()
 
 bool LocationService_test::manageRequest()
 {
+    emit(queueLength, requests_.length());
     EV << "LocationService_test::manageRequest()" << endl;
     bool result;
     //check if facke request
