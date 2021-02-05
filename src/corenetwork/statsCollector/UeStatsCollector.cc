@@ -66,6 +66,7 @@ void UeStatsCollector::resetDelayCounter()
 void UeStatsCollector::add_ul_nongbr_delay_ue()
 {
     double delay = flowManager_->getDelayStats();
+    EV << "UeStatsCollector::add_ul_nongbr_delay_ue() - delay: " << delay << endl;
     ul_nongbr_delay_ue.addValue(delay);
 }
 

@@ -65,10 +65,10 @@ nlohmann::ordered_json L2Meas::toJson() const {
 	}
 
 	if(ueArray.size() > 1){
-		val["CellUEInfo"] = ueArray;
+		val["cellUEInfo"] = ueArray;
     }
 	else if(ueArray.size() == 1){
-		val["CellUEInfo"] = ueArray[0];
+		val["cellUEInfo"] = ueArray[0];
 	}
 	
 	l2Meas["L2Meas"] = val;

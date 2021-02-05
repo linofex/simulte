@@ -452,7 +452,7 @@ void LteBinder::addUeCollectorToEnodeB(MacNodeId ue, UeStatsCollector* ueCollect
         }
         else
         {
-//            throw cRuntimeError("LteBinder::addUeCollector - eNodeBStatsCollector not present in eNodeB [%d]", ue,(*it)->id ) ;
+//            throw cRuntimeError("LteBinder::addUeCollector - eNodeBStatsCollector not present in eNodeB [%d]", (*it)->id ) ;
 
         }
 
@@ -466,7 +466,7 @@ void LteBinder::addUeCollectorToEnodeB(MacNodeId ue, UeStatsCollector* ueCollect
     }
     else
     {
-        throw cRuntimeError("LteBinder::addUeCollector - eNodeBStatsCollector not present in eNodeB [%d]",(*it)->id ) ;
+//        throw cRuntimeError("LteBinder::addUeCollector - eNodeBStatsCollector not present in eNodeB [%d]",(*it)->id ) ;
     }
 
 
@@ -516,13 +516,13 @@ void LteBinder::moveUeCollector(MacNodeId ue,  MacNodeId oldCell, MacNodeId newC
         }
         else
         {
-            throw cRuntimeError("LteBinder::addUeCollector - UeStatsCollector of node [%d] not present in eNodeB [%d]", ue,oldCell ) ;
+            throw cRuntimeError("LteBinder::moveUeCollector - UeStatsCollector of node [%d] not present in eNodeB [%d]", ue,oldCell ) ;
         }
 
     }
     else
     {
-        throw cRuntimeError("LteBinder::addUeCollector - eNodeBStatsCollector not present in eNodeB [%d]", oldCell) ;
+        throw cRuntimeError("LteBinder::moveUeCollector - eNodeBStatsCollector not present in eNodeB [%d]", oldCell) ;
     }
 
 

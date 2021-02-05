@@ -92,6 +92,8 @@ private:
     //debug vars to be deleted
     std::map<MacNodeId,cOutVector> times_;
     std::map<MacNodeId,cOutVector> tput_;
+//    std::vector<simsignal_t>
+    //simsignal_t delaySignal;
     cOutVector ee;
     cOutVector ii;
     cOutVector ww;

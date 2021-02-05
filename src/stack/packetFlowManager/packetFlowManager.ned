@@ -22,6 +22,8 @@ simple PacketFlowManagerBase
 
 simple PacketFlowManagerEnb extends PacketFlowManagerBase {
     @class("PacketFlowManagerEnb");
+	@signal[delay];
+    @statistic[delay](title="Delay at the rlc layer UL"; unit="s"; source="delay"; record=mean,vector);
 }
 
 simple PacketFlowManagerUe extends PacketFlowManagerBase {

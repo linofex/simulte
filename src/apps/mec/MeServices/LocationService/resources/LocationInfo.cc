@@ -30,9 +30,9 @@ nlohmann::ordered_json LocationInfo::toJson() const
     val["x"] = coordinates_.x;
     val["y"] = coordinates_.y;
     val["z"] = coordinates_.z;
-    val["speed"]["x"] = speed_.x;
-    val["speed"]["y"] = speed_.y;
-    val["speed"]["z"] = speed_.z;
+//    val["speed"]["x"] = speed_.x;
+//    val["speed"]["y"] = speed_.y;
+//    val["speed"]["z"] = speed_.z;
 
  return val;
 }

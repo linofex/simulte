@@ -22,6 +22,7 @@ EnodeBStatsCollector::EnodeBStatsCollector()
     packetDelay_ = nullptr;
     mac_ = nullptr;
     pdcp_ = nullptr;
+    flowManager_ = nullptr;
 }
 
 
@@ -252,6 +253,7 @@ bool EnodeBStatsCollector::hasUeCollector(MacNodeId id)
 void EnodeBStatsCollector::add_dl_total_prb_usage_cell()
 {
     double prb_usage = mac_->getUtilization(DL);
+    EV << "EnodeBStatsCollector::add_dl_total_prb_usage_cell " << prb_usage << "%"<< endl;
     dl_total_prb_usage_cell.addValue(prb_usage);
 }
 void EnodeBStatsCollector::add_ul_total_prb_usage_cell()
@@ -262,6 +264,7 @@ void EnodeBStatsCollector::add_ul_total_prb_usage_cell()
 void EnodeBStatsCollector::add_number_of_active_ue_dl_nongbr_cell()
 {
     int users = mac_->getActiveUeSet(DL);
+    EV << "EnodeBStatsCollector::add_number_of_active_ue_dl_nongbr_cell " << users << endl;
     number_of_active_ue_dl_nongbr_cell.addValue(users);
 }
 void EnodeBStatsCollector::add_number_of_active_ue_ul_nongbr_cell()
@@ -328,7 +331,9 @@ void EnodeBStatsCollector::add_dl_nongbr_delay_perUser()
     double delay;
     for(; it != end ; ++it)
     {
-        it->second->add_ul_nongbr_delay_ue();
+        delay = flowManager_->getDelayStatsPerUe(it->first);
+        EV << "EnodeBStatsCollector::add_dl_nongbr_delay_perUser - delay: " << delay << " for node id: " << it->first << endl;
+        it->second->add_dl_nongbr_pdr_ue(delay);
     }
 }
 
@@ -344,7 +349,7 @@ void EnodeBStatsCollector::add_ul_nongbr_data_volume_ue_perUser()
     for(; it != end ; ++it)
     {
         bytes = pdcp_->getPdcpBytesUlPerUe(it->first);
-        EV << "EnodeBStatsCollector::add_ul_nongbr_data_volume_ue_perUser - sent :" << bytes << "B in UL from node id: " << it->first << endl;
+        EV << "EnodeBStatsCollector::add_ul_nongbr_data_volume_ue_perUser - received :" << bytes << "B in UL from node id: " << it->first << endl;
         it->second->add_ul_nongbr_data_volume_ue(bytes);
     }
 }

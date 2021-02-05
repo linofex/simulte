@@ -110,6 +110,7 @@ void RNIService::handleGETRequest(const std::string& uri, inet::TCPSocket* socke
                     }
                     else if(it->rfind("ue_ipv4_address", 0) == 0)
                     {
+                        // TO DO manage acr:10.12
                         params = lte::utils::splitString(*it, "=");
                         if(params.size()!= 2) //must be param=values
                         {

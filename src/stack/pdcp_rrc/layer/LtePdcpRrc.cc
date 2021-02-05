@@ -368,8 +368,8 @@ void LtePdcpRrcEnb::fromDataPort(cPacket* pkt)
     // Control Information
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pkt->getControlInfo());
     // dest id
-//    MacNodeId destId = binder_->getMacNodeId(IPv4Address(lteInfo->getDstAddr()));
-    MacNodeId destId = lteInfo->getDestId();
+    MacNodeId destId = binder_->getMacNodeId(IPv4Address(lteInfo->getDstAddr()));
+//    MacNodeId destId = lteInfo->getDestId();
 //    MacNodeId destUe = getDestId(lteInfo); // could be the relay
     if(pdcpPktCounterPerUe_.find(destId) == pdcpPktCounterPerUe_.end())
         pdcpPktCounterPerUe_[destId] = 0; // ue
