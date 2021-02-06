@@ -21,6 +21,7 @@
 
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/httpUtils/json.hpp"
 #include "corenetwork/nodes/mec/MEPlatform/MeServices/MeServiceBase/SocketManager.h"
+
 MeServiceBase::MeServiceBase(){}
 
 void MeServiceBase::initialize(int stage)
@@ -96,7 +97,7 @@ void MeServiceBase::handleMessage(cMessage *msg)
         if (!socket) // TCP_ESTABLISHED
         {
             socket = new inet::TCPSocket(msg);
-            socket->setOutputGate(gate("tcpOut"));        requestQueueSizeSignal_ = registerSignal("requestQueueSize");
+            socket->setOutputGate(gate("tcpOut"));
 
 
         //        std::cout <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << std::endl ;

@@ -20,7 +20,7 @@ MeApp_test::~MeApp_test(){}
 void MeApp_test::handleTcpMsg()
 {
     EV_INFO << "payload: " <<endl;//<< receivedMessage.at("body") << endl;
-    scheduleAt(simTime()+0.1, sendTimer);
+    scheduleAt(simTime()+0.010, sendTimer);
 }
 
 void MeApp_test::established(int connId)

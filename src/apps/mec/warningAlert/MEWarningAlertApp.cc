@@ -199,7 +199,9 @@ void MEWarningAlertApp::connect()
     socket.renewSocket();
 
     // connect
-    const char *connectAddress = "127.0.0.1";
+    // const char *connectAddress = "195.168.8.1";
+   const char *connectAddress = "127.0.0.1";
+
     int connectPort = 10020;
 
     inet::L3Address destination;

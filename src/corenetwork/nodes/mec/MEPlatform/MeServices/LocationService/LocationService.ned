@@ -28,6 +28,8 @@ simple LocationService like MeServiceBase, ITCPApp
         double subscriptionServiceTime @unit(s) = default(0.5us);
         string serverThreadClass = default("SocketManager")
         @display("i=block/app");
+        @signal[requestQueueSize](type = long);
+        @statistic[requestQueueSizeStat](title="Request queue size"; source="requestQueueSize"; record=mean,vector);
 
     gates:
         input tcpIn @labels(TCPCommand/up);

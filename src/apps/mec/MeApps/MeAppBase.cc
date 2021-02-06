@@ -18,11 +18,18 @@ MeAppBase::MeAppBase()
 {
     responseMessageLength = 0;
     receivedMessage.clear();
+    sendTimer = nullptr;
     }
 
 MeAppBase::~MeAppBase()
 {
-    cancelAndDelete(sendTimer);
+   if(sendTimer != nullptr)
+   {
+    if(sendTimer->isSelfMessage())
+        cancelAndDelete(sendTimer);
+    else
+        delete sendTimer;
+   }
 }
 
 

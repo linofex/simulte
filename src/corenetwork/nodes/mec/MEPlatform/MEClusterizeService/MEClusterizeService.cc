@@ -99,6 +99,7 @@ void MEClusterizeService::initialize(int stage)
     selfGet_ = new cMessage("GetRequest");
     getPeriod_ = par("getPeriod");
 
+    respTime = registerSignal("respTime");
     //txMode information for sending INFO_MEAPP
     preconfiguredTxMode = par("preconfiguredTxMode").stringValue();
     //----------------------------------
@@ -143,6 +144,7 @@ void MEClusterizeService::requestUserPositions()
         uri = "/example/location/v2/queries/users";
     std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
     Http::sendGetRequest(&socket, body.c_str(), host.c_str(), uri.c_str());
+    t1 = simTime();
 }
 
 /*
@@ -373,6 +375,7 @@ void MEClusterizeService::handleClusterizeNewCar(ClusterizePacket* pkt){
 
 void MEClusterizeService::handleTcpMsg()
 {
+    emit(respTime, (simTime() - t1).dbl());
     updateClusterInfo();
     if(selfGet_->isScheduled())
         cancelEvent(selfGet_);

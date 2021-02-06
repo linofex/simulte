@@ -102,7 +102,8 @@ class MEClusterizeService : public MeAppBase
         bool receivingMessage;
         cMessage *selfGet_;
         simtime_t getPeriod_;
-
+        simsignal_t respTime;
+        simtime_t t1;
         //----------------------------------
         //auto-scheduling
         cMessage *selfSender_;

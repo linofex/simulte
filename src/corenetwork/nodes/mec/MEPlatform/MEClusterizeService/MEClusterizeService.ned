@@ -47,6 +47,9 @@ simple MEClusterizeService like IMEService
        	string dataTransferMode @enum("bytecount","object","bytestream") = default("bytestream");
        	string serverThreadClass = default("SocketManager");      	
 	
+		@signal[respTime]; 
+        @statistic[respTime](title="respTime"; source="respTime"; record=mean,vector);
+	
     gates:
         
         input meAppIn[];

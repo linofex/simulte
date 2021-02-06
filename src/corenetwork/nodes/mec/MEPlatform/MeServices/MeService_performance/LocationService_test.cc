@@ -133,6 +133,7 @@ bool LocationService_test::manageRequest()
             }
             else
             {
+                emit(requestQueueSizeSignal_, requests_.length());
                 EV_INFO <<"LocationService_test::manageRequest() - dataArrived" << endl;
                 handleRequest(currentRequestServed_, socket);
                 result = true;

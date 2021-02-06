@@ -298,7 +298,7 @@ bool CircleNotificationSubscription::fromJson(const nlohmann::ordered_json& body
     response["circleNotificationSubscription"]["resourceURL"] = resourceURL;
     std::pair<std::string, std::string> p("Location: ", resourceURL);
     Http::send201Response(socket_, response.dump(2).c_str(), p );
-
+    firstNotificationSent = false;
     //if checkImmediate is true, check it
     if(checkImmediate)
         handleSubscription();
