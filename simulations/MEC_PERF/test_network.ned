@@ -20,6 +20,9 @@ import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.ethernet.Eth10G;
 import inet.node.inet.Router;
+package lte.simulations.MEC.InetMobility;
+
+import lte.corenetwork.nodes.carss.Car;
 import inet.node.inet.StandardHost;
 import lte.corenetwork.binder.LteBinder;
 import lte.corenetwork.nodes.Ue;
@@ -35,6 +38,7 @@ import lte.corenetwork.nodes.mec.MEPlatform.MEPlatform;
 network test_network
 {
     parameters:
+        int numCars = default(1);
         int numExtCells = default(0);
         @display("i=block/network2;bgb=991,558;bgi=background/budapest");
     submodules:
@@ -67,18 +71,16 @@ network test_network
         eNodeB2: eNodeB {
             @display("p=522.375,160.44376;is=vl");
         }
-        ue11: Ue {
-            @display("p=227.60625,279.84375");
-        }
-        ue12: Ue {
-            @display("p=322.13126,349.49374");
-        }
-        ue21: Ue {
-            @display("p=575.85626,292.28125");
-        }
-        ue22: Ue {
-            @display("p=701.475,195.26875");
-        }
+       car[numCars]: Car {	@display("p=300,300");}
+//        ue12: Ue {
+//            @display("p=322.13126,349.49374");
+//        }
+//        ue21: Ue {
+//            @display("p=575.85626,292.28125");
+//        }
+//        ue22: Ue {
+//            @display("p=701.475,195.26875");
+//        }
 //        extCell[numExtCells]: ExtCell {
 //            @display("p=100,480;is=vl");
 //        }

@@ -1,0 +1,25 @@
+
+ifconfig:
+
+# interface 0 to router
+name: ext0
+    inet_addr: 195.168.8.1
+    Mask: 255.255.255.0
+    MTU: 1500
+    Metric: 1
+    POINTTOPOINT MULTICAST
+    
+name: lo0
+    inet_addr: 127.0.0.1
+    Mask: 255.0.0.0
+    MTU: 65536
+    POINTTOPOINT MULTICAST
+    
+ifconfigend.
+
+route:
+#Destination     Gateway          Genmask          Flags  Metric  Iface
+195.168.8.0          *            255.255.255.0    G      0       lo0
+192.168.0.0          *            255.255.0.0      G      0       ext0
+127.0.0.0			*			  255.0.0.0        G      0       lo0
+routeend.
