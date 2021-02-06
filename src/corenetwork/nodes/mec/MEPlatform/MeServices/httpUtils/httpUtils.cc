@@ -76,12 +76,14 @@ namespace Http {
 
     void send201Response(inet::TCPSocket *socket, const char* body){
             HTTPResponsePacket resp = HTTPResponsePacket(CREATED);
+            resp.setConnection("keep-alive");
             resp.setBody(body);
             sendPacket(resp.getPayload(), socket);
     }
 
     void send201Response(inet::TCPSocket *socket, const char* body, std::pair<std::string, std::string>& header){
             HTTPResponsePacket resp = HTTPResponsePacket(CREATED);
+            resp.setConnection("keep-alive");
             resp.setBody(body);
             resp.setHeaderField(header.first, header.second);
             sendPacket(resp.getPayload(), socket);
@@ -89,6 +91,7 @@ namespace Http {
 
     void send201Response(inet::TCPSocket *socket, const char* body,std::map<std::string, std::string>& headers){
             HTTPResponsePacket resp = HTTPResponsePacket(CREATED);
+            resp.setConnection("keep-alive");
             resp.setBody(body);
             std::map<std::string, std::string>::iterator it = headers.begin();
             std::map<std::string, std::string>::iterator end = headers.end();

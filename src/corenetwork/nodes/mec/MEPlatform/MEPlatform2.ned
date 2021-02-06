@@ -15,7 +15,7 @@ package lte.corenetwork.nodes.mec.MEPlatform;
 
 import inet.linklayer.ppp.PPPInterface;
 import inet.linklayer.loopback.LoopbackInterface;
-
+import inet.linklayer.contract.IExternalNic;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.contract.IRoutingTable;
@@ -44,7 +44,6 @@ module MEPlatform2
         string routingTableType = default("IPv4RoutingTable");
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
-
         //# Num Services
         int numServices = default(0); // no of UDP ME Services. Specify the service types in INI file with udpManager.udpService[0..1].typename="UDPServ" syntax
 
@@ -86,6 +85,10 @@ module MEPlatform2
          lo0: LoopbackInterface {
                     @display("p=78,406");
                 }
+	     ext0: <default("ExtInterface")> like IExternalNic {
+            parameters:
+                @display("p=149,406,row,10;q=txQueue;i=block/ifcard");
+        }
 
         tcpApp[numTcpApps]: <> like ITCPApp {
             parameters:
@@ -153,6 +156,13 @@ module MEPlatform2
         tcp.ipOut --> networkLayer.transportIn++;
         tcp.ipIn <-- networkLayer.transportOut++;
 
+
+//        for i=0..numExtInterfaces-1 {
+//            ext[i].upperLayerOut --> networkLayer.ifIn++;
+//            ext[i].upperLayerIn <-- networkLayer.ifOut++;
+//        }
+	        ext0.upperLayerOut --> networkLayer.ifIn++;
+            ext0.upperLayerIn <-- networkLayer.ifOut++;
         //# 
         //# Internal connections: meAppIn & meAppOut gates to virtualisationManager.meAppIn & virtualisationManager.meAppOut
         //#
