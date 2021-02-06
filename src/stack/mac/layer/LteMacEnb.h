@@ -309,7 +309,7 @@ class LteMacEnb : public LteMacBase
      */
     void allocatedRB(unsigned int rb);
 
-    /*
+    /* // @author Alessandro Noferi
      * Return the current active set (active connections)
      * @par direction
      */
@@ -317,7 +317,7 @@ class LteMacEnb : public LteMacBase
 
     void cqiStatistics(MacNodeId id, Direction dir, LteFeedback fb);
 
-    // get band occupation for this/previous TTI. Used for interference computation purposes
+    // gets band occupation for this/previous TTI. Used for interference computation purposes
     unsigned int getDlBandStatus(Band b);
     unsigned int getDlPrevBandStatus(Band b);
     virtual bool isReuseD2DEnabled()
@@ -332,8 +332,7 @@ class LteMacEnb : public LteMacBase
 
     virtual ConflictGraph* getConflictGraph();
 
-    // @author Alessandro Noferi
-    /* Get the number of active users based on the direction.
+    /* gets the number of active users based on the direction.
      * A user is active (according with TS 136 314) if:
      * - it has buffered data in MAC RLC or PDCP layers -> ActiveSet
      * - it has data for which HARQ trasmission has not yet terminated -> !EMPTY HarqBuffer
@@ -342,10 +341,13 @@ class LteMacEnb : public LteMacBase
      */
     int getActiveUeSet(Direction dir);
 
-    /* get percentage of block utilized during the last TTI
+    /* gets percentage of block utilized during the last TTI
      * @param dir UL or DL
      */
     double getUtilization(Direction dir);
+
+    /* notifies the TTI to RLC UM  */
+    void notifyTTIRlc();
 
 };
 

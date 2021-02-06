@@ -21,6 +21,11 @@ class LteMacBase;
 class LteRlcUm;
 class LteRlcUmDataPdu;
 
+enum BurstCheck
+{
+    LAST_TTI, REORDERING
+};
+
 /**
  * @class UmRxEntity
  * @brief Receiver entity for UM
@@ -47,16 +52,6 @@ class UmRxEntity : public cSimpleModule
 
     // called when a D2D mode switch is triggered
     void rlcHandleD2DModeSwitch(bool oldConnection, bool oldMode, bool clearBuffer=true);
-
-
-    /*
-    * @author Alessandro Noferi
-    * This method is used to manage a burst and calculate the UL tput of a UE
-    * It is called at the and of enque() and at the and of a t_reorering
-    * period. Only the EnodeB needs to manage the buffer, since onyl it has to
-    * calculate UL tput.
-    */
-    void handleBurst();
 
     // returns true if the buffer is empty and the LteRlcSdu* buffer_ is null
     bool isEmpty() const;
@@ -150,6 +145,7 @@ class UmRxEntity : public cSimpleModule
      * estimate of the UE buffer size is continuously above zero by
      * excluding transmission of the last piece of data.
      */
+    simtime_t lastTTI_;
 
     bool isBurst_; // a burst is started last TTI
     bool t2Set_; // used to save t2
@@ -159,6 +155,18 @@ class UmRxEntity : public cSimpleModule
     simtime_t t1_; // point in time last pkt sent during burst
     simtime_t ttiT2_; // point in time last pkt sent during this tti
     simtime_t ttiT1_;
+
+
+
+    /*
+    * This method is used to manage a burst and calculate the UL tput of a UE
+    * It is called at the end of each TTI period and at the end of a t_reordering
+    * period. Only the EnodeB needs to manage the buffer, since only it has to
+    * calculate UL tput.
+    *
+    * @param event specifies when it is called, i.e after TTI or after timer reoridering
+    */
+    void handleBurst(BurstCheck event);
 
 
 //debug

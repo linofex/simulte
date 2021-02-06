@@ -844,6 +844,19 @@ void LteMacEnb::handleUpperMessage(cPacket* pkt)
 }
 
 
+void LteMacEnb::notifyTTIRlc()
+{
+    LteRlcUm *rlcUm;
+    cModule *rlc = getParentModule()->getSubmodule("rlc");
+    if(rlc->findSubmodule("um") != -1)
+    {
+        rlcUm = check_and_cast<LteRlcUm *>(getParentModule()->getSubmodule("rlc")->getSubmodule("um"));
+        rlcUm->notifyTTI();
+    }
+
+}
+
+
 void LteMacEnb::handleSelfMessage()
 {
     /***************
@@ -874,6 +887,11 @@ void LteMacEnb::handleSelfMessage()
             macPduUnmake(pdu);
         }
     }
+
+    //@author Alessandro Noferi
+    // notify TTI to RLC UM layer
+    EV << NOW << " LteMacEnb::handleSelfMessage - send TTI notification " << endl;
+    notifyTTIRlc();
 
     /*UPLINK*/
     EV << "============================================== UPLINK ==============================================" << endl;
@@ -1082,7 +1100,6 @@ int LteMacEnb::getActiveUeSet(Direction dir)
         }
 
         // check the presence of um
-
         LteRlcUm *rlcUm;
         cModule *rlc = getParentModule()->getSubmodule("rlc");
         if(rlc->findSubmodule("um") != -1)

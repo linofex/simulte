@@ -37,6 +37,7 @@ UmRxEntity::UmRxEntity() :
     t1_ = 0;
     ttiT2_ = 0;
     ttiT1_ = 0;
+    lastTTI_ = 0;
 }
 
 UmRxEntity::~UmRxEntity()
@@ -51,6 +52,22 @@ void UmRxEntity::enque(cPacket* pkt)
 {
     Enter_Method("enque()");
     EV << NOW << " UmRxEntity::enque - buffering new PDU" << endl;
+
+    /* @author Alessandro Noferi
+     * before do any computation check if it is a new TTI
+     * and manage the Burst.
+     */
+
+    if(flowControlInfo_->getDirection() == UL) //only eNodeB checks the burst
+    {
+        if(lastTTI_ < rlc_->getLastTTI())
+        {
+            EV << NOW << " UmRxEntity::enque - "<< lastTTI_ << " e " << rlc_->getLastTTI() << endl;
+            // it is a new TTI, manage the buffer state
+            handleBurst(LAST_TTI);
+            lastTTI_ = rlc_->getLastTTI();
+        }
+    }
 
     LteRlcUmDataPdu* pdu = check_and_cast<LteRlcUmDataPdu*>(pkt);
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pdu->getControlInfo());
@@ -143,7 +160,8 @@ void UmRxEntity::enque(cPacket* pkt)
     index = tsn - rxWindowDesc_.firstSno_;
     pduBuffer_.addAt(index, pdu);
     received_.at(index) = true;
-
+    ttiBits_ += pdu->getByteLength() - 2; // TO retrieve rlc um header size!
+    EV << NOW << " UmRxEntity::enque - added "  << ttiBits_ << " this TTI" << endl;
     if (lteInfo->getDirection() == UL)
     {
         MacCid cid = idToMacCid(flowControlInfo_->getSourceId(), flowControlInfo_->getLcid());
@@ -219,13 +237,6 @@ void UmRxEntity::enque(cPacket* pkt)
             rxWindowDesc_.reorderingSno_ = rxWindowDesc_.highestReceivedSno_;
         }
     }
-
-
-    if(flowControlInfo_->getDirection() == UL) //only eNodeB checks the burst
-    {
-        handleBurst();
-    }
-
 }
 
 /* burst management
@@ -244,20 +255,25 @@ void UmRxEntity::enque(cPacket* pkt)
  *          burst = 1
  *          update total var with temp var
  */
-void UmRxEntity::handleBurst()
+void UmRxEntity::handleBurst(BurstCheck event)
 {
     EV_FATAL << "size: " << pduBuffer_.size() + ((buffered_== NULL)?0 : 1) << endl;
-    if((pduBuffer_.size() + (buffered_== NULL)? 0 : 1) == 0)
+    if(((pduBuffer_.size() + (buffered_== NULL))? 0 : 1) == 0) //last TTI emptied the burst
     {
         if(isBurst_) // burst ends
         {
             //send stats
-            LteRlcUm* lteRlc = check_and_cast<LteRlcUm*>(getParentModule()->getSubmodule("um"));
-            Throughput throughput = {totalBits_, (t1_- t2_)};
-            lteRlc->addUeThroughput(flowControlInfo_->getSourceId(), throughput);
-            EV_FATAL << "BURST ENDED - size : " << totalBits_ << endl;
-            EV_FATAL << "tput: size " << totalBits_ << " time " << (t1_- t2_) <<  endl;
+            // if the transmission requires two TTIs and I do not count
+            // the second last, in the simulator t1 - t2 is 0.
 
+            if(t1_ != t2_)
+            {
+                Throughput throughput = {totalBits_, (t1_-t2_)};
+                rlc_->addUeThroughput(flowControlInfo_->getSourceId(), throughput);
+
+                EV_FATAL << "BURST ENDED - size : " << totalBits_ << endl;
+                EV_FATAL << "tput: size " << totalBits_ << " time " << (t1_- t2_) <<  endl;
+            }
             totalBits_ = 0;
             t2_ = 0;
             t1_ = 0;
@@ -271,19 +287,21 @@ void UmRxEntity::handleBurst()
     }
     else
     {
-        if(isBurst_)
+        if(isBurst_ )
         {
-
-            totalBits_ += ttiBits_;
-            t1_ = ttiT1_;
-            EV_FATAL << "BURST CONTINUE - size : " << totalBits_ << endl;
+            if(event == LAST_TTI) // handleBurts called at the end of the TTI
+            {
+                totalBits_ += ttiBits_;
+                t1_ = rlc_->getLastTTI();
+                EV_FATAL << "BURST CONTINUE - size : " << totalBits_ << endl;
+            }
         }
         else
         {
             isBurst_ = true;
             totalBits_ = ttiBits_;
-            t2_ = ttiT2_;
-            t1_ = ttiT1_;
+            t2_ = lastTTI_;
+            t1_ = lastTTI_; // it will be updated
             EV_FATAL << "BURST STARTED - size : " << totalBits_ << endl;
         }
     }
@@ -395,14 +413,6 @@ void UmRxEntity::toPdcp(LteRlcSdu* rlcSdu)
 
     EV << NOW << " UmRxEntity::toPdcp Created PDCP PDU with length " <<  pdcpPdu->getByteLength() << " bytes" << endl;
     EV << NOW << " UmRxEntity::toPdcp Send packet to upper layer" << endl;
-
-    if(t2Set_ == false) // first packet sent in this TTI
-    {
-        ttiT2_ = simTime();
-        t2Set_ = true;
-    }
-    ttiT1_ = simTime(); // last packet sent in this TTI
-    ttiBits_ += pdcpPdu->getBitLength();
 
     lteRlc->sendDefragmented(pdcpPdu);
 }
@@ -872,9 +882,9 @@ void UmRxEntity::handleMessage(cMessage* msg)
         }
 
         //manage burst only eNodeB checks the burst
-        if(flowControlInfo_->getDirection() == UL && ttiBits_ > 0) // ttiBits >0 means that a packet has been sent
+        if(flowControlInfo_->getDirection() == UL) // ttiBits >0 means that a packet has been sent
         {                                                          // during the previous reassembling
-            handleBurst();
+            handleBurst(REORDERING);
         }
 
         delete msg;

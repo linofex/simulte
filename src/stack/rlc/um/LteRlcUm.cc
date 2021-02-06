@@ -349,3 +349,13 @@ void LteRlcUm::activeUeUL(std::set<LogicalCid>* ueSet)
     }
 }
 
+void LteRlcUm::notifyTTI()
+{
+    lastTTI_ = simTime();
+}
+
+simtime_t LteRlcUm::getLastTTI()
+{
+   return lastTTI_;
+}
+

@@ -115,6 +115,8 @@ class LteRlcUm : public cSimpleModule
     cGate* up_[2];
     cGate* down_[2];
 
+    simtime_t lastTTI_;
+
     // statistics
     simsignal_t receivedPacketFromUpperLayer;
     simsignal_t receivedPacketFromLowerLayer;
@@ -209,6 +211,8 @@ class LteRlcUm : public cSimpleModule
   public:
     ActiveUeUL& getActiveUeUL() { return activeUsersUl_;}
     void activeUeUL(std::set<LogicalCid>* ueSet);
+    void notifyTTI();
+    simtime_t getLastTTI();
 
 };
 
