@@ -62,6 +62,8 @@ void MEClusterizeService::initialize(int stage)
     //auto-scheduling
     selfSender_ = new cMessage("selfSender");
     period_ = par("period");
+
+    errorSpeed.setName("speed error");
     //----------------------------------
     //parent modules
     mePlatform = getParentModule();
@@ -379,7 +381,8 @@ void MEClusterizeService::handleTcpMsg()
     updateClusterInfo();
     if(selfGet_->isScheduled())
         cancelEvent(selfGet_);
-    scheduleAt(simTime() + getPeriod_, selfGet_);
+    double time = exponential(0.05, 2);
+    scheduleAt(simTime() + time, selfGet_);
 
 }
 
@@ -495,6 +498,10 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
                     if(it->second.hasInitialInfo == false){
                         // first time the service has info about UE
                         it->second.hasInitialInfo = true;
+                        it->second.oldPosition. x = positionX;
+                        it->second.oldPosition. y = positionY;
+                        it->second.oldPosition. z = positionZ;
+
 
                     }
                     else{
@@ -510,6 +517,13 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
                         newSpeed.y = deltaPosition.y/deltaTime;
                         newSpeed.z = deltaPosition.z/deltaTime;
 
+                        double speedT = userInfo["locationInfo"]["speed"]["y"];
+
+                        double diff = speedT - newSpeed.y;
+
+                        errorSpeed.record(diff);
+
+
                         inet::Coord newAcc;
                         newAcc.x = (newSpeed.x - it->second.oldSpeed.x)/deltaTime;
                         newAcc.y = (newSpeed.y - it->second.oldSpeed.y)/deltaTime;
@@ -521,6 +535,8 @@ void MEClusterizeService::updateCarInfo(nlohmann::json& userInfo)
                         EV << "delta time: " << deltaTime << endl;
                         EV << "delta Position: "<< deltaPosition << endl;
                         EV << "calculated speed: " << newSpeed << endl;
+                        EV << "speed diff: " << diff << endl;
+
 
                         it->second.speed = newSpeed;
 

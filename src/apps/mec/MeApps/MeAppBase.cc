@@ -116,7 +116,7 @@ void MeAppBase::socketEstablished(int connId, void *)
 
 void MeAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
 {
-    EV << "MEClusterizeService::socketDataArrived" << endl;
+    EV << "MeAppBase::socketDataArrived" << endl;
 
     std::string packet = lte::utils::getPacketPayload(msg);
     delete msg;
@@ -144,9 +144,9 @@ void MeAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
 
     if(responseMessageLength == std::stoi(receivedMessage.at("Content-Length")) && receivingMessage == true)
     {
-        EV << "MEClusterizeService::socketDataArrived - Completed packet arrived." << endl;
+        EV << "MeAppBase::socketDataArrived - Completed packet arrived." << endl;
       //  if(receivedMessage.at("type").compare("request") == 0)
-            EV << "MEClusterizeService::socketDataArrived - payload: "<< endl;
+            EV << "MeAppBase::socketDataArrived - payload: "<< endl;
             for(auto it = receivedMessage.cbegin(); it != receivedMessage.cend(); ++it)
             {
                 EV << it->first << " " << it->second << endl;
@@ -158,12 +158,12 @@ void MeAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
         receivingMessage = false;
     }
     else if(responseMessageLength < 0)
-        throw cRuntimeError("MEClusterizeService::socketDataArrived - read payload more than Content-Length header");
+        throw cRuntimeError("MeAppBase::socketDataArrived - read payload more than Content-Length header");
 }
 
 bool MeAppBase::parseReceivedMsg(std::string& packet)
 {
-    EV_INFO << "MEClusterizeService::parseResponse" << endl;
+    EV_INFO << "MeAppBase::parseResponse" << endl;
 
 //    std::string packet(packet_);
     std::vector<std::string> splitting = lte::utils::splitString(packet, "\r\n\r\n"); // bound between header and body

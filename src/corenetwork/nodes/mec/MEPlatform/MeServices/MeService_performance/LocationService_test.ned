@@ -29,7 +29,10 @@ simple LocationService_test like MeServiceBase, ITCPApp
         @display("i=block/app");
         
 		@signal[requestQueueSize](type = long);
-        @statistic[requestQueueSizeStat](title="Request queue size"; source="requestQueueSize"; record=mean,vector);     
+        @statistic[requestQueueSizeStat](title="Request queue size"; source="requestQueueSize"; record=mean,vector);  
+        
+//        @signal[requestServTime](type = time);
+//        @statistic[requestServTimeStat](title="Request queue size"; source="requestServTime"; record=mean,vector);   
         
     gates:
         input tcpIn @labels(TCPCommand/up);

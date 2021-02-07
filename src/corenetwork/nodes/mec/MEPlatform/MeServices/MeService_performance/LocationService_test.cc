@@ -97,13 +97,12 @@ double LocationService_test::calculateRequestServiceTime()
     if(strcmp(currentRequestServed_->getName(), "lastFakeRequest") == 0){
         EV << "LocationService_test::calculateRequestServiceTime - lastFakeRequest" << endl;
         double time = poisson(requestServiceTime_, REQUEST_RNG);
-        return time;
+        return time*1e-6;;
     }
     else if(strcmp(currentRequestServed_->getName(), "fakeRequest") == 0){
         EV << "LocationService_test::calculateRequestServiceTime - fakeRequest" << endl;
-
         double time = poisson(requestServiceTime_, REQUEST_RNG);
-        return time;
+        return time*1e-6;;
     }
     return MeServiceBase::calculateRequestServiceTime();
 }
@@ -111,7 +110,7 @@ double LocationService_test::calculateRequestServiceTime()
 
 bool LocationService_test::manageRequest()
 {
-    emit(queueLength, requests_.length());
+    //emit(queueLength, requests_.length());
     EV << "LocationService_test::manageRequest()" << endl;
     bool result;
     //check if facke request

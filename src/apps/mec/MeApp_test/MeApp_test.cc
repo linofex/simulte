@@ -20,7 +20,7 @@ MeApp_test::~MeApp_test(){}
 void MeApp_test::handleTcpMsg()
 {
     EV_INFO << "payload: " <<endl;//<< receivedMessage.at("body") << endl;
-    scheduleAt(simTime()+0.010, sendTimer);
+    scheduleAt(simTime()+ 0, sendTimer);
 }
 
 void MeApp_test::established(int connId)
@@ -58,11 +58,18 @@ void MeApp_test::initialize(int stage){
 
 void MeApp_test::sendBulkRequest(){
     inet::RawPacket *request = new inet::RawPacket("BulkRequest");
-    std::string payload = "BulkRequest: " + std::to_string(numberOfApplications_);
+    int numRequests;
+    //do{
+
+//        numRequests = poisson(numberOfApplications_, 2);
+    numRequests = truncnormal(numberOfApplications_, 5, 2);
+
+    //}while(numRequests == 0);
+    std::string payload = "BulkRequest: " + std::to_string(numRequests+1);
     request->setDataFromBuffer(payload.c_str(), payload.length());
     request->setByteLength(payload.length());
     socket.send(request);
-    EV << "sent"<<endl;
+    EV << "sent " << numRequests << " requests to the server"<<endl;
 }
 
 

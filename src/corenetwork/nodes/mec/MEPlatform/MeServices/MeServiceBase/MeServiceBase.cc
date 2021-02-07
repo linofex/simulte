@@ -51,8 +51,6 @@ void MeServiceBase::initialize(int stage)
         serverSocket.listen();
 
         requestQueueSizeSignal_ = registerSignal("requestQueueSize");
-
-
         binder_ = getBinder();
         meHost_ = getParentModule() // virtualizationInfrastructure
                 ->getParentModule(); // MeHost
@@ -162,7 +160,7 @@ void MeServiceBase::scheduleNextEvent(bool now)
 
         //calculate the serviceTime base on the type | parameters
         double serviceTime = calculateRequestServiceTime(); //must be >0
-        scheduleAt(simTime() + serviceTime*1e-6 , requestService_);
+        scheduleAt(simTime() + serviceTime , requestService_);
        // EV << "scheduleNextEvent - Request execution started" << endl;
 //        if(now)
 //            scheduleAt(simTime() + 0 , requestService_);
@@ -214,7 +212,7 @@ double MeServiceBase::calculateRequestServiceTime()
             // max * random if numPar == 0 (all info)
             //int numPar = getNumberOfParameters(currentRequestServedmap_.at(uri));
             double time = poisson(requestServiceTime_, REQUEST_RNG);
-            return time;
+            return (time*1e-6);
         }
     }
     else

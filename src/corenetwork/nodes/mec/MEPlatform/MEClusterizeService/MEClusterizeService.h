@@ -104,6 +104,7 @@ class MEClusterizeService : public MeAppBase
         simtime_t getPeriod_;
         simsignal_t respTime;
         simtime_t t1;
+        ::omnetpp::cOutVector errorSpeed;
         //----------------------------------
         //auto-scheduling
         cMessage *selfSender_;
