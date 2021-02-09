@@ -1105,10 +1105,10 @@ int LteMacEnb::getActiveUeSet(Direction dir)
         if(rlc->findSubmodule("um") != -1)
         {
             rlcUm = check_and_cast<LteRlcUm *>(getParentModule()->getSubmodule("rlc")->getSubmodule("um"));
-            std::set<LogicalCid> activeRlcUe;
+            std::set<MacNodeId> activeRlcUe;
             rlcUm->activeUeUL(&activeRlcUe);
-            std::set<LogicalCid>::iterator rit =  activeRlcUe.begin();
-            std::set<LogicalCid>::iterator endrit =  activeRlcUe.end();
+            std::set<MacNodeId>::iterator rit =  activeRlcUe.begin();
+            std::set<MacNodeId>::iterator endrit =  activeRlcUe.end();
 //            for(; rit != endrit ; ++rit){
 //                if(rit->second.empty()){
 //                    activeUeSet.insert(rit->first); // active users in RLC

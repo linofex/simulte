@@ -210,7 +210,7 @@ class LteRlcUm : public cSimpleModule
 
   public:
     ActiveUeUL& getActiveUeUL() { return activeUsersUl_;}
-    void activeUeUL(std::set<LogicalCid>* ueSet);
+    void activeUeUL(std::set<MacNodeId>* ueSet);
     void notifyTTI();
     simtime_t getLastTTI();
 
