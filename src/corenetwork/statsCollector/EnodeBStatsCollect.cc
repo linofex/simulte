@@ -33,6 +33,7 @@ EnodeBStatsCollector::~EnodeBStatsCollector()
     cancelAndDelete(discardRate_);
     cancelAndDelete(activeUsers_);
     cancelAndDelete(packetDelay_);
+    cancelAndDelete(tPut_);
 
 }
 
@@ -74,12 +75,14 @@ void EnodeBStatsCollector::initialize(int stage){
         discardRate_ = new cMessage("discardRate_");
         packetDelay_ = new cMessage("packetDelay_");
         pdcpBytes_ = new cMessage("pdcpBytes_");
+        tPut_ = new cMessage("tPut_");
 
         prbUsagePeriod_    = par("prbUsagePeriod");
         activeUsersPeriod_ = par("activeUserPeriod");
         discardRatePeriod_ = par("discardRatePeriod");
         delayPacketPeriod_ = par("delayPacketPeriod");
-        dataVolumePeriod_   = par("dataVolumePeriod");
+        dataVolumePeriod_  = par("dataVolumePeriod");
+        tPutPeriod_ = par("tPutPeriod");
 
         // start scheduling the l2 meas
         // schedule only stats not using packetFlowManager
@@ -90,6 +93,7 @@ void EnodeBStatsCollector::initialize(int stage){
         {
             scheduleAt(NOW + discardRatePeriod_, discardRate_);
             scheduleAt(NOW + delayPacketPeriod_, packetDelay_);
+            scheduleAt(NOW + tPutPeriod_,tPut_);
         }
         scheduleAt(NOW + dataVolumePeriod_, pdcpBytes_);
     }
@@ -113,6 +117,13 @@ void EnodeBStatsCollector::handleMessage(cMessage *msg)
             add_number_of_active_ue_dl_nongbr_cell();
             add_number_of_active_ue_ul_nongbr_cell();
             scheduleAt(NOW + activeUsersPeriod_, activeUsers_);
+
+        }
+        else if(strcmp(msg->getName(), "tPut_") == 0)
+        {
+            add_dl_nongbr_throughput_ue_perUser();
+            add_ul_nongbr_throughput_ue_perUser();
+            scheduleAt(NOW + tPutPeriod_, tPut_);
 
         }
         else if(strcmp(msg->getName(), "discardRate_") == 0)
@@ -333,7 +344,7 @@ void EnodeBStatsCollector::add_dl_nongbr_delay_perUser()
     {
         delay = flowManager_->getDelayStatsPerUe(it->first);
         EV << "EnodeBStatsCollector::add_dl_nongbr_delay_perUser - delay: " << delay << " for node id: " << it->first << endl;
-        it->second->add_dl_nongbr_pdr_ue(delay);
+        it->second->add_dl_nongbr_delay_ue(delay);
     }
 }
 
@@ -376,6 +387,7 @@ void EnodeBStatsCollector::add_dl_nongbr_throughput_ue_perUser()
     for(; it != end ; ++it)
     {
         throughput = flowManager_->getThroughputStatsPerUe(it->first);
+        EV << "EnodeBStatsCollector::add_dl_nongbr_throughput_ue_perUser - tput: " << throughput << " for node " << it->first << endl;
         flowManager_->resetThroughputCounterPerUe(it->first);
         if(throughput > 0.0)
             it->second->add_dl_nongbr_throughput_ue(throughput);

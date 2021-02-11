@@ -217,7 +217,7 @@ void LteHarqBufferTx::receiveHarqFeedback(LteHarqFeedback *fbpkt)
     bool reset = (*processes_)[acid]->pduFeedback(harqResult, cw);
     if (reset)
     numEmptyProc_++;
-    if(macOwner_->getNodeType() == ENODEB && result  == true)
+    if(result  == true)
         {
             UserControlInfo* fb = check_and_cast<UserControlInfo *>(fbpkt->getControlInfo());
             macOwner_->harqAckToFlowManager(fb->getLcid(), fbPduId);

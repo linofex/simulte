@@ -34,6 +34,7 @@ simple EnodeBStatsCollector
         double dataVolumePeriod @unit(s)   = default(0.5s);
         double delayPacketPeriod @unit(s)  = default(0.5s);
         double discardRatePeriod @unit(s) = default(60s);
+        double tPutPeriod @unit(s) = default(1s);
 
         @display("i=block/cogwheel");
 }

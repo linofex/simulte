@@ -70,6 +70,7 @@ class EnodeBStatsCollector: public cSimpleModule
          * - Discard rate
          * - Packet delay
          * - PDCP bytes
+         * - scheduled tput
          */
 
         cMessage *prbUsage_;
@@ -77,12 +78,15 @@ class EnodeBStatsCollector: public cSimpleModule
         cMessage *discardRate_;
         cMessage *packetDelay_;
         cMessage *pdcpBytes_;
+        cMessage *tPut_;
+
 
         double prbUsagePeriod_;
         double activeUsersPeriod_;
         double discardRatePeriod_;
         double delayPacketPeriod_;
         double dataVolumePeriod_;
+        double tPutPeriod_;
 
     public:
         EnodeBStatsCollector();

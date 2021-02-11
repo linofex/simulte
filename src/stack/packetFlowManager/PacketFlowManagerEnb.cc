@@ -829,7 +829,11 @@ double PacketFlowManagerEnb::getThroughputStatsPerUe(MacNodeId id)
 //    if(it->second.pktSizeCount == 0) // a burst is not finished yet, return a tput of this period
 
     double time = (it->second.time.dbl()*1000); // ms
+    if(time == 0){
+        return 0;
+    }
     double throughput = (it->second.pktSizeCount)/time;
+    EV_FATAL << NOW << " PacketFlowManagerEnb::getThroughputStatsPerUe - Throughput Stats for Node Id " << id << " " << throughput << endl;
     return throughput;
 }
 

@@ -570,6 +570,8 @@ void PacketFlowManagerUe::resetDiscardPktCounter()
 
 double PacketFlowManagerUe::getDelayStats()
 {
+    if(pdcpDelay.pktCount == 0)
+        return 0;
     return (pdcpDelay.time.dbl()*1000)/pdcpDelay.pktCount;
 }
 void PacketFlowManagerUe::resetDelayCounter()
