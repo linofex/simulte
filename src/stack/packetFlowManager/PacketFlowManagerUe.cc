@@ -473,7 +473,8 @@ void PacketFlowManagerUe::macPduArrived(LogicalCid lcid, unsigned int macPdu)
                 { // the whole current pdcp seqNum has been received
                     EV_FATAL << NOW << "node id "<< desc->nodeId_-1025 << " PacketFlowManagerUe::macPduArrived - ----> PDCP PDU [" << pdcpPduSno << "] has been completely sent, remove from PDCP buffer" << endl;
 
-                    pdcpDelay.time += simTime() - pit->second.entryTime;
+                    double time = (simTime() - pit->second.entryTime).dbl();
+                    pdcpDelay.time += time;
                     pdcpDelay.pktCount += 1;
 
                     EV_FATAL << NOW << "node id "<< desc->nodeId_-1025 << " PacketFlowManagerUe::macPduArrived - PDCP PDU "<< pdcpPduSno << " of lcid " << lcid << " acknowledged. Delay time: " << time << "ms"<< endl;
@@ -572,6 +573,8 @@ double PacketFlowManagerUe::getDelayStats()
 {
     if(pdcpDelay.pktCount == 0)
         return 0;
+    EV_FATAL << NOW << " PacketFlowManagerUe::getDelayStats- Delay Stats total time: "<< pdcpDelay.time.dbl()*1000 << " pckcount: " <<pdcpDelay.pktCount   << endl;
+
     return (pdcpDelay.time.dbl()*1000)/pdcpDelay.pktCount;
 }
 void PacketFlowManagerUe::resetDelayCounter()

@@ -22,11 +22,11 @@ simple UeStatsCollector
         
         
         // time periods for measurements 
-        int ttiPeriodPRBUsage = default(5);
-        double samplingPeriod @unit(s) = default(0.05s);
+        int dataVolumePeriods = default(2);
+        int delayPacketPeriods = default(2); //used by the ue collector, remove 
+        int discardRatePeriods = default(2);
+        int tPutPeriods = default(2);
         
-        double dataVolumePeriod @unit(s) = default(0.5s);
-        int dataVolumePeriods = default(10);
         
         int numberOfSamples = default(20);
         bool movingAverage = default(false);

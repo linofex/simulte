@@ -27,6 +27,7 @@ simple EnodeBStatsCollector
         int activeUserPeriods = default(10); //10*100ms = 1s
         int delayPacketPeriods = default(2); //used by the ue collector, remove 
         int discardRatePeriods = default(2);
+        int tPutPeriods = default(2);
 
 		// period duration for each l2 meas
 		double prbUsagePeriod  @unit(s)   = default(0.001s); // TTI period

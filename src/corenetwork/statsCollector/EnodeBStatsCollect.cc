@@ -328,7 +328,6 @@ void EnodeBStatsCollector::add_ul_nongbr_delay_perUser()
 {
     UeStatsCollectorMap::iterator it = ueCollectors_.begin();
     UeStatsCollectorMap::iterator end = ueCollectors_.end();
-    double delay;
     for(; it != end ; ++it)
     {
         it->second->add_ul_nongbr_delay_ue();
@@ -344,7 +343,8 @@ void EnodeBStatsCollector::add_dl_nongbr_delay_perUser()
     {
         delay = flowManager_->getDelayStatsPerUe(it->first);
         EV << "EnodeBStatsCollector::add_dl_nongbr_delay_perUser - delay: " << delay << " for node id: " << it->first << endl;
-        it->second->add_dl_nongbr_delay_ue(delay);
+        if(delay != 0)
+            it->second->add_dl_nongbr_delay_ue(delay);
     }
 }
 

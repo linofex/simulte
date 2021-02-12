@@ -44,17 +44,17 @@ void UeStatsCollector::initialize(int stage){
         handover_ = false;
 
         // packet delay
-         ul_nongbr_delay_ue.init("ul_nongbr_delay_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
-         dl_nongbr_delay_ue.init("dl_nongbr_delay_ue",par("ttiPeriodPRBUsage"), par("movingAverage"));
+         ul_nongbr_delay_ue.init("ul_nongbr_delay_ue", par("delayPacketPeriods"), par("movingAverage"));
+         dl_nongbr_delay_ue.init("dl_nongbr_delay_ue",par("delayPacketPeriods"), par("movingAverage"));
         // packet discard rate
-         ul_nongbr_pdr_ue.init("ul_nongbr_pdr_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
-         dl_nongbr_pdr_ue.init("dl_nongbr_pdr_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
+         ul_nongbr_pdr_ue.init("ul_nongbr_pdr_ue", par("discardRatePeriods"), par("movingAverage"));
+         dl_nongbr_pdr_ue.init("dl_nongbr_pdr_ue", par("discardRatePeriods"), par("movingAverage"));
         // scheduled throughput
-         ul_nongbr_throughput_ue.init("ul_nongbr_throughput_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
-         dl_nongbr_throughput_ue.init("dl_nongbr_throughput_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
+         ul_nongbr_throughput_ue.init("ul_nongbr_throughput_ue", par("tPutPeriods"), par("movingAverage"));
+         dl_nongbr_throughput_ue.init("dl_nongbr_throughput_ue", par("tPutPeriods"), par("movingAverage"));
         // data volume
-         ul_nongbr_data_volume_ue.init("ul_nongbr_data_volume_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
-         dl_nongbr_data_volume_ue.init("dl_nongbr_data_volume_ue", par("ttiPeriodPRBUsage"), par("movingAverage"));
+         ul_nongbr_data_volume_ue.init("ul_nongbr_data_volume_ue", par("dataVolumePeriods"), par("movingAverage"));
+         dl_nongbr_data_volume_ue.init("dl_nongbr_data_volume_ue", par("dataVolumePeriods"), par("movingAverage"));
     }
 }
 
@@ -66,7 +66,8 @@ void UeStatsCollector::resetDelayCounter()
 void UeStatsCollector::add_ul_nongbr_delay_ue()
 {
     double delay = flowManager_->getDelayStats();
-    EV << "UeStatsCollector::add_ul_nongbr_delay_ue() - delay: " << delay << endl;
+    if(delay != 0)
+        EV << "UeStatsCollector::add_ul_nongbr_delay_ue() - delay: " << delay << endl;
     ul_nongbr_delay_ue.addValue(delay);
 }
 

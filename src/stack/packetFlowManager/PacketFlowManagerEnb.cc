@@ -794,6 +794,9 @@ double PacketFlowManagerEnb::getDelayStatsPerUe(MacNodeId id)
         return 0;
     }
 
+    if(it->second.pktCount == 0)
+        return 0;
+    EV_FATAL << NOW << " PacketFlowManagerEnb::getDelayStatsPerUe - Delay Stats for Node Id " << id << " total time: "<< (it->second.time.dbl())*1000 << " pckcount: " <<it->second.pktCount   << endl;
     double totalMs = (it->second.time.dbl())*1000; // ms
     double delayMean = totalMs / it->second.pktCount;
     return delayMean;
