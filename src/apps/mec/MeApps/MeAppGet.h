@@ -19,8 +19,14 @@ class MeAppGet : public MeAppBase
       inet::NodeStatus *nodeStatus = nullptr;
       bool earlySend = false;    // if true, don't wait with sendRequest() until established()
       int numRequestsToSend = 0;    // requests to send in this session
-      simtime_t startTime;
+      simtime_t sendTimestamp;;
       simtime_t stopTime;
+      cMessage *burstTimer;
+        cMessage *burstPeriod;
+        bool      burstFlag;
+        cMessage *sendBurst;
+
+      simsignal_t responseTime_;
 
 //      virtual void sendRequest();
 //      virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
@@ -29,13 +35,17 @@ class MeAppGet : public MeAppBase
 
       virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
       virtual void initialize(int stage) override;
+      virtual void sendMsg();
 //      virtual void handleTimer(cMessage *msg) override;
-      virtual void socketEstablished(int connId, void *yourPtr) override;
-      virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
+//      virtual void socketEstablished(int connId, void *yourPtr) override;
+//      virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
 //      virtual void socketClosed(int connId, void *yourPtr) override;
 //      virtual void socketFailure(int connId, void *yourPtr, int code) override;
 //      virtual bool isNodeUp();
 //      virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
+
+      virtual void handleTcpMsg();
+      virtual void established(int connId);
 
     public:
       MeAppGet() {}

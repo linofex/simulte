@@ -310,7 +310,11 @@ void LtePhyUe::doHandover()
     das_->setMasterRuSet(candidateMasterId_);
 
     // @author Alessandro Noferi
-    binder_->moveUeCollector(nodeId_, masterId_, candidateMasterId_);
+    if(getParentModule()->getParentModule()->findSubmodule("ueCollector") != -1)
+    {
+        binder_->moveUeCollector(nodeId_, masterId_, candidateMasterId_);
+    }
+
 
 
     // change masterId and notify handover to the MAC layer

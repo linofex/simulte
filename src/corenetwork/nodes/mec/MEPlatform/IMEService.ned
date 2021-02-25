@@ -13,7 +13,6 @@
 
 
 package lte.corenetwork.nodes.mec.MEPlatform;
-
 //
 // Template for ME Services.
 //
@@ -26,7 +25,10 @@ moduleinterface IMEService
     gates:
         
         input meAppIn[];
-        output meAppOut[];     
+        output meAppOut[];
+        
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);     
 }
 
 

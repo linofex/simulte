@@ -96,9 +96,9 @@ module eNodeB
             @display("p=50,225;is=s");
         }
         
-        collector: EnodeBStatsCollector {
-            @display("p=50,275;is=s");
-        }
+//        collector: EnodeBStatsCollector {
+//            @display("p=50,275;is=s");
+//        }
 
         //#
         //# lteNic modules

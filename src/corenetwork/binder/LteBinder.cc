@@ -435,10 +435,11 @@ void LteBinder::removeUeHandoverTriggered(MacNodeId nodeId)
 
 void LteBinder::addUeCollectorToEnodeB(MacNodeId ue, UeStatsCollector* ueCollector , MacNodeId cell)
 {
+    EV << "LteBinder::addUeCollector"<< endl;
     std::vector<EnbInfo*>::iterator it = enbList_.begin(), end = enbList_.end();
     cModule *enb = nullptr;
     EnodeBStatsCollector * enbColl = nullptr;
-    for(; it != end ; ++it)
+    for(; it != end ; ++it) // for each eNodeB
     {
         enb = (*it)->eNodeB;
         if (enb->getSubmodule("collector") != nullptr)
@@ -463,9 +464,11 @@ void LteBinder::addUeCollectorToEnodeB(MacNodeId ue, UeStatsCollector* ueCollect
     {
         enbColl = check_and_cast<EnodeBStatsCollector *>(enb->getSubmodule("collector"));
         enbColl->addUeCollector(ue, ueCollector);
+        EV << "LteBinder::addUeCollector - UeCollector for node [" << ue << "] added to eNodeB [" << cell << "]" << endl;
     }
     else
     {
+        EV << "LteBinder::addUeCollector - UeCollector for node [" << ue << "] NOT added to eNodeB [" << cell << "]" << endl;
 //        throw cRuntimeError("LteBinder::addUeCollector - eNodeBStatsCollector not present in eNodeB [%d]",(*it)->id ) ;
     }
 
@@ -503,6 +506,7 @@ void LteBinder::addUeCollectorToEnodeB(MacNodeId ue, UeStatsCollector* ueCollect
 
 void LteBinder::moveUeCollector(MacNodeId ue,  MacNodeId oldCell, MacNodeId newCell)
 {
+    EV << "LteBinder::moveUeCollector"<< endl;
     const char* cellModuleName = getModuleNameByMacNodeId(oldCell); // eNodeB module name
     cModule *oldEnb = getParentModule()->getSubmodule(cellModuleName); //  eNobe module
     if (oldEnb->getSubmodule("collector") != nullptr)
@@ -512,6 +516,7 @@ void LteBinder::moveUeCollector(MacNodeId ue,  MacNodeId oldCell, MacNodeId newC
         {
             UeStatsCollector * ueColl = enbColl->getUeCollector(ue);
             enbColl->removeUeCollector(ue);
+            EV << "LteBinder::moveUeCollector - UeCollector for node [" << ue << "] removed from eNodeB [" << oldCell << "]" << endl;
             addUeCollectorToEnodeB(ue, ueColl, newCell);
         }
         else

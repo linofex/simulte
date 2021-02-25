@@ -7,7 +7,7 @@
 
 
 #include "apps/mec/MeApps/MeAppSubscription.h"
-#include "apps/mec/MeServices/httpUtils/httpUtils.h"
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/httpUtils/httpUtils.h"
 #include "common/utils/utils.h"
 #include <string>
 
@@ -16,47 +16,10 @@ Define_Module(MeAppSubscription);
 MeAppSubscription::~MeAppSubscription(){}
 
 
-void MeAppSubscription::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
+void MeAppSubscription::established(int connId)
 {
-    std::string packet = lte::utils::getPacketPayload(msg);
-    EV_INFO << "payload: " << packet << endl;
-    delete msg;
-    i++;
-
-    if(i == 2)
-    {
-        std::string uri = "/example/location/v2/subscriptions/area/circle/0";
-        std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
-        Http::sendDeleteRequest(&socket, host.c_str(), uri.c_str());
+    EV << "Estabolished"<< endl;
     }
-        //delete subscription
-
-
-}
-
-void MeAppSubscription::socketEstablished(int connId, void *yourPtr)
-{
-
-    std::string body = "{  \"circleNotificationSubscription\": {"
-               "\"callbackReference\" : {"
-                "\"callbackData\":\"1234\","
-                "\"notifyURL\":\"example.com/notification/1234\"},"
-               "\"checkImmediate\": \"false\","
-            "\"address\": \"10.0.0.3\","
-            "\"clientCorrelator\": \"ciao\","
-            "\"enteringLeavingCriteria\": \"Entering\","
-            "\"frequency\": 10,"
-            "\"radius\": 30,"
-            "\"trackingAccuracy\": 10,"
-            "\"latitude\": 230,"
-            "\"longitude\": 230"
-            "}"
-            "}\r\n";
-    std::string uri = "/example/location/v2/subscriptions/area/circle";
-    std::string host = socket.getRemoteAddress().str()+":"+std::to_string(socket.getRemotePort());
-    Http::sendPostRequest(&socket, body.c_str(), host.c_str(), uri.c_str());
-
-}
 
 
 void MeAppSubscription::handleSelfMsg(cMessage *msg){

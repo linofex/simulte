@@ -25,7 +25,7 @@ moduleinterface IMEApp
         
         string ueSimbolicAddress; 		// i.e. UE[x] or car[x]
         string meHostSimbolicAddress;	// i.e meHost.virtualisationInfrastructure
-        
+                
     gates:
         
         input virtualisationInfrastructureIn;
@@ -33,6 +33,11 @@ moduleinterface IMEApp
         
         input mePlatformIn;
         output mePlatformOut;
+        
+        input mePlatformTcpIn;
+        output mePlatformTcpOut;
+        
+      
 }
 
 

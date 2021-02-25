@@ -7,11 +7,11 @@
 
 
 #include "apps/mec/PerformanceEvaluation/MeApp/MeAppGet_test/MeAppGet_test.h"
-#include "apps/mec/MeServices/httpUtils/httpUtils.h"
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/httpUtils/httpUtils.h"
 #include "common/utils/utils.h"
 #include <string>
 #include "inet/networklayer/common/L3AddressResolver.h"
-#include "apps/mec/MeServices/httpUtils/json.hpp"
+#include "corenetwork/nodes/mec/MEPlatform/MeServices/httpUtils/json.hpp"
 #include "corenetwork/lteCellInfo/LteCellInfo.h"
 #include "corenetwork/binder/LteBinder.h"
 
@@ -92,6 +92,8 @@ void MeAppGet_test::socketEstablished(int connId, void *yourPtr)
 
 }
 
+void MeAppGet_test::handleTcpMsg(){};
+void MeAppGet_test::established(int connId){};
 
 void MeAppGet_test::handleMessage(cMessage *msg)
 {

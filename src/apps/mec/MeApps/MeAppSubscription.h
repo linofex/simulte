@@ -23,23 +23,26 @@ class MeAppSubscription : public MeAppBase
 
 //      virtual void sendRequest();
 //      virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
-
-      virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
       virtual void handleSelfMsg(cMessage *msg);
 
       virtual int numInitStages() const override { return inet::NUM_INIT_STAGES; }
       virtual void initialize(int stage) override;
 //      virtual void handleTimer(cMessage *msg) override;
-      virtual void socketEstablished(int connId, void *yourPtr) override;
+//      virtual void socketEstablished(int connId, void *yourPtr) override;
 //      virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) override;
 //      virtual void socketClosed(int connId, void *yourPtr) override;
 //      virtual void socketFailure(int connId, void *yourPtr, int code) override;
 //      virtual bool isNodeUp();
 //      virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) override;
 
+
+
     public:
       MeAppSubscription() {i = 0;}
       virtual ~MeAppSubscription();
+
+      virtual void handleTcpMsg(){};
+      virtual void established(int connId);
 
  };
 

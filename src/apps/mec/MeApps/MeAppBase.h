@@ -10,7 +10,6 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
-#include "inet/common/INETDefs.h"
 
 /**
  * Base class for clients app for TCP-based request-reply protocols or apps.
@@ -22,6 +21,13 @@ class  MeAppBase : public cSimpleModule, public inet::TCPSocket::CallbackInterfa
 {
   protected:
     inet::TCPSocket socket;
+
+    std::map<std::string, std::string> receivedMessage;
+    cMessage *sendTimer;
+
+    int responseMessageLength;
+    bool receivingMessage;
+
 
 //    // statistics
     int numSessions;
@@ -43,12 +49,17 @@ class  MeAppBase : public cSimpleModule, public inet::TCPSocket::CallbackInterfa
     virtual void finish() override;
     virtual void refreshDisplay() const override;
 
-    virtual void handleSelfMsg(cMessage *msg) = 0;
+    virtual void handleSelfMsg(cMessage *msg){};
 
     /* Utility functions */
     virtual void connect();
     virtual void close();
     virtual void sendPacket(cPacket *pkt);
+    virtual bool parseReceivedMsg(std::string& packet);
+
+
+    virtual void handleTcpMsg() = 0;
+    virtual void established(int connId) = 0;
 
     /* TCPSocket::CallbackInterface callback methods */
     virtual void socketEstablished(int connId, void *yourPtr) override;
@@ -57,6 +68,10 @@ class  MeAppBase : public cSimpleModule, public inet::TCPSocket::CallbackInterfa
     virtual void socketClosed(int connId, void *yourPtr) override;
     virtual void socketFailure(int connId, void *yourPtr, int code) override;
     virtual void socketStatusArrived(int connId, void *yourPtr, inet::TCPStatusInfo *status) override { delete status; }
+
+  public:
+        MeAppBase();
+        virtual ~MeAppBase();
 
 
 };

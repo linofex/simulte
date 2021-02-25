@@ -22,8 +22,8 @@ void L2MeasBase::init(std::string name, int period, bool movingAverage)
     sum_ = 0;
     mean_ = 0;
     movingAverage_ = movingAverage;
-    outVector_.setName(name_.c_str());
-    histogram_.setName(name_.c_str());
+//    outVector_.setName(name_.c_str());
+//    histogram_.setName(name_.c_str());
 
 }
 L2MeasBase::~L2MeasBase()
@@ -46,8 +46,8 @@ void L2MeasBase::addValue(double value){
 
     if(movingAverage_ || index_ == period_){ // compute mean
         mean_ = computeMean();
-        outVector_.record(mean_);
-        histogram_.collect(mean_);
+        //outVector_.record(mean_);
+        //histogram_.collect(mean_);
     }
 }
 int L2MeasBase::computeMean()

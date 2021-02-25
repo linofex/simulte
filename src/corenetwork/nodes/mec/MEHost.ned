@@ -13,10 +13,11 @@
 
 
 package lte.corenetwork.nodes.mec;
-import inet.node.inet.StandardHost;
 
 import lte.corenetwork.nodes.mec.VirtualisationInfrastructure.VirtualisationInfrastructure;
 import lte.corenetwork.nodes.mec.MEPlatform.MEPlatform;
+import lte.corenetwork.nodes.mec.MEPlatform.MEPlatform2;
+
 
 //lte tunneling endpoint to connect externally with an eNodeB
 import lte.corenetwork.nodes.mec.GtpEndpoint.GtpEndpoint;
@@ -54,13 +55,14 @@ module MEHost
 
     submodules:
 
-        
-        virtualisationInfrastructure: StandardHost {
+        virtualisationInfrastructure: VirtualisationInfrastructure {
             parameters:
-                @display("p=350,400");
-                numExtInterfaces = 1;
-            gates:
-                pppg[];
+                @display("p=500,400");
+        }
+
+        mePlatform: MEPlatform2 {
+            parameters:
+                @display("p=500,50;is=m");
         }
 
         //gtp endpoint to connect directly with an eNodeB
@@ -77,7 +79,7 @@ module MEHost
         //#
         //# internal connection between GtpEndpoint and VirtualisationInfrastrcuture
         //#
-        virtualisationInfrastructure.pppg++ <--> Eth10G <--> gtpEndpoint.filterGate;
+        virtualisationInfrastructure.ppp++ <--> Eth10G <--> gtpEndpoint.filterGate;
 
         for i=0..sizeof(pppENB)-1 
         {
@@ -89,6 +91,6 @@ module MEHost
             //#
             //# external connection to external networks
             //#
-            virtualisationInfrastructure.pppg++ <--> ppp++;
+            virtualisationInfrastructure.ppp++ <--> ppp++;
         }
 }

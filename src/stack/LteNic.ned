@@ -148,9 +148,9 @@ module LteNicUe extends LteNicBase
         dlFbGen: LteDlFeedbackGenerator {
             @display("p=50,50;is=s");
         }
-        packetFlowManager: PacketFlowManagerUe {
-			@display("p=104.8, 389.75998");
-		}
+//        packetFlowManager: PacketFlowManagerUe {
+//			@display("p=104.8, 389.75998");
+//		}
 }
 
 //
@@ -200,9 +200,9 @@ module LteNicEnb extends LteNicBase
  		//#
         //# Modules used to take trace of PDCP pkt flow
         //#
-		packetFlowManager: PacketFlowManagerEnb {
-			@display("p=104.8, 389.75998");
-		}
+//		packetFlowManager: PacketFlowManagerEnb {
+//			@display("p=104.8, 389.75998");
+//		}
     connections:
         //# connections between X2 Manager and its users
         compManager.x2ManagerIn <-- x2Manager.dataPort$o++ if compEnabled;

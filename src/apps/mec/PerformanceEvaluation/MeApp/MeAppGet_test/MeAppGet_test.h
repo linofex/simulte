@@ -37,7 +37,10 @@ class MeAppGet_test : public MeAppBase
       virtual void sendRequest();
 
 
-      virtual void handleSelfMsg(cMessage *msg);
+      virtual void handleSelfMsg(cMessage *msg) override;
+
+      virtual void handleTcpMsg() override;
+      virtual void established(int connId) override;
 
       virtual void connectUEapp();
 

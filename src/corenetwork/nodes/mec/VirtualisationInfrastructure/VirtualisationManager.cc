@@ -51,6 +51,7 @@ void VirtualisationManager::initialize(int stage)
         this->setGateSize("meAppIn", maxMEApps);
         virtualisationInfr->setGateSize("meAppOut", maxMEApps);
         virtualisationInfr->setGateSize("meAppIn", maxMEApps);
+
         //VirtualisationInfrastructure internal gate connections with VirtualisationManager
         for(int index = 0; index < maxMEApps; index++)
         {
@@ -63,6 +64,8 @@ void VirtualisationManager::initialize(int stage)
         {
             mePlatform->setGateSize("meAppOut", maxMEApps);
             mePlatform->setGateSize("meAppIn", maxMEApps);
+            mePlatform->setGateSize("meAppTcpOut", maxMEApps);
+            mePlatform->setGateSize("meAppTcpIn", maxMEApps);
         }
         // retrieving all available ME Services loaded
         numServices = mePlatform->par("numServices").longValue();
@@ -71,6 +74,16 @@ void VirtualisationManager::initialize(int stage)
             meServices.push_back(mePlatform->getSubmodule("udpService", i));
             EV << "VirtualisationManager::initialize - Available meServices["<<i<<"] " << meServices.at(i)->getClassName() << endl;
         }
+
+        if(mePlatform->findSubmodule("tcp") != -1)
+        {
+            TCPModule = mePlatform->getSubmodule("tcp");
+        }
+        else
+        {
+            TCPModule = nullptr;
+        }
+
     }
     else
     {
@@ -154,6 +167,8 @@ void VirtualisationManager::handleMEAppPacket(MEAppPacket* pkt){
 
     /* Handling INFO_UEAPP */
     else if(!strcmp(pkt->getType(), INFO_UEAPP))    upstreamToMEApp(pkt);
+    else if(!strcmp(pkt->getType(), INIT_MEAPP))    upstreamToMEApp(pkt);
+
 
     /* Handling INFO_MEAPP */
     else if(!strcmp(pkt->getType(), INFO_MEAPP))    downstreamToUEApp(pkt);
@@ -363,6 +378,23 @@ void VirtualisationManager::instantiateMEApp(MEAppPacket* pkt)
             //connecting internal MEPlatform gates to the required MEService gates
             (meServices.at(serviceIndex))->gate("meAppOut", index)->connectTo(mePlatform->gate("meAppOut", index));
             mePlatform->gate("meAppIn", index)->connectTo((meServices.at(serviceIndex))->gate("meAppIn", index));
+
+            //connecting the TCP gates to connect the MeAPP to the TCP layer
+           if(TCPModule != nullptr)
+           {
+               mePlatform->gate("meAppTcpOut", index)->connectTo(module->gate("mePlatformTcpIn"));
+               module->gate("mePlatformTcpOut")->connectTo(mePlatform->gate("meAppTcpIn", index));
+
+               cGate* newAppInGate = TCPModule->getOrCreateFirstUnconnectedGate("appIn", 0, false, true);
+               cGate* newAppOutGate = TCPModule->getOrCreateFirstUnconnectedGate("appOut", 0, false, true);
+
+               newAppOutGate->connectTo(mePlatform->gate("meAppTcpOut", index));
+               mePlatform->gate("meAppTcpIn", index)->connectTo(newAppInGate);
+
+           }
+
+
+
         }
         else EV << "VirtualisationManager::instantiateMEApp - NO MEService required!"<< endl;
 
@@ -418,6 +450,15 @@ void VirtualisationManager::terminateMEApp(MEAppPacket* pkt)
         //disconnecting MEPlatform gates to the MEApp gates
         mePlatform->gate("meAppOut", index)->disconnect();
         mePlatform->gate("meAppIn", index)->disconnect();
+
+        //disconnect tcp gates
+
+        mePlatform->gate("meAppTcpOut", index)->getPreviousGate()->disconnect();
+        mePlatform->gate("meAppTcpIn", index)->getNextGate()->disconnect();
+
+        mePlatform->gate("meAppTcpOut", index)->disconnect();
+        mePlatform->gate("meAppTcpIn", index)->disconnect();
+
 
         //update maps
         ueAppIdToMeAppMapKey.erase(ueAppIdToMeAppMapKey.find(ueAppID));

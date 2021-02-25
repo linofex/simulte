@@ -26,8 +26,8 @@ class L2MeasBase
         int size_;
         bool movingAverage_;
 
-        ::omnetpp::cOutVector outVector_;
-        ::omnetpp::cHistogram histogram_;
+//        ::omnetpp::cOutVector outVector_;
+//        ::omnetpp::cHistogram histogram_;
 
     public:
         L2MeasBase();

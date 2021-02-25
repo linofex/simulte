@@ -18,5 +18,7 @@
 #define INFO_MEAPP "MEAppInfo"
 #define INFO_UEAPP "UEAppInfo"
 
+#define INIT_MEAPP "MEAppInit"
+
 
 #endif /* CORENETWORK_NODES_MEC_MEPLATFORM_MEAPPPACKET_TYPES_H_ */

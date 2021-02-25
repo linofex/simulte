@@ -42,5 +42,9 @@ simple MEWarningAlertService like IMEService
     gates:
        
         input meAppIn[];
-        output meAppOut[];     
+        output meAppOut[];
+        
+                input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);     
+             
 }
