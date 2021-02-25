@@ -62,10 +62,13 @@ void EnodeBStatsCollector::initialize(int stage){
 
         cellInfo_ = check_and_cast<LteCellInfo *>(getParentModule()->getSubmodule("cellInfo"));
         ecgi_.cellId = cellInfo_->getMacCellId();
+
         dl_total_prb_usage_cell.init("dl_total_prb_usage_cell", par("prbUsagePeriods"), par("movingAverage"));
         ul_total_prb_usage_cell.init("ul_total_prb_usage_cell", par("prbUsagePeriods"), par("movingAverage"));
+
         number_of_active_ue_dl_nongbr_cell.init("number_of_active_ue_dl_nongbr_cell", par("activeUserPeriods"), false);
         number_of_active_ue_ul_nongbr_cell.init("number_of_active_ue_ul_nongbr_cell", par("activeUserPeriods"), false);
+
         dl_nongbr_pdr_cell.init("dl_nongbr_pdr_cell", par("discardRatePeriods"), false);
         ul_nongbr_pdr_cell.init("ul_nongbr_pdr_cell", par("discardRatePeriods"), false);
 
@@ -291,7 +294,7 @@ void EnodeBStatsCollector::add_dl_nongbr_pdr_cell()
 
 void EnodeBStatsCollector::add_ul_nongbr_pdr_cell()
 {
-    double pdr = 0;
+    double pdr = 0.0;
     DiscardedPkts pair = {0,0};
     DiscardedPkts temp = {0,0};
 

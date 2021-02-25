@@ -1,5 +1,3 @@
-
-
 //
 //                           SimuLTE
 //
@@ -23,8 +21,12 @@
 using namespace inet;
 
 /**
+ * The UeStatsCollector retrieves some L2 measures used for the RNI service of
+ * the MEC framework. In particular it retrieves packet delays and discard rate.
  *
- * TODO
+ * It is managed by the eNodeBStatsCollector modules. The latter has timers that
+ * periodically calculate che measures.
+ *
  */
 
 class LtePdcpRrcUe;
@@ -33,9 +35,6 @@ class PacketFlowManagerUe;
 class UeStatsCollector: public cSimpleModule
 {
     private:
-
-
-
 
         // Used by the RNI service
         mec::AssociateId associateId_;
@@ -58,7 +57,7 @@ class UeStatsCollector: public cSimpleModule
         L2MeasBase ul_nongbr_data_volume_ue;
         L2MeasBase dl_nongbr_data_volume_ue;
 
-        // inserire segnali
+        // insert signals for statistics
 
         bool handover_;
 
@@ -66,39 +65,66 @@ class UeStatsCollector: public cSimpleModule
         UeStatsCollector();
         virtual ~UeStatsCollector(){}
 
+        // methods to update L2 measures
+
+        // packet delay
         void add_ul_nongbr_delay_ue();
         void add_dl_nongbr_delay_ue(double value);// called by the eNodeBCollector
-        void resetDelayCounter();
 
+        // packet discard rate
         void add_ul_nongbr_pdr_ue(double value); // called by this module, but from a method
         void add_dl_nongbr_pdr_ue(double value); // called by the eNodeBCollector
-        DiscardedPkts getULDiscardedPkt();
 
+        // throughput
         void add_ul_nongbr_throughput_ue(double value);
         void add_dl_nongbr_throughput_ue(double value);
 
+        // PDPC bytes
         void add_ul_nongbr_data_volume_ue(unsigned int value); // called by the eNodeBCollector
         void add_dl_nongbr_data_volume_ue(unsigned int value); // called by the eNodeBCollector
 
 
+        void resetDelayCounter(); // reset structures to calculate the measure
+
+        /* thie method is used by the eNodeBStatsCollector to calculate
+         * packet discard rate per cell
+         */
+        DiscardedPkts getULDiscardedPkt();
+
+
+
+        // getters to retrieve L2 measures (e.g from RNI service)
+
+        // packet delay getters
         int get_ul_nongbr_delay_ue();
         int get_dl_nongbr_delay_ue();
 
+        // packet discard rate getters
         int get_ul_nongbr_pdr_ue();
         int get_dl_nongbr_pdr_ue();
 
+        // throughput getters
         int get_ul_nongbr_throughput_ue();
         int get_dl_nongbr_throughput_ue();
 
+        // PDPC bytes getters
         int get_ul_nongbr_data_volume_ue();
         int get_dl_nongbr_data_volume_ue();
 
+
+        /* getters for GBR (Guaranteed Bit Rate) L2 measures.
+         * currently not implemented since the simulator does not
+         * handle them         *
+         */
         int get_dl_gbr_delay_ue(){return -1;}
         int get_ul_gbr_delay_ue(){return -1;}
+
         int get_dl_gbr_pdr_ue(){return -1;}
         int get_ul_gbr_pdr_ue(){return -1;}
+
         int get_dl_gbr_throughput_ue(){return -1;}
         int get_ul_gbr_throughput_ue(){return -1;}
+
         int get_dl_gbr_data_volume_ue(){return -1;}
         int get_ul_gbr_data_volume_ue(){return -1;}
 
@@ -124,9 +150,6 @@ class UeStatsCollector: public cSimpleModule
         }
 
 };
-
-
-
 
 
 #endif //_LTE_ENOBSTATSCOLLECTOR_H_

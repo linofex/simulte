@@ -205,8 +205,6 @@ class LteRlcUm : public cSimpleModule
 
     typedef std::map<MacNodeId, std::set<LogicalCid> > ActiveUeUL;
     ActiveUeUL activeUsersUl_;
-    //debug
-    std::map<MacNodeId, cOutVector> tt;
 
   public:
     ActiveUeUL& getActiveUeUL() { return activeUsersUl_;}

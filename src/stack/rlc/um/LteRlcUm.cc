@@ -289,15 +289,11 @@ void LteRlcUm::addUeThroughput(MacNodeId nodeId, Throughput throughtput)
         strs << "rlc:" << nodeId -1025;
         std::string temp_str = strs.str();
         char* char_type = (char*) temp_str.c_str();
-        tt[nodeId].setName(char_type);
-        tt[nodeId].record(getUeThroughput(nodeId));
-
-    }
+        }
     else
     {
         it->second.pktSizeCount = throughtput.pktSizeCount;
         it->second.time = throughtput.time;
-        tt[nodeId].record(getUeThroughput(nodeId));
     }
 }
 

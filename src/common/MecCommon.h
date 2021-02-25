@@ -16,6 +16,10 @@ enum Trigger
 };
 
 
+/*
+ * temporary method to get the trigger of a RNI notification.
+ * unused since the subscription are not implemented, yet
+ */
 Trigger getTrigger(std::string& trigger);
 
 typedef struct
@@ -38,20 +42,44 @@ typedef struct {
 
 namespace mec {
 
+    /*
+     * associated identifier for a UE
+     *
+     * type:
+     *      0 = reserved.
+     *      1 = UE_IPv4_ADDRESS.
+     *      2 = UE_IPV6_ADDRESS.
+     *      3 = NATED_IP_ADDRESS.
+     *      4 = GTP_TEID.
+     *
+     * value:
+     *       Value for the identifier.
+     */
     struct AssociateId 
     {
         std::string type;
         std::string value;
     };
 
-
-    // write defs
+    /*
+     * Public Land Mobile Network Identity as defined in ETSI TS 136 413
+     *
+     * mcc: The Mobile Country Code part of PLMN Identity
+     * mnc: The Mobile Network Code part of PLMN Identity
+     */
     struct Plmn
     {
         std::string mcc;
         std::string mnc;
     };
 
+    /*
+     * E-UTRAN CelI Global Identifier as defined in ETSI TS 136 413
+     *
+     *  plmn: Public Land Mobile Network Identity.
+     *  cellid: E-UTRAN CelI Global Identifier (CellId in our case)
+     *
+     */
     struct Ecgi
     {
         Plmn plmn;

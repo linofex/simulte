@@ -48,7 +48,7 @@ class LteBinder : public cSimpleModule
 
     unsigned int numBands_;  // number of logical bands
     std::map<IPv4Address, MacNodeId> IPAddressToMacNodeId_;
-    std::map<MacNodeId, IPv4Address> macNodeIdToIPAddress_; // @autrho Alessandro Noferi
+    std::map<MacNodeId, IPv4Address> macNodeIdToIPAddress_; // @author Alessandro Noferi
     std::map<MacNodeId, char*> macNodeIdToModuleName_;
     std::map<MacNodeId, LteMacBase*> macNodeIdToModule_;
     std::vector<MacNodeId> nextHop_; // MacNodeIdMaster --> MacNodeIdSlave
@@ -381,8 +381,23 @@ class LteBinder : public cSimpleModule
      * UeStatsCollector management
      */
 
-    void addUeCollectorToEnodeB(MacNodeId ue, UeStatsCollector* ueCollector, MacNodeId cell);
-    void moveUeCollector(MacNodeId ue, MacNodeId oldCell, MacNodeId newCell);
+    /* this method adds the UeStastCollector reference to the eNodeBStatsCollector
+     * structure.
+     * @params:
+     *  ue: MacNodeId of the ue
+     *  ueCollector: reference to the collector
+     *  cell: MacCellId of the target eNB
+     */
+    void addUeCollectorToEnodeB(MacNodeId ue, UeStatsCollector* ueCollector, MacCellId cell);
+
+    /* this method moves the UeStastCollector reference between the eNB's eNodeBStatsCollector
+     * structure.
+     * @params:
+     *  ue: MacNodeId of the ue
+     *  oldCell: MacCellId of the source eNB
+     *  newCell: MacCellId of the target eNB
+     */
+    void moveUeCollector(MacNodeId ue, MacCellId oldCell, MacCellId newCell);
 
 
     /*

@@ -87,7 +87,7 @@ void MeApp_test::sendBulkRequest(){
     //do{
 
 //        numRequests = poisson(numberOfApplications_, 2);
-    numRequests = truncnormal(numberOfApplications_, 5, 2);
+    numRequests = truncnormal(numberOfApplications_, 20, 2);
 
     //}while(numRequests == 0);
     std::string payload = "BulkRequest: " + std::to_string(numberOfApplications_+1);

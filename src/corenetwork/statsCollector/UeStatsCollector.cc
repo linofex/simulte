@@ -27,20 +27,30 @@ UeStatsCollector::UeStatsCollector()
 void UeStatsCollector::initialize(int stage){
     if (stage == INITSTAGE_NETWORK_LAYER_3) // same as lteMacUe, when read the interface entry
     {
-        associateId_.type = "1"; // UE_IPV4_ADDRESS
+
         // find interface entry and use its address
-        IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        // TODO: how do we find the LTE interface?
-        InterfaceEntry * interfaceEntry = interfaceTable->getInterfaceByName("wlan");
-//
-        IPv4InterfaceData* ipv4if = interfaceEntry->ipv4Data();
-        if(ipv4if == nullptr)
-            throw cRuntimeError("UeStatsCollector::initialize - no IPv4 interface data");
-        associateId_.value = ipv4if->getIPAddress().str();
+//        IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+//        // TODO: how do we find the LTE interface?
+//        InterfaceEntry * interfaceEntry = interfaceTable->getInterfaceByName("wlan");
+//        IPv4InterfaceData* ipv4if = interfaceEntry->ipv4Data();
+//        if(ipv4if == nullptr)
+//            throw cRuntimeError("UeStatsCollector::initialize - no IPv4 interface data");
+//        associateId_.value = ipv4if->getIPAddress().str();
+
+        LteBinder* binder = getBinder();
+
+
         mac_ = check_and_cast<LteMacUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("mac"));
         pdcp_ = check_and_cast<LtePdcpRrcUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("pdcpRrc"));
+
+        associateId_.value = binder->getIPv4Address(mac_->getMacNodeId()).str(); // UE_IPV4_ADDRESS
+        associateId_.type = "1"; // UE_IPV4_ADDRESS
+
+
+        // get packetFlowManager if present
         if(getParentModule()->getSubmodule("lteNic")->findSubmodule("packetFlowManager") != -1)
             flowManager_ = check_and_cast<PacketFlowManagerUe *>(getParentModule()->getSubmodule("lteNic")->getSubmodule("packetFlowManager"));
+
         handover_ = false;
 
         // packet delay
@@ -60,15 +70,19 @@ void UeStatsCollector::initialize(int stage){
 
 void UeStatsCollector::resetDelayCounter()
 {
-    flowManager_ ->resetDelayCounter();
+    if(flowManager_ != nullptr)
+        flowManager_ ->resetDelayCounter();
 }
 
 void UeStatsCollector::add_ul_nongbr_delay_ue()
 {
-    double delay = flowManager_->getDelayStats();
-    if(delay != 0)
-        EV << "UeStatsCollector::add_ul_nongbr_delay_ue() - delay: " << delay << endl;
-    ul_nongbr_delay_ue.addValue(delay);
+    if(flowManager_ != nullptr)
+    {
+        double delay = flowManager_->getDelayStats();
+        if(delay != 0)
+            EV << "UeStatsCollector::add_ul_nongbr_delay_ue() - delay: " << delay << endl;
+        ul_nongbr_delay_ue.addValue(delay);
+    }
 }
 
 // called by the eNodeBCollector
@@ -144,9 +158,13 @@ int UeStatsCollector::get_dl_nongbr_data_volume_ue()
 
 DiscardedPkts UeStatsCollector::getULDiscardedPkt()
 {
-    DiscardedPkts pair;
-    pair = flowManager_->getDiscardedPkt();
-    double rate = pair.discarded * 1000000 / pair.total;
-    add_ul_nongbr_pdr_ue(rate);
+    DiscardedPkts pair = {0,0};
+    if(flowManager_ != nullptr)
+    {
+
+        pair = flowManager_->getDiscardedPkt();
+        double rate = pair.discarded * 1000000 / pair.total;
+        add_ul_nongbr_pdr_ue(rate);
+    }
     return pair;
 }
