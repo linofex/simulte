@@ -113,7 +113,6 @@ void PacketFlowManagerUe::initPdcpStatus(StatusDescriptor* desc, unsigned int pd
     newpdcpStatus.sentOverTheAir =  false;
     newpdcpStatus.pdcpSduSize = pdcpSize;
 
-
     desc->pdcpStatus_[pdcp] = newpdcpStatus;
 }
 
@@ -132,6 +131,7 @@ void PacketFlowManagerUe::insertPdcpSdu(LogicalCid lcid, unsigned int pdcpSno,un
     StatusDescriptor* desc = &cit->second;
 
     initPdcpStatus(desc, pdcpSno, pdcpSize, arrivalTime);
+    pktDiscardCounterTotal_.total += 1;
 
     EV_FATAL << NOW << "node id "<< desc->nodeId_-1025 <<" PacketFlowManagerUe::insertPdcpSdu - PDCP status for PDCP PDU SN " << pdcpSno<<" added. Logicl cid " << lcid << endl;
 
@@ -310,7 +310,7 @@ void PacketFlowManagerUe::discardRlcPdu(LogicalCid lcid, unsigned int rlcSno, bo
         if(rit->second.empty() && pit->second.hasArrivedAll && !pit->second.discardedAtMac && !pit->second.sentOverTheAir)
         {
             EV_FATAL << NOW << "node id "<< desc->nodeId_-1025 << " PacketFlowManagerUe::discardRlcPdu - lcid[" << lcid << "], discarded PDCP PDU " << pdcpSno << " in RLC PDU " << rlcSno << endl;
-            pktDiscardCounterTotal_ += 1;
+            pktDiscardCounterTotal_.discarded += 1;
         }
         // if the pdcp was entire and the set of rlc is empty, discard it
         if(rit->second.empty() && pit->second.hasArrivedAll){
@@ -466,8 +466,8 @@ void PacketFlowManagerUe::macPduArrived(LogicalCid lcid, unsigned int macPdu)
             {
 
                 // set the time for pdcpPduSno
-                if(pit->second.entryTime == 0)
-                    throw cRuntimeError("PacketFlowManagerUe::macPduArrived - PDCP PDU SN %d of Lcid %d has not an entry time timestamp, this should not happen. Aborting", pdcpPduSno, lcid);
+//                if(pit->second.entryTime == 0) // change to entrytime negativo
+//                    throw cRuntimeError("PacketFlowManagerUe::macPduArrived - PDCP PDU SN %d of Lcid %d has not an entry time timestamp, this should not happen. Aborting", pdcpPduSno, lcid);
 
                 if(pit->second.hasArrivedAll && !pit->second.discardedAtRlc && !pit->second.discardedAtMac)
                 { // the whole current pdcp seqNum has been received
@@ -557,15 +557,15 @@ void PacketFlowManagerUe::discardMacPdu(LogicalCid lcid, unsigned int macPduId)
 
 DiscardedPkts PacketFlowManagerUe::getDiscardedPkt()
 {
-    DiscardedPkts pair;
-    pair.discarded = pktDiscardCounterTotal_;
-    pair.total = pdcp_->getPktCount();
-    return pair;
+//    DiscardedPkts pair;
+//    pair.discarded = pktDiscardCounterTotal_;
+//    pair.total = pdcp_->getPktCount();
+    return pktDiscardCounterTotal_;
 }
 
 void PacketFlowManagerUe::resetDiscardPktCounter()
 {
- pktDiscardCounterTotal_ = 0;
+ pktDiscardCounterTotal_ = {0,0};
 }
 
 

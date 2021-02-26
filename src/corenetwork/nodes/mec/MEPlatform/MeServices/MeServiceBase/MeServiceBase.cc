@@ -39,16 +39,17 @@ void MeServiceBase::initialize(int stage)
         requestServiceTime_ = par("requestServiceTime");
         requestService_ = new cMessage("serveRequest");
         requestQueueSize_ = par("requestQueueSize");
+
         subscriptionServiceTime_ = par("subscriptionServiceTime");
         subscriptionService_ = new cMessage("serveSubscription");
-
+        subscriptionQueueSize_ = par("subscriptionQueueSize");
         currentRequestServed_ = nullptr;
         currentSubscriptionServed_ = nullptr;
 
         serverSocket.setOutputGate(gate("tcpOut"));
         serverSocket.readDataTransferModePar(*this);
 //        serverSocket.bind(localAddress[0] ? inet::L3AddressResolver().resolve(localAddress) : inet::L3Address(), localPort);
-        serverSocket.bind(inet::L3Address(), localPort);
+        serverSocket.bind(inet::L3Address(), localPort); // bind socket for any address
 
         serverSocket.listen();
 
@@ -100,7 +101,7 @@ void MeServiceBase::handleMessage(cMessage *msg)
             socket->setOutputGate(gate("tcpOut"));
 
 
-        //        std::cout <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << std::endl ;
+            //std::cout <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << std::endl ;
             EV <<"New connection from: " << socket->getRemoteAddress() << " and port " << socket->getRemotePort() << endl ;
 
             const char *serverThreadClass = par("serverThreadClass");
@@ -132,7 +133,7 @@ bool MeServiceBase::manageRequest()
         currentRequestState_= UNDEFINED;
         return true;
     }
-    else // socket has been closed or some error occurs, discard request
+    else // socket has been closed or some error occured, discard request
     {
         // I should schedule immediately a new request execution
         if(currentRequestServed_!= nullptr)
@@ -164,24 +165,18 @@ void MeServiceBase::scheduleNextEvent(bool now)
         double serviceTime = calculateRequestServiceTime(); //must be >0
         scheduleAt(simTime() + serviceTime , requestService_);
        // EV << "scheduleNextEvent - Request execution started" << endl;
-//        if(now)
-//            scheduleAt(simTime() + 0 , requestService_);
-//        else
-//        {
-//            double time = poisson(requestServiceTime_, REQUEST_RNG);
-//         //   EV <<"time: "<< time << "-> " <<time*1e-6 << endl;
-//            scheduleAt(simTime() + time*1e-6 , requestService_);
-//        }
+        EV <<"request service time: "<< serviceTime << endl;
+
     }
 }
 
-void MeServiceBase::handleQueueFull(cMessage *msg)
+void MeServiceBase::handleRequestQueueFull(cMessage *msg)
 {
     EV << " MeServiceBase::handleQueueFull" << endl;
     inet::TCPSocket *socket = socketMap.findSocketFor(msg);
     if(!socket)
     {
-        throw cRuntimeError ("MeServiceBase::handleQueueFull - socket not found, this should not happen.");
+        throw cRuntimeError ("MeServiceBase::handleRequestQueueFull - socket not found, this should not happen.");
     }
     Http::send400Response(socket);
     delete msg;
@@ -190,10 +185,10 @@ void MeServiceBase::handleQueueFull(cMessage *msg)
 
 void MeServiceBase::newRequest(cMessage *msg)
 {
-    //EV << "Queue length: " << requests_.length() << endl;
-    // If queue is full respons 503 queue full
+    EV << "Queue length: " << requests_.length() << endl;
+    // If queue is full respond 503 queue full
     if(requestQueueSize_ != 0 && requests_.getLength() == requestQueueSize_){
-        handleQueueFull(msg);
+        handleRequestQueueFull(msg);
         return;
     }
     
@@ -203,6 +198,13 @@ void MeServiceBase::newRequest(cMessage *msg)
 
 void MeServiceBase::newSubscriptionEvent(cMessage *msg)
 {
+    EV << "Queue length: " << subscriptionEvents_.length() << endl;
+    // If queue is full delete event
+    if(requestQueueSize_ != 0 && subscriptionEvents_.getLength() == subscriptionQueueSize_){
+        delete msg;
+        return;
+    }
+
     subscriptionEvents_.insert(msg);
     scheduleNextEvent();
 }
@@ -210,12 +212,11 @@ void MeServiceBase::newSubscriptionEvent(cMessage *msg)
 bool MeServiceBase::manageSubscription()
 {
     return handleSubscriptionType(currentSubscriptionServed_);
-
 }
 
+// TODO method not used
 void MeServiceBase::triggeredEvent(short int event)
 {
-    //chiamo direttamente la newSubscriptionEvent
     cMessage *msg = new cMessage("subscriptionEvent", event);
     newSubscriptionEvent(msg);
 }
@@ -228,10 +229,6 @@ double MeServiceBase::calculateRequestServiceTime()
     {
         if(currentRequestServedmap_.at("method").compare("GET") == 0)
         {
-            //parse the uri and calculate the service time as:
-            // numPar * random if numPar >= 1
-            // max * random if numPar == 0 (all info)
-            //int numPar = getNumberOfParameters(currentRequestServedmap_.at(uri));
             double time = poisson(requestServiceTime_, REQUEST_RNG);
             return (time*1e-6);
         }
@@ -281,6 +278,7 @@ void MeServiceBase::handleCurrentRequest(inet::TCPSocket *socket){
  }
 
 
+// It only works with complete HTTP messages in a single TCP segment
 void MeServiceBase::parseCurrentRequest(){
 
     EV_INFO << "MeServiceBase::parseCurrentRequest() - Start parseRequest" << endl;
@@ -345,6 +343,7 @@ void MeServiceBase::parseCurrentRequest(){
 }
 
 
+// old version, before request parsing. Not used anymore
 void MeServiceBase::handleRequest(cMessage* msg, inet::TCPSocket *socket){
     EV << "MeServiceBase::handleRequest" << endl;
      reqMap *request = new reqMap;
@@ -379,12 +378,12 @@ void MeServiceBase::handleRequest(cMessage* msg, inet::TCPSocket *socket){
      }
      else
      {
-         EV << "NNO" << endl;
+         EV << "NO" << endl;
      }
      delete request;
  }
 
-
+// old version, before current request parsing. Not used anymore
 bool MeServiceBase::parseRequest(std::string& packet_, inet::TCPSocket *socket, reqMap* request){
     EV_INFO << "MeServiceBase::parseRequest - Start parseRequest" << endl;
     EV_INFO << "MeServiceBase::parseRequest - payload: " << packet_ << endl;
@@ -463,8 +462,7 @@ void MeServiceBase::getConnectedEnodeB(){
 void MeServiceBase::removeConnection(SocketManager *connection)
 {
     // remove socket
-    socketMap.removeSocket(connection->getSocket());
-    delete connection->getSocket();
+    delete socketMap.removeSocket(connection->getSocket());
     // remove thread object
     delete connection;
 }
@@ -481,17 +479,14 @@ MeServiceBase::~MeServiceBase(){
     cancelAndDelete(currentRequestServed_);
     cancelAndDelete(currentSubscriptionServed_);
 
-    cObject* msg;
     while(!requests_.isEmpty())
     {
-        msg = requests_.pop();
-        delete msg;
+        delete requests_.pop();;
     }
 
     while(!subscriptionEvents_.isEmpty())
     {
-        msg = subscriptionEvents_.pop();
-        delete msg;
+        delete subscriptionEvents_.pop();;
 
     }
     std::cout << "Subscriptions list length: " << subscriptions_.size() << std::endl;
@@ -552,15 +547,4 @@ void MeServiceBase::removeSubscritions(int connId)
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 

@@ -19,12 +19,12 @@ typedef std::set<unsigned int> SequenceNumberSet;
 typedef unsigned int BurstId;
 
 /*
- * This module is responsible for keep trace of all PDCP SDUs.
- * A PDCP SDU passes the following state while it is going down
+ * This module is responsible for keeping trace of all PDCP SDUs.
+ * A PDCP SDU is encapsulated in the following packets while it is going down
  * through the LTE NIC layers:
  * 
  * PDCP SDU
- * few operations
+ * some operations
  * PDCP PDU
  * RLC SDU
  * RLC PDU or fragmented in more then one RLC PDUs
@@ -46,6 +46,11 @@ struct StatusDescriptor;
 class PacketFlowManagerBase : public cSimpleModule
 {
     protected:
+
+        /*
+         * this structure maintains the state of a PDCP
+         * used to calculate L2Meas of RNI service
+         */
         typedef struct
         {
             bool hasArrivedAll;
@@ -56,7 +61,7 @@ class PacketFlowManagerBase : public cSimpleModule
             simtime_t entryTime;
         } PdcpStatus;
 
-        int pktDiscardCounterTotal_; // total discarded packets counter of the node
+        DiscardedPkts pktDiscardCounterTotal_; // total discarded packets counter of the node
 
         LteNodeType nodeType_; // UE or ENODED (used for set MACROS)
         short int harqProcesses_; // number of harq processes
@@ -68,13 +73,13 @@ class PacketFlowManagerBase : public cSimpleModule
 
         int headerCompressedSize_;
 
-        virtual void initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, unsigned int headerSize, simtime_t& arrivalTime);
+        virtual void initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, unsigned int sduHeaderSize, simtime_t& arrivalTime);
         virtual void removePdcpBurst(StatusDescriptor* desc, PdcpStatus& pdcpStatus,  unsigned int pdcpSno, bool ack);
 
-        virtual int numInitStages() const { return 2; }
+        virtual int numInitStages() const {return 2;}
         virtual void initialize(int stage);
 
-//        virtual bool hasFragments(LogicalCid lcid, unsigned int pdcp);
+//      virtual bool hasFragments(LogicalCid lcid, unsigned int pdcp);
 
     public:
     

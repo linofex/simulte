@@ -38,8 +38,9 @@ EnodeBStatsCollector::~EnodeBStatsCollector()
 }
 
 void EnodeBStatsCollector::initialize(int stage){
-    if (stage == 4)//inet::INITSTAGE_LOCAL)
+    if (stage == inet::INITSTAGE_APPLICATION_LAYER)//inet::INITSTAGE_LOCAL)
     {
+        EV << "EnodeBStatsCollector::initialize stage: "<< stage << endl;
 
         ecgi_.plmn.mcc = getAncestorPar("mcc").stdstringValue();
         ecgi_.plmn.mnc = getAncestorPar("mnc").stdstringValue();
@@ -73,32 +74,32 @@ void EnodeBStatsCollector::initialize(int stage){
         ul_nongbr_pdr_cell.init("ul_nongbr_pdr_cell", par("discardRatePeriods"), false);
 
         // setup timer
-        prbUsage_ = new cMessage("prbUsage_");
+        prbUsage_    = new cMessage("prbUsage_");
         activeUsers_ = new cMessage("activeUsers_");
         discardRate_ = new cMessage("discardRate_");
         packetDelay_ = new cMessage("packetDelay_");
-        pdcpBytes_ = new cMessage("pdcpBytes_");
-        tPut_ = new cMessage("tPut_");
+        pdcpBytes_   = new cMessage("pdcpBytes_");
+        tPut_        = new cMessage("tPut_");
 
         prbUsagePeriod_    = par("prbUsagePeriod");
         activeUsersPeriod_ = par("activeUserPeriod");
         discardRatePeriod_ = par("discardRatePeriod");
         delayPacketPeriod_ = par("delayPacketPeriod");
         dataVolumePeriod_  = par("dataVolumePeriod");
-        tPutPeriod_ = par("tPutPeriod");
+        tPutPeriod_        = par("tPutPeriod");
 
         // start scheduling the l2 meas
         // schedule only stats not using packetFlowManager
 
         scheduleAt(NOW + prbUsagePeriod_, prbUsage_);
         scheduleAt(NOW + activeUsersPeriod_, activeUsers_);
+        scheduleAt(NOW + dataVolumePeriod_, pdcpBytes_);
         if(flowManager_ != nullptr)
         {
             scheduleAt(NOW + discardRatePeriod_, discardRate_);
             scheduleAt(NOW + delayPacketPeriod_, packetDelay_);
             scheduleAt(NOW + tPutPeriod_,tPut_);
         }
-        scheduleAt(NOW + dataVolumePeriod_, pdcpBytes_);
     }
 }
 
@@ -139,7 +140,6 @@ void EnodeBStatsCollector::handleMessage(cMessage *msg)
             // ul is done add_ul_nongbr_pdr_cell
 
             //reset counters
-            pdcp_->resetPktCounter();
             flowManager_->resetDiscardCounter();
             resetDiscardCounterPerUe();
             scheduleAt(NOW + discardRatePeriod_, discardRate_);
@@ -167,23 +167,26 @@ void EnodeBStatsCollector::handleMessage(cMessage *msg)
         }
 
     }
-
+    else
+        delete msg;
 }
 
 
 void EnodeBStatsCollector::resetDiscardCounterPerUe()
 {
+    EV << "EnodeBStatsCollector::resetDiscardCounterPerUe " << endl;
     UeStatsCollectorMap::iterator it = ueCollectors_.begin();
     UeStatsCollectorMap::iterator end = ueCollectors_.end();
     for(; it != end ; ++it)
     {
-        pdcp_->resetPktCounterPerUe(it->first);
         flowManager_->resetDiscardCounterPerUe(it->first);
     }
 }
 
 void EnodeBStatsCollector::resetDelayCounterPerUe()
 {
+    EV << "EnodeBStatsCollector::resetDelayCounterPerUe " << endl;
+
     UeStatsCollectorMap::iterator it = ueCollectors_.begin();
     UeStatsCollectorMap::iterator end = ueCollectors_.end();
     for(; it != end ; ++it)
@@ -233,13 +236,13 @@ void EnodeBStatsCollector::removeUeCollector(MacNodeId id)
 {
     std::map<MacNodeId, UeStatsCollector*>::iterator it = ueCollectors_.find(id);
     if(it != ueCollectors_.end())
-        {
-            ueCollectors_.erase(it);
-        }
-        else
-        {
-            throw cRuntimeError("EnodeBStatsCollector::removeUeCollector - UeStatsCollector not present for UE nodeid[%d]", id);
-        }
+    {
+        ueCollectors_.erase(it);
+    }
+    else
+    {
+        throw cRuntimeError("EnodeBStatsCollector::removeUeCollector - UeStatsCollector not present for UE nodeid[%d]", id);
+    }
 }
 
 UeStatsCollector* EnodeBStatsCollector::getUeCollector(MacNodeId id)
@@ -264,28 +267,33 @@ bool EnodeBStatsCollector::hasUeCollector(MacNodeId id)
 {
     return (ueCollectors_.find(id) != ueCollectors_.end()) ? true : false;
 }
+
 void EnodeBStatsCollector::add_dl_total_prb_usage_cell()
 {
     double prb_usage = mac_->getUtilization(DL);
     EV << "EnodeBStatsCollector::add_dl_total_prb_usage_cell " << prb_usage << "%"<< endl;
     dl_total_prb_usage_cell.addValue(prb_usage);
 }
+
 void EnodeBStatsCollector::add_ul_total_prb_usage_cell()
 {
     double prb_usage = mac_->getUtilization(UL);
     ul_total_prb_usage_cell.addValue(prb_usage);
 }
+
 void EnodeBStatsCollector::add_number_of_active_ue_dl_nongbr_cell()
 {
     int users = mac_->getActiveUeSet(DL);
     EV << "EnodeBStatsCollector::add_number_of_active_ue_dl_nongbr_cell " << users << endl;
     number_of_active_ue_dl_nongbr_cell.addValue(users);
 }
+
 void EnodeBStatsCollector::add_number_of_active_ue_ul_nongbr_cell()
 {
     int users = mac_->getActiveUeSet(UL);
     number_of_active_ue_ul_nongbr_cell.addValue(users);
 }
+
 void EnodeBStatsCollector::add_dl_nongbr_pdr_cell()
 {
     double discard = flowManager_->getDiscardedPkt();
@@ -308,12 +316,14 @@ void EnodeBStatsCollector::add_ul_nongbr_pdr_cell()
         pair.total += temp.total;
     }
 
-    pdr = pair.discarded * 1000000/ pair.total;
+    pdr = ((double)pair.discarded * 1000000)/ pair.total;
     ul_nongbr_pdr_cell.addValue(pdr);
 }
 
-// for each user save stats
+
 //TODO handover management
+
+// for each user save stats
 
 void EnodeBStatsCollector::add_dl_nongbr_pdr_cell_perUser()
 {
@@ -350,9 +360,6 @@ void EnodeBStatsCollector::add_dl_nongbr_delay_perUser()
             it->second->add_dl_nongbr_delay_ue(delay);
     }
 }
-
-
-
 
 void EnodeBStatsCollector::add_ul_nongbr_data_volume_ue_perUser()
 {

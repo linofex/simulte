@@ -25,16 +25,10 @@
 
 PacketFlowManagerBase::PacketFlowManagerBase()
 {
-//    connectionMap_.clear();
-//    lcidToNodeIdmap_.clear();
-//    pktDiscardCounterPerUe_.clear();
-//    pdcpDelay_.clear();
-//    pdcpThroughput_.clear();
 }
 
 PacketFlowManagerBase::~PacketFlowManagerBase()
 {
-//times_.clear();
 }
 
 void PacketFlowManagerBase::initialize(int stage)
@@ -47,11 +41,13 @@ void PacketFlowManagerBase::initialize(int stage)
     }
 }
 
+
 void PacketFlowManagerBase::initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, unsigned int headerSize, simtime_t& arrivalTime){}
 void PacketFlowManagerBase::removePdcpBurst(StatusDescriptor* desc, PdcpStatus& pdcpStatus,  unsigned int pdcpSno, bool ack){}
+
 void PacketFlowManagerBase::resetDiscardCounter()
 {
-    pktDiscardCounterTotal_ = 0;
+    pktDiscardCounterTotal_ = {0,0};
 }
 
 void PacketFlowManagerBase::finish()

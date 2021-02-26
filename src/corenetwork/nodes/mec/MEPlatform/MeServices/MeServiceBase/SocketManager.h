@@ -14,6 +14,15 @@
 #include "inet/common/lifecycle/ILifecycle.h"
 #include "inet/transportlayer/contract/tcp/TCPSocket.h"
 
+/*
+ * For each new connection, the MeServiceBase creates a new SocketManager
+ * object to manage the state TCP connection by implementing the
+ * TCPSocket::CallbackInterface interface.
+ * It reassembles (if necessary) HTTP packets sent by the MEC application
+ * and it puts them in the request queue of the server.
+ */
+
+
 class SocketManager : public cObject, public TCPSocket::CallbackInterface
 {
   protected:

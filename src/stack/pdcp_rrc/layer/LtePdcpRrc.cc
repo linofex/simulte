@@ -371,9 +371,9 @@ void LtePdcpRrcEnb::fromDataPort(cPacket* pkt)
     MacNodeId destId = binder_->getMacNodeId(IPv4Address(lteInfo->getDstAddr()));
 //    MacNodeId destId = lteInfo->getDestId();
 //    MacNodeId destUe = getDestId(lteInfo); // could be the relay
-    if(pdcpPktCounterPerUe_.find(destId) == pdcpPktCounterPerUe_.end())
-        pdcpPktCounterPerUe_[destId] = 0; // ue
-    pdcpPktCounterPerUe_[destId] += 1; // ue
+//    if(pdcpPktCounterPerUe_.find(destId) == pdcpPktCounterPerUe_.end())
+//        pdcpPktCounterPerUe_[destId] = 0; // ue
+//    pdcpPktCounterPerUe_[destId] += 1; // ue
 
     if(pdcpSduBytesDl_.find(destId) == pdcpSduBytesDl_.end())
         pdcpSduBytesDl_[destId] = 0;

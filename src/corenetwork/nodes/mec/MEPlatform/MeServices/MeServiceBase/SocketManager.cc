@@ -14,7 +14,7 @@
 
 Register_Class(SocketManager);
 
-
+// TODO manage HTTP messages splitted in more TCP segments
 void SocketManager::dataArrived(cMessage *msg, bool urgent){
         EV << "SocketManager::dataArrived" << endl;
 //        EV << "SocketManager::dataArrived";

@@ -13,6 +13,15 @@
 
 namespace Http {
 
+/*
+ * TODO
+ *
+ * consider to useonly one method with the code as argument
+ * e.g sendResponse(code, socket, body, *args)
+ *
+ *
+ */
+
 enum DataType {REQUEST, RESPONSE, UNKNOWN};
 
 void sendPacket(const char* pck, inet::TCPSocket *socket);
@@ -33,8 +42,6 @@ void send404Response(inet::TCPSocket *socket);
 void send505Response(inet::TCPSocket *socket);
 void send503Response(inet::TCPSocket *socket, const char *reason);
 
-
-//maybe use only one method with the code as argument
 
 void sendPostRequest(inet::TCPSocket *socket, const char* body, const char* host, const char* uri);
 void sendPutRequest(inet::TCPSocket *socket, const char* body, const char* host, const char* uri);

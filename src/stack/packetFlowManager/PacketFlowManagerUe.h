@@ -72,9 +72,10 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
 
     protected:
 
-    virtual int numInitStages() const { return 2; }
-    virtual void initialize(int stage);
-    virtual void initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, unsigned int pdcpSize, simtime_t& arrivalTime);
+    virtual void initialize(int stage) override;
+    virtual void initPdcpStatus(StatusDescriptor* desc, unsigned int pdcp, unsigned int pdcpSize, simtime_t& arrivalTime) ;
+    virtual void removePdcpBurst(StatusDescriptor* desc, PdcpStatus& pdcpStatus,  unsigned int pdcpSno, bool ack) {};
+
 
 
 //    bool hasFragments(LogicalCid lcid, unsigned int pdcp);
@@ -82,13 +83,13 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
   public:
     PacketFlowManagerUe();
     // return true if a structure for this lcid is present
-    virtual bool checkLcid(LogicalCid lcid);
+    virtual bool checkLcid(LogicalCid lcid) override;
     // initialize a new structure for this lcid
-    virtual void initLcid(LogicalCid lcid, MacNodeId nodeId);
+    virtual void initLcid(LogicalCid lcid, MacNodeId nodeId) override;
     // reset the structure for this lcid
-    virtual void clearLcid(LogicalCid lcid);
+    virtual void clearLcid(LogicalCid lcid) override;
     // reset structures for all connections
-    virtual void clearAllLcid();
+    virtual void clearAllLcid() override;
 
 
     /* 
@@ -97,7 +98,7 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
     * @param pdcpSno sequence number of the pdcp pdu
     * @param entryTime the time the packet enters PDCP layer
     */
-    virtual void insertPdcpSdu(LogicalCid lcid, unsigned int pdcpSno,unsigned int sduSize, simtime_t entryTime);
+    virtual void insertPdcpSdu(LogicalCid lcid, unsigned int pdcpSno,unsigned int sduSize, simtime_t entryTime) override;
     
     /* 
     * This method insert a new rlc seqnum and the corresponding pdcp pdus inside it
@@ -106,14 +107,14 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
     * @param pdcpSnoSet list of pdcp pdu inside the rlc pdu
     * @param lastIsFrag used to inform if the last pdcp is fragmented or not
     */
-    virtual void insertRlcPdu(LogicalCid lcid, unsigned int rlcSno, SequenceNumberSet& pdcpSnoSet, bool lastIsFrag);
+    virtual void insertRlcPdu(LogicalCid lcid, unsigned int rlcSno, SequenceNumberSet& pdcpSnoSet, bool lastIsFrag) override;
     
     /*
     * This method insert a new rlc seqnum and the corresponding pdcp pdus inside it
     * @param lcid
     * @param rlcPdu packet pointer
     */
-    virtual void insertRlcPdu(LogicalCid lcid, LteRlcUmDataPdu* rlcPdu, RlcBurstStatus status);
+    virtual void insertRlcPdu(LogicalCid lcid, LteRlcUmDataPdu* rlcPdu, RlcBurstStatus status) override;
 
     /* 
     * This method insert a new macPduId Omnet id and the corresponding rlc pdus inside it
@@ -121,7 +122,7 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
     * @param macPduId Omnet id of the mac pdu
     * @param rlcSnoSet list of rlc pdu inside the rlc pdu
     */  
-    virtual void insertMacPdu(LogicalCid lcid, unsigned int macPduId, SequenceNumberSet& rlcSnoSet);
+    virtual void insertMacPdu(LogicalCid lcid, unsigned int macPduId, SequenceNumberSet& rlcSnoSet) override;
 
     /*
     * This method checks if the HARQ ack relative to a macPduId acknowledges an ENTIRE
@@ -129,7 +130,7 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
     * @param lcid
     * @param macPduId Omnet id of the mac pdu 
     */
-    virtual void macPduArrived(LogicalCid lcid, unsigned int macPduId);
+    virtual void macPduArrived(LogicalCid lcid, unsigned int macPduId) override;
 
     /*
     * This method is called after maxHarqTrasmission of a MAC PDU ID has been
@@ -138,7 +139,7 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
     * @param lcid
     * @param macPduId Omnet id of the mac pdu to be discarded
     */
-    virtual void discardMacPdu(LogicalCid lcid, unsigned int macPduId);
+    virtual void discardMacPdu(LogicalCid lcid, unsigned int macPduId) override;
 
     /*
      * This method is used to take trace of all discarded RLC pdus. If all rlc pdus
@@ -147,9 +148,9 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
      * @param rlcSno sequence number of the rlc pdu
      * @param fromMac used when this method is called by discardMacPdu
      */
-    virtual void discardRlcPdu(LogicalCid lcid, unsigned int rlcSno, bool fromMac = false);
+    virtual void discardRlcPdu(LogicalCid lcid, unsigned int rlcSno, bool fromMac = false) override;
 
-    virtual void insertHarqProcess(LogicalCid lcid, unsigned int harqProcId, unsigned int macPduId);
+    virtual void insertHarqProcess(LogicalCid lcid, unsigned int harqProcId, unsigned int macPduId) override;
 
 
     /*
@@ -172,7 +173,7 @@ class PacketFlowManagerUe : public PacketFlowManagerBase
     void resetDelayCounter();
 
     virtual ~PacketFlowManagerUe();
-    virtual void finish();
+    virtual void finish() override;
 
 };
 #endif

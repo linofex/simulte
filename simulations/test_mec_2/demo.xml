@@ -16,9 +16,6 @@
 	<route hosts="ue*" destination="192.168.1.0" netmask="255.255.255.0" interface="wlan"/>
 	<route hosts="eNodeB*" destination="192.168.1.0"  netmask="255.255.255.255" interface="pppMEHostIf"/>
 	<route hosts="meHost.gtpEndpoint*" destination="192.168.1.0" netmask="255.255.255.0" interface="pppInterface"/>
-	<route hosts="meHost.virtualisationInfrastructure*" destination="192.168.1.0" netmask="255.255.255.0" interface="ext0"/>	
-	<route hosts="meHost.virtualisationInfrastructure*" destination="192.168.1.0" netmask="255.255.255.0" interface="ext0"/>	
-	<route hosts="meHost.virtualisationInfrastructure*" destination="127.0.0.1" netmask="255.255.255.255" interface="ext0"/>	
 
     <!-- all D2D-capable UEs participate in the multicast group --> 
     <multicast-group hosts="car*" interfaces="wlan" address="224.0.0.10"/>

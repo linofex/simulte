@@ -25,7 +25,7 @@ using namespace inet;
  * the MEC framework. In particular it retrieves packet delays and discard rate.
  *
  * It is managed by the eNodeBStatsCollector modules. The latter has timers that
- * periodically calculate che measures.
+ * periodically calculate the measures.
  *
  */
 
@@ -57,7 +57,7 @@ class UeStatsCollector: public cSimpleModule
         L2MeasBase ul_nongbr_data_volume_ue;
         L2MeasBase dl_nongbr_data_volume_ue;
 
-        // insert signals for statistics
+        // TODO insert signals for statistics
 
         bool handover_;
 
@@ -114,7 +114,7 @@ class UeStatsCollector: public cSimpleModule
 
         /* getters for GBR (Guaranteed Bit Rate) L2 measures.
          * currently not implemented since the simulator does not
-         * handle them         *
+         * handle them
          */
         int get_dl_gbr_delay_ue(){return -1;}
         int get_ul_gbr_delay_ue(){return -1;}

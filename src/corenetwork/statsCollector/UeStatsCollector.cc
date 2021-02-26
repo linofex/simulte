@@ -163,7 +163,7 @@ DiscardedPkts UeStatsCollector::getULDiscardedPkt()
     {
 
         pair = flowManager_->getDiscardedPkt();
-        double rate = pair.discarded * 1000000 / pair.total;
+        double rate = ((double)pair.discarded * 1000000) / pair.total;
         add_ul_nongbr_pdr_ue(rate);
     }
     return pair;

@@ -9,17 +9,18 @@
 
 
 package lte.corenetwork.statsCollector;
-// 
-// This is the statistic collector for an eNodeB. It stores all the attributes of the RNI 
-// service Layer2Meaurements resource. The RNI service will call its methods in order to 
-// responds to requests
-
 //
+// The UeStatsCollector retrieves some L2 measures used for the RNI service of
+// the MEC framework. In particular it retrieves packet delays and discard rate.
+// It is managed by the eNodeBStatsCollector modules. The latter has timers that
+// periodically calculate the measures.
+//
+
 simple UeStatsCollector 
 {
     parameters:
         string interfaceTableModule;
-        
+        bool movingAverage = default(false);
         
         // time periods for measurements 
         int dataVolumePeriods = default(2);
@@ -27,9 +28,8 @@ simple UeStatsCollector
         int discardRatePeriods = default(2);
         int tPutPeriods = default(2);
         
-        
         int numberOfSamples = default(20);
-        bool movingAverage = default(false);
+        
          
         
         @display("i=block/cogwheel");

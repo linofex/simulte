@@ -20,10 +20,12 @@
 using namespace inet;
 
 /**
- *
- * TODO
+ * This is the statistic collector of an eNodeB. It stores all the attributes of the RNI
+ * service Layer2Meaurements resource. The RNI service will call its methods in order to
+ * responds to requests.
+ * It holds a map structure with all the UeCollectors of the UEs connected to the
+ * eNodeB
  */
-
 
 
 class UeStatsCollector;
@@ -42,7 +44,7 @@ class EnodeBStatsCollector: public cSimpleModule
         // used by the RNI service
         mec::Ecgi ecgi_;
 
-        // LTE Nic layers
+        // LTE NIC layers
         LtePdcpRrcEnb *pdcp_;
         LteMacEnb     *mac_;
         LteRlcUm      *rlc_;
@@ -60,7 +62,7 @@ class EnodeBStatsCollector: public cSimpleModule
         L2MeasBase dl_nongbr_pdr_cell;
         L2MeasBase ul_nongbr_pdr_cell;
 
-        // inserire segnali?
+        // TODO insert signals for statistics
 
 
         /*
@@ -80,7 +82,6 @@ class EnodeBStatsCollector: public cSimpleModule
         cMessage *pdcpBytes_;
         cMessage *tPut_;
 
-
         double prbUsagePeriod_;
         double activeUsersPeriod_;
         double discardRatePeriod_;
@@ -94,8 +95,6 @@ class EnodeBStatsCollector: public cSimpleModule
 
         const mec::Ecgi& getEcgi() const;
         MacCellId getCellId() const;
-
-
 
         // UeStatsCollector management methods
 
@@ -134,22 +133,44 @@ class EnodeBStatsCollector: public cSimpleModule
          */
         bool hasUeCollector(MacNodeId id);
 
-        // L2 measurements methods
+        // L2 measurements methods per cell
 
+        /*
+         * It indicates (in percentage) the PRB usage for UL/DL
+         * non-GBR traffic, as defined in ETSI TS 136 314
+         */
         void add_dl_total_prb_usage_cell();
         void add_ul_total_prb_usage_cell();
+
+        /*
+         * It indicates the number of active UEs with UL/DL non-GBR
+         * traffic, as defined in ETSI TS 136 314
+         */
         void add_number_of_active_ue_dl_nongbr_cell();
         void add_number_of_active_ue_ul_nongbr_cell();
+
+        /*
+         * t indicates the packet discard rate in percentage of the
+         * UL/DL non-GBR traffic in a cell, as defined in ETSI
+         * TS 136 314
+         */
         void add_dl_nongbr_pdr_cell();
         void add_ul_nongbr_pdr_cell();
 
+        /*
+         * It indicates (in percentage) the PRB usage for total UL/DL
+         * traffic, as defined in ETSI TS 136 314
+         */
         int get_dl_total_prb_usage_cell();
         int get_ul_total_prb_usage_cell();
+
+        // getters
         int get_dl_nongbr_prb_usage_cell();
         int get_ul_nongbr_prb_usage_cell();
 
         int get_number_of_active_ue_dl_nongbr_cell();
         int get_number_of_active_ue_ul_nongbr_cell();
+
         int get_dl_nongbr_pdr_cell();
         int get_ul_nongbr_pdr_cell();
 
@@ -163,6 +184,10 @@ class EnodeBStatsCollector: public cSimpleModule
         void add_ul_nongbr_throughput_ue_perUser();
 
 
+        /* getters for GBR (Guaranteed Bit Rate) L2 measures.
+        * currently not implemented since the simulator does not
+        * handle them
+        */
         int get_dl_gbr_prb_usage_cell(){return -1;}
         int get_ul_gbr_prb_usage_cell(){return -1;}
         int get_received_dedicated_preambles_cell(){return -1;}
@@ -173,7 +198,7 @@ class EnodeBStatsCollector: public cSimpleModule
         int get_dl_gbr_pdr_cell(){return -1;}
         int get_ul_gbr_pdr_cell(){return -1;}
 
-
+        // reset structures to calculate the measure
         void resetDiscardCounterPerUe();
         void resetDelayCounterPerUe();
         void resetBytesCountersPerUe();
@@ -188,9 +213,5 @@ class EnodeBStatsCollector: public cSimpleModule
         virtual void handleMessage(cMessage *msg);
 
 };
-
-
-
-
 
 #endif //_LTE_ENOBSTATSCOLLECTOR_H_

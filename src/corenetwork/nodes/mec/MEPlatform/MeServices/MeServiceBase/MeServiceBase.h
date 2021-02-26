@@ -18,12 +18,14 @@
 /**
  * @author Alessandro Noferi
  *
- * This class implements the general structure of a Mec Services.
- * It holds all the TCP connections with e.g Mec Applications and
+ * This class implements the general structure of a Mec Service.
+ * It holds all the TCP connections with the e.g Mec Applications and
  * manages its lifecycle.
+ * * It manages Request-Replay and Subscribe-Notify schemes.
+ *
  * Every request is inserted in the queue and executed in FIFO order.
- * The exectution time a parametric value.
- * It manages Request-Replay and Subscribe-Notify schemes.
+ * Also subscription event are queued in a separate queue and have the priority.
+ * The execution times are calculated with the calculateRequestServiceTime method.
  *
  * During initialization it saves all the eNodeB connected to the MeHost in
  * which the service is running.
@@ -61,13 +63,14 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
         std::string baseUriQueries_;
         std::string baseUriSubscriptions_;
         std::string baseSubscriptionLocation_;
+
         typedef std::map<unsigned int, SubscriptionBase*> Subscriptions;
         Subscriptions subscriptions_; //list of all active subscriptions
 
         std::vector<cModule*> eNodeB_;     //eNodeBs connected to the ME Host
 
-        // maybe it is better to add a variable that holds the current served message
-        // and pop it from the queue length, done below
+        /* TODO reimplement message management in a more OMNet++ style
+         */
         cMessage *currentRequestServed_;
         reqMap currentRequestServedmap_;
         int requestQueueSize_;
@@ -80,9 +83,11 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
 
         cMessage *subscriptionService_;
         double subscriptionServiceTime_;
+        int subscriptionQueueSize_;
         cQueue subscriptionEvents_;          // queue that holds events relative to subscriptions
         cMessage *currentSubscriptionServed_;
 
+        // signals for statistics
         simsignal_t requestQueueSizeSignal_;
 
 
@@ -91,6 +96,7 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
          * It check if the receiver is still connected and in case manages the request
          */
         virtual bool manageRequest();
+
         /*
          * This method is called for every element in the subscriptions_ queue.
          */
@@ -129,17 +135,36 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
          */
         virtual bool parseRequest(std::string& packet_, inet::TCPSocket *socket, reqMap* request);
 
-
+        /*
+         * This method parses a HTTP request splitting headers from body (if present).
+         * the request parsed is cMessage *currentRequestServed_;
+         */
         virtual void parseCurrentRequest();
-        virtual void handleCurrentRequest(inet::TCPSocket *socket);
-
-        virtual void handleQueueFull(cMessage *msg);
 
         /*
-            * This method calculate the service time of the request based on:
-            *  - the method (e.g. GET POST)
-            *  - the number of parameters
-            *
+         * This method call the handle method according to the HTTP verb
+         * e.g GET --> handleGetRequest()
+         * These methods have to be implemented by the MEC services
+         */
+        virtual void handleCurrentRequest(inet::TCPSocket *socket);
+
+        /*
+         * This method manages the situation of an incoming request when
+         * the request queue is full. It responds with a HTTP 503
+         */
+        virtual void handleRequestQueueFull(cMessage *msg);
+
+        /*
+        * This method calculate the service time of the request based on:
+        *  - the method (e.g. GET POST)
+        *  - the number of parameters
+        *  - .ini parameter
+        *  - combination of the above
+        *
+        * In the base class it returns a Poisson service time with mean
+        * given by an .ini parameter.
+        * The Mec service can implement the calculation as preferred
+        *
         */
         virtual double calculateRequestServiceTime();
 
@@ -201,6 +226,7 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
         virtual void newRequest(cMessage *msg);
 
         // This method adds the subscription event in the subscriptions_ queue
+
         virtual void newSubscriptionEvent(cMessage *msg);
 
         /*
@@ -221,11 +247,17 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
 
         virtual Http::DataType getDataType(std::string& packet_);
 
+        /* This method can be used by the socketManager class to emit
+         * the length of the request queue upon a request arrival
+         */
         virtual void emitRequestQueueLength();
 
+        /* This method removes the subscriptions associated
+         * with a closed connection
+         */
         virtual void removeSubscritions(int connId);
 };
 
 
-#endif // ifndef __INET_GENERICSERVICE_H
+#endif // __INET_GENERICSERVICE_H
 

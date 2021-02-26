@@ -107,7 +107,7 @@ double LocationService_test::calculateRequestServiceTime()
     return MeServiceBase::calculateRequestServiceTime();
 }
 
-void LocationService_test::handleQueueFull(cMessage *msg)
+void LocationService_test::handleRequestQueueFull(cMessage *msg)
 {
     if(strcmp(msg->getName(), "fakeRequest") == 0)
     {
@@ -115,7 +115,7 @@ void LocationService_test::handleQueueFull(cMessage *msg)
         return;
     }
 
-    MeServiceBase::handleQueueFull(msg);
+    MeServiceBase::handleRequestQueueFull(msg);
 
 }
 

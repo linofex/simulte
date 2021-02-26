@@ -6,7 +6,12 @@
 #include "inet/common/INETDefs.h"
 
 namespace Http {
-    /* ProblemDetail structure from RFC 7807
+
+
+    /*
+     * TODO
+     *
+     * ProblemDetail structure from RFC 7807
      * {
      * "type": "https://example.com/probs/out-of-credit",
      * "title": "You do not have enough credit.",
@@ -52,11 +57,10 @@ namespace Http {
 
     void sendPacket(const char* payload, inet::TCPSocket *socket){
         inet::RawPacket *res = new inet::RawPacket("response");
-    //        const char* payload = pck.getPayload();
         res->setDataFromBuffer(payload , strlen(payload));
         res->setByteLength(strlen(payload));
         socket->send(res);
-        EV <<"sent" << endl;
+        EV <<"Http Utils - sendPacket" << endl;
     }
 
 

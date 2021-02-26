@@ -90,9 +90,9 @@ module Ue
             parameters:
                 @display("p=250,258");
         }
-//        ueCollector:UeStatsCollector{
-//            @display("p=50,225;is=s");
-//        }
+        ueCollector:UeStatsCollector{
+            @display("p=50,225;is=s");
+        }
     connections allowunconnected:
         //# 
         //# Internal TCP/UDP applications connections with IP stack

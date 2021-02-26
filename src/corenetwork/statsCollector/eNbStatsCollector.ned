@@ -10,7 +10,7 @@
 
 package lte.corenetwork.statsCollector;
 // 
-// This is the statistic collector for an eNodeB. It stores all the attributes of the RNI 
+// This is the statistic collector of an eNodeB. It stores all the attributes of the RNI 
 // service Layer2Meaurements resource. The RNI service will call its methods in order to 
 // responds to requests
 
@@ -30,7 +30,7 @@ simple EnodeBStatsCollector
         int tPutPeriods = default(2);
 
 		// period duration for each l2 meas
-		double prbUsagePeriod  @unit(s)   = default(0.001s); // TTI period
+		double prbUsagePeriod  @unit(s)   = default(1s); // TTI period
         double activeUserPeriod @unit(s)  = default(0.1s);
         double dataVolumePeriod @unit(s)   = default(0.5s);
         double delayPacketPeriod @unit(s)  = default(0.5s);
