@@ -27,7 +27,8 @@ simple RNIService like MeServiceBase, ITCPApp
         double requestServiceTime @unit(s) = default(10us);
         double subscriptionServiceTime @unit(s) = default(10us);
         string serverThreadClass = default("SocketManager");
-        int requestQueueSize = default(0);
+        int requestQueueSize;
+        int subscriptionQueueSize;
         @display("i=block/app");
 
     gates:

@@ -65,37 +65,20 @@ class RNIService: public MeServiceBase
     typedef std::map<unsigned int, SubscriptionBase*> Subscriptions;
     Subscriptions subscriptions_;
 
-
-    double L2measSubscriptionPeriod_;
-    cMessage *L2measSubscriptionEvent_;
-
-    unsigned int subscriptionId_;
-    std::string baseUriQueries_;//move to servicebase
-    std::string baseUriSubscriptions_;//move to servicebase
-    std::string baseSubscriptionLocation_; //move to servicebase
-    std::set<std::string>supportedQueryParams_;
-    std::set<std::string>supportedSubscriptionParams_;
-    
     bool scheduledSubscription;
-
-    bool manageL2MeasSubscriptions(Trigger trigger);
 
   public:
     RNIService();
-    virtual void removeSubscritions(inet::TCPSocket *socket);
   protected:
 
     virtual void initialize(int stage) override;
-    virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
 
     virtual void handleGETRequest(const std::string& uri, inet::TCPSocket* socket) override;
     virtual void handlePOSTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket) override;
     virtual void handlePUTRequest(const std::string& uri, const std::string& body, inet::TCPSocket* socket) override;
     virtual void handleDELETERequest(const std::string& uri, inet::TCPSocket* socket) override;
-    virtual bool handleSubscriptionType(cMessage *msg) override;
-
+    virtual bool handleSubscriptionType(cMessage *msg);
 
     virtual ~RNIService();
 

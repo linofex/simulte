@@ -20,6 +20,8 @@ simple LocationService_test like MeServiceBase, ITCPApp
 {
     parameters:
         int requestQueueSize;
+        int subscriptionQueueSize;
+        
         string localAddress = default(""); // local address; may be left empty ("")
         int localPort = default(1000);     // localPort number to listen on
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytestream"); // bytestreamfor emulation

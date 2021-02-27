@@ -46,6 +46,10 @@ void MeServiceBase::initialize(int stage)
         currentRequestServed_ = nullptr;
         currentSubscriptionServed_ = nullptr;
 
+        subscriptionId_ = 0;
+        subscriptions_.clear();
+
+
         serverSocket.setOutputGate(gate("tcpOut"));
         serverSocket.readDataTransferModePar(*this);
 //        serverSocket.bind(localAddress[0] ? inet::L3AddressResolver().resolve(localAddress) : inet::L3Address(), localPort);

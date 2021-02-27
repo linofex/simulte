@@ -64,6 +64,13 @@ class MeServiceBase: public cSimpleModule, public ILifecycle
         std::string baseUriSubscriptions_;
         std::string baseSubscriptionLocation_;
 
+        unsigned int subscriptionId_; // identifier for new subscriptions
+
+        // currently not uses
+        std::set<std::string>supportedQueryParams_;
+        std::set<std::string>supportedSubscriptionParams_;
+
+
         typedef std::map<unsigned int, SubscriptionBase*> Subscriptions;
         Subscriptions subscriptions_; //list of all active subscriptions
 

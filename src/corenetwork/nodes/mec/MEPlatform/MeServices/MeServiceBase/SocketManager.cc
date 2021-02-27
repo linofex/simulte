@@ -53,6 +53,7 @@ void SocketManager::dataArrived(cMessage *msg, bool urgent){
               }
               else
               {
+                  // simple cMessage, it does not need a socket
                   cMessage *request = new cMessage("fakeRequest");
                   service->newRequest(request);
               }

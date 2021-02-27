@@ -50,11 +50,6 @@ class LocationService: public MeServiceBase
 
     double LocationSubscriptionPeriod_;
     cMessage *LocationSubscriptionEvent_;
-
-    unsigned int subscriptionId_;
-
-    std::set<std::string>supportedQueryParams_;
-    std::set<std::string>supportedSubscriptionParams_;
     
     bool scheduledSubscription;
 
@@ -66,9 +61,7 @@ class LocationService: public MeServiceBase
   protected:
 
     virtual void initialize(int stage) override;
-    virtual int  numInitStages() const override { return inet::NUM_INIT_STAGES; }
     virtual void finish() override;
-    virtual void refreshDisplay() const override;
     virtual void handleMessage(cMessage *msg) override;
 
     virtual void handleGETRequest(const std::string& uri, inet::TCPSocket* socket);
